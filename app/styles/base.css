@@ -1,0 +1,201 @@
+@theme inline {
+  --font-sans: var(--font-body);
+  --color-amber: #efb735;
+  --color-cream: #f4eedf;
+}
+:root {
+  --bg: #171815;
+  --surface: #20211d;
+  --cream: #f4eedf;
+  --muted: #b2b3a7;
+  --amber: #efb735;
+  --line: #36372f;
+  --radius: 12px;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--cream);
+  font-family: var(--font-body), sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input {
+  font: inherit;
+}
+button,
+a,
+input,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  color: inherit;
+}
+img,
+svg {
+  display: block;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.04;
+}
+h1,
+h2 {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+h3 {
+  font-size: 22px;
+  letter-spacing: -0.035em;
+}
+p {
+  color: var(--muted);
+}
+button {
+  border: 0;
+}
+a,
+button,
+input {
+  outline-offset: 5px;
+}
+*:focus-visible {
+  outline: 2px solid var(--amber);
+}
+::selection {
+  color: var(--bg);
+  background: var(--amber);
+}
+.container {
+  width: min(1240px, calc(100% - 96px));
+  margin-inline: auto;
+}
+.section {
+  padding-block: 88px;
+}
+.button {
+  min-height: 52px;
+  padding: 14px 23px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+  line-height: 1.3;
+}
+.button:hover {
+  transform: translateY(-2px);
+}
+.button:active {
+  transform: translateY(1px);
+}
+.button-primary {
+  background: var(--amber);
+  color: #1c2017;
+}
+.button-primary:hover {
+  background: #fac650;
+}
+.button-secondary {
+  background: transparent;
+  border: 1px solid #5a5c50;
+  color: var(--cream);
+}
+.button-secondary:hover {
+  background: #2c2e26;
+}
+.button-quiet {
+  background: transparent;
+  color: var(--muted);
+}
+.button-small {
+  min-height: 41px;
+  padding: 10px 20px;
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.text-link:hover {
+  color: var(--amber);
+}
+.small-label {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 14px;
+  color: var(--muted);
+}
+.icon-button {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+}
+.icon-button:hover {
+  background: #ffffff0d;
+}
+.wordmark {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: 46px;
+  letter-spacing: -0.055em;
+  font-style: italic;
+  line-height: 1;
+  display: inline-block;
+  position: relative;
+  font-weight: 800;
+  transform: skew(-6deg);
+  padding-right: 13px;
+}
+.wordmark-dot {
+  font-family: Arial, sans-serif;
+  position: absolute;
+  right: 0;
+  top: 4px;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0;
+}
