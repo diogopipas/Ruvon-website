@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { priceBasket } from "@/lib/pricing";
 import { contactSchema, leadSchema, orderSchema } from "@/lib/validation";
 import { summarize } from "@/lib/dashboard";
 import { products, packs } from "@/lib/products";
+import { getSiteUrl } from "@/lib/site-url";
 import type { Database, SimulatedOrder } from "@/types";
 const session = "58cbb87a-13e6-40f3-a988-272c60dbd821";
 const items = [
@@ -172,5 +173,46 @@ describe("demand metrics", () => {
       conversion: 100,
     });
     expect(summarize(db).locations[0]).toMatchObject({ demand: 2, leads: 2 });
+  });
+});
+
+describe("deployment URL", () => {
+  const original = {
+    site: process.env.NEXT_PUBLIC_SITE_URL,
+    vercel: process.env.VERCEL_URL,
+    production: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    isVercel: process.env.VERCEL,
+  };
+
+  function restore(name: string, value: string | undefined) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
+
+  afterEach(() => {
+    restore("NEXT_PUBLIC_SITE_URL", original.site);
+    restore("VERCEL_URL", original.vercel);
+    restore("VERCEL_PROJECT_PRODUCTION_URL", original.production);
+    restore("VERCEL", original.isVercel);
+  });
+
+  it("normalizes a localhost URL without a protocol", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "localhost:3000";
+    delete process.env.VERCEL;
+    expect(getSiteUrl().toString()).toBe("http://localhost:3000/");
+  });
+
+  it("uses Vercel's generated URL instead of localhost in a deployment", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "localhost:3000";
+    process.env.VERCEL = "1";
+    process.env.VERCEL_URL = "jola-preview.vercel.app";
+    expect(getSiteUrl().toString()).toBe("https://jola-preview.vercel.app/");
+  });
+
+  it("preserves a configured production domain", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://jola.pt";
+    process.env.VERCEL = "1";
+    process.env.VERCEL_URL = "jola-preview.vercel.app";
+    expect(getSiteUrl().toString()).toBe("https://jola.pt/");
   });
 });

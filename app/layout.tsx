@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Providers } from "@/components/providers";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 import { CartLayer } from "@/components/cart/cart";
 const display = localFont({
@@ -14,9 +15,7 @@ const body = localFont({
   display: "swap",
 });
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  ),
+  metadataBase: getSiteUrl(),
   title: { default: "Jola — Bebidas e gelo à porta", template: "%s · Jola" },
   description:
     "Acabou a bebida? Jola leva cerveja gelada, gelo, mixers, snacks e tudo o que falta para salvar a noite.",

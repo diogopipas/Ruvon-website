@@ -69,6 +69,8 @@ Before inviting public traffic, add the actual operator identity, privacy contac
 
 The application is prepared for Vercel; no public deployment was made as part of this implementation.
 
+`NEXT_PUBLIC_SITE_URL` should include `https://`. Bare hostnames are normalized, and Vercel deployments automatically fall back to `VERCEL_PROJECT_PRODUCTION_URL` or `VERCEL_URL`. A localhost value is ignored on Vercel so it cannot break OpenGraph metadata or the sitemap.
+
 ## Verification
 
 ```bash
