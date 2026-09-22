@@ -1,6 +1,6 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { priceBasket } from "@/lib/pricing";
 const db = new PGlite();
@@ -8,9 +8,14 @@ beforeAll(async () => {
   await db.exec(
     "create role anon; create role authenticated; create role service_role;",
   );
-  const sql = await readFile("supabase/migrations/001_jola.sql", "utf8");
-  // PGlite includes gen_random_uuid in core; its WASM build omits the optional pgcrypto extension.
-  await db.exec(sql.replace("create extension if not exists pgcrypto;", ""));
+  const migrations = (await readdir("supabase/migrations"))
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  for (const migration of migrations) {
+    const sql = await readFile(`supabase/migrations/${migration}`, "utf8");
+    // PGlite includes gen_random_uuid in core; its WASM build omits pgcrypto.
+    await db.exec(sql.replace("create extension if not exists pgcrypto;", ""));
+  }
 }, 20000);
 afterAll(async () => {
   await db.close();
@@ -140,8 +145,68 @@ describe("PostgreSQL migration and transactions", () => {
           JSON.stringify(order),
         ]),
       ).rejects.toThrow();
+      await expect(
+        db.query("select public.capture_lead($1::jsonb, null)", ["{}"]),
+      ).rejects.toThrow();
     } finally {
       await db.exec("reset role");
     }
+  });
+  it("preserves purchase intent and attribution after a city-only retry", async () => {
+    const { order, lead } = fixture();
+    await db.query("select public.capture_lead($1::jsonb,$2::jsonb)", [
+      JSON.stringify(lead),
+      JSON.stringify(order),
+    ]);
+    const citySignup = {
+      ...lead,
+      id: randomUUID(),
+      city: "Porto",
+      postcode: "4000-001",
+      basket_items: [],
+      basket_total: 0,
+      utm_source: null,
+      utm_campaign: null,
+    };
+    await db.query("select public.capture_lead($1::jsonb, null)", [
+      JSON.stringify(citySignup),
+    ]);
+    const saved = await db.query(
+      "select * from public.leads where session_id=$1",
+      [lead.session_id],
+    );
+    expect(saved.rows).toHaveLength(1);
+    expect(saved.rows[0]).toMatchObject({
+      id: lead.id,
+      city: "Porto",
+      basket_items: lead.basket_items,
+      basket_total: 1834,
+      utm_source: "instagram",
+      utm_campaign: "sql_test",
+    });
+  });
+  it("updates the saved basket when the visitor submits a different nonempty basket", async () => {
+    const { order, lead } = fixture();
+    await db.query("select public.capture_lead($1::jsonb,$2::jsonb)", [
+      JSON.stringify(lead),
+      JSON.stringify(order),
+    ]);
+    const priced = priceBasket([{ id: "gelo", quantity: 2 }]);
+    await db.query("select public.capture_lead($1::jsonb,$2::jsonb)", [
+      JSON.stringify({
+        ...lead,
+        basket_items: priced.items,
+        basket_total: priced.total,
+      }),
+      JSON.stringify({ ...order, ...priced }),
+    ]);
+    const saved = await db.query(
+      "select basket_items, basket_total from public.leads where session_id=$1",
+      [lead.session_id],
+    );
+    expect(saved.rows[0]).toEqual({
+      basket_items: priced.items,
+      basket_total: priced.total,
+    });
   });
 });

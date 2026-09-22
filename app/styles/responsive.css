@@ -58,11 +58,11 @@
   .pack-people {
     left: 9px;
     top: 9px;
-    font-size: 9px;
+    font-size: 13px;
   }
   .pack-tag {
-    top: 38px;
-    font-size: 7px;
+    top: 49px;
+    font-size: 13px;
   }
   .pack-info {
     padding: 17px 13px;
@@ -87,7 +87,7 @@
   }
   .category-card > span {
     padding: 10px;
-    font-size: 12px;
+    font-size: 13px;
   }
   .category-card > span svg {
     width: 13px;
@@ -138,7 +138,7 @@
   }
   .checkout-steps {
     gap: 12px;
-    font-size: 9px;
+    font-size: 13px;
   }
   .checkout-main h1 {
     font-size: 55px;
@@ -152,7 +152,7 @@
     gap: 22px;
   }
   .nav-link {
-    font-size: 11px;
+    font-size: 13px;
   }
   .hero {
     padding-top: 38px;
@@ -161,7 +161,7 @@
     font-size: 9.1vw;
   }
   .hero-description {
-    font-size: 13px;
+    font-size: 14px;
     max-width: 290px;
   }
   .hero-cta {
@@ -182,7 +182,7 @@
   .hero-note {
     padding: 10px;
     bottom: 20%;
-    font-size: 9px;
+    font-size: 13px;
   }
   .hero-note svg {
     width: 19px;
@@ -191,7 +191,7 @@
     object-fit: cover;
   }
   .visual-caption {
-    font-size: 8px;
+    font-size: 13px;
   }
   .category-grid {
     grid-template-columns: repeat(7, 125px);
@@ -209,13 +209,13 @@
     height: 250px;
   }
   .pack-tag {
-    top: 13px;
-    font-size: 9px;
+    top: 49px;
+    font-size: 13px;
   }
   .pack-people {
     top: 13px;
     left: 13px;
-    font-size: 10px;
+    font-size: 13px;
   }
   .pack-objects .product-art {
     width: 125px;
@@ -237,7 +237,7 @@
     font-size: 18px;
   }
   .steps-grid p {
-    font-size: 11px;
+    font-size: 14px;
   }
   .group-section {
     gap: 40px;
@@ -249,7 +249,7 @@
     padding: 20px 17px 23px;
   }
   .chat-message p {
-    font-size: 10px;
+    font-size: 13px;
   }
   .chat-message {
     width: 92%;
@@ -258,7 +258,7 @@
     width: 93%;
   }
   .chat-title strong {
-    font-size: 12px;
+    font-size: 13px;
   }
   .merchant-section {
     flex-wrap: wrap;
@@ -307,7 +307,7 @@
   }
   .checkout-steps {
     gap: 9px;
-    font-size: 8px;
+    font-size: 13px;
   }
   .checkout-main h1 {
     font-size: 47px;
@@ -316,22 +316,25 @@
     padding: 18px;
   }
   .checkout-description {
-    font-size: 12px;
+    font-size: 14px;
   }
   .cart-item-art {
     display: none;
   }
   .cart-item-info > strong {
-    font-size: 10px;
+    font-size: 14px;
   }
   .cart-item-price {
-    font-size: 11px;
+    font-size: 13px;
   }
   .checkout-success-layout {
     display: block;
   }
 }
 @media (max-width: 600px) {
+  :root {
+    --shop-header-height: 77px;
+  }
   .container {
     width: calc(100% - 40px);
   }
@@ -348,9 +351,9 @@
     display: none;
   }
   .nav-inner .button-small {
-    min-height: 37px;
+    min-height: 44px;
     padding: 9px 15px;
-    font-size: 12px;
+    font-size: 13px;
     gap: 17px;
   }
   .hero {
@@ -364,7 +367,7 @@
     padding-bottom: 0;
   }
   .launch-badge {
-    font-size: 10px;
+    font-size: 13px;
     padding: 5px 9px;
   }
   .hero h1 {
@@ -379,27 +382,27 @@
     white-space: nowrap;
   }
   .hero-description {
-    font-size: 12px;
+    font-size: 14px;
     max-width: 302px;
     line-height: 1.75;
     margin-bottom: 21px;
   }
   .hero-cta {
-    height: 51px;
-    min-width: 213px;
-    font-size: 14px;
+    height: 54px;
+    width: 100%;
+    font-size: 16px;
   }
   .hero-microcopy {
-    font-size: 10px;
+    font-size: 13px;
     margin-top: 9px;
   }
   .hero-visual {
-    height: 337px;
-    margin: -13px -20px -10px 20px;
+    height: 305px;
+    margin: 6px -20px -10px 20px;
     z-index: 0;
   }
   .hero-visual > img {
-    height: 385px;
+    height: 345px;
     max-height: none;
     top: -12px;
     object-position: center 55%;
@@ -409,7 +412,7 @@
   }
   .time-sticker {
     right: 8%;
-    top: 12%;
+    top: 9%;
     padding: 10px 12px;
     gap: 7px;
     border-radius: 5px;
@@ -418,28 +421,31 @@
     font-size: 26px;
   }
   .time-sticker span {
-    font-size: 9px;
+    font-size: 11px;
+    max-width: 100px;
+    display: block;
   }
   .hero-note {
     left: 0;
     bottom: 16%;
-    font-size: 9px;
+    font-size: 13px;
     padding: 9px 11px;
   }
   .hero-note svg {
     width: 20px;
   }
   .visual-caption {
-    font-size: 8px;
+    font-size: 13px;
     bottom: 5%;
     right: 8%;
   }
   .hero-bottom {
     padding: 18px 0;
-    gap: 14px;
-    font-size: 9px;
+    gap: 10px 16px;
+    font-size: 13px;
     position: relative;
     z-index: 2;
+    flex-wrap: wrap;
   }
   .hero-bottom > span {
     gap: 5px;
@@ -472,11 +478,11 @@
     font-size: 39px;
   }
   .section-heading p {
-    font-size: 11px;
+    font-size: 13px;
     margin-top: 11px;
   }
   .section-heading .text-link {
-    font-size: 10px;
+    font-size: 13px;
     gap: 7px;
     white-space: nowrap;
     padding-bottom: 3px;
@@ -497,7 +503,7 @@
     height: 136px;
   }
   .category-card > span {
-    font-size: 12px;
+    font-size: 13px;
     padding: 8px 10px 12px;
   }
   .packs-section {
@@ -511,40 +517,51 @@
     display: none;
   }
   .small-label {
-    font-size: 11px;
+    font-size: 13px;
     margin-bottom: 11px;
   }
-  .pack-grid {
-    gap: 13px;
+  .pack-grid,
+  .catalog-packs .pack-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
-  .pack-visual {
-    height: 196px;
+  .pack-card {
+    display: grid;
+    grid-template-columns: 35% minmax(0, 1fr);
+  }
+  .pack-visual,
+  .catalog-packs .pack-visual {
+    height: 100%;
+    min-height: 275px;
   }
   .pack-people {
-    font-size: 8px;
+    font-size: 11px;
     top: 10px;
-    left: 9px;
-    padding: 3px 5px;
+    left: 6px;
+    right: 6px;
+    justify-content: center;
+    padding: 4px 3px;
+    white-space: nowrap;
   }
   .pack-people svg {
     width: 11px;
   }
   .pack-tag {
-    font-size: 7px;
-    top: 38px;
-    right: 8px;
+    font-size: 10px;
+    top: 45px;
+    right: 6px;
     padding: 3px 5px;
   }
   .pack-objects {
-    bottom: 34px;
-    height: 137px;
-    left: -4%;
-    width: 108%;
+    bottom: 60px;
+    height: 160px;
+    left: -20%;
+    width: 140%;
     overflow: visible;
   }
   .pack-objects > div {
     width: 75px;
-    margin-left: -13px;
+    margin-left: -30px;
   }
   .pack-objects .product-art {
     height: 160px;
@@ -552,47 +569,54 @@
     margin-left: -13px;
   }
   .pack-visual-name {
-    font-size: 35px;
-    bottom: 10px;
+    font-size: 33px;
+    bottom: 19px;
+    padding-inline: 5px;
   }
   .pack-info {
-    padding: 15px 12px 12px;
+    padding: 18px 14px;
   }
-  .pack-info > div {
-    gap: 4px;
+  .pack-info > div:first-child {
+    gap: 6px;
     align-items: flex-start;
     flex-wrap: wrap;
   }
   .pack-info h3 {
-    font-size: 18px;
+    font-size: 23px;
     line-height: 1.2;
   }
   .pack-info strong {
-    font-size: 13px;
+    font-size: 16px;
     margin-top: 2px;
   }
   .pack-info p {
-    font-size: 9px;
+    font-size: 14px;
     line-height: 1.6;
     margin-top: 8px;
-    min-height: 29px;
+    min-height: 0;
   }
   .pack-info .pack-contents {
-    font-size: 8px;
-    min-height: 39px;
+    font-size: 13px;
+    min-height: 0;
+    margin: 12px 0 18px;
+    gap: 2px;
   }
   .pack-add {
-    min-height: 39px;
-    font-size: 9px;
+    min-height: 44px;
+    font-size: 13px;
     padding: 9px;
     gap: 7px;
-    margin-top: 12px;
+    margin-top: auto;
+  }
+  .pack-in-basket {
+    flex-wrap: wrap;
+    gap: 6px;
   }
   .pack-add svg {
     width: 14px;
   }
   .preview-note {
-    font-size: 8px;
+    font-size: 13px;
     line-height: 1.8;
     margin-top: 15px;
   }
@@ -680,7 +704,7 @@
     line-height: 1.15;
   }
   .steps-grid p {
-    font-size: 10px;
+    font-size: 14px;
     line-height: 1.75;
   }
   .how-section .preview-note {
@@ -695,11 +719,11 @@
     font-size: 56px;
   }
   .group-copy p {
-    font-size: 12px;
+    font-size: 14px;
     margin: 22px 0;
   }
   .group-copy .button {
-    font-size: 12px;
+    font-size: 13px;
     min-height: 47px;
   }
   .chat-composition {
@@ -709,7 +733,7 @@
     padding: 22px 22px 25px;
   }
   .chat-message p {
-    font-size: 12px;
+    font-size: 13px;
   }
   .chat-message {
     width: 83%;
@@ -721,7 +745,7 @@
     font-size: 13px;
   }
   .chat-caption {
-    font-size: 7px;
+    font-size: 13px;
     left: 10px;
   }
   .location-section {
@@ -732,10 +756,10 @@
     margin: 18px 0;
   }
   .location-section > .container > p {
-    font-size: 11px;
+    font-size: 14px;
   }
   .location-dot {
-    font-size: 10px;
+    font-size: 13px;
   }
   .city-options {
     display: grid;
@@ -744,7 +768,7 @@
     margin-top: 25px;
   }
   .city-options button {
-    font-size: 10px;
+    font-size: 13px;
     padding: 11px 8px;
     gap: 6px;
     justify-content: center;
@@ -756,7 +780,7 @@
     display: none;
   }
   .city-picker > p {
-    font-size: 8px;
+    font-size: 13px;
     max-width: 290px;
     margin: auto;
     line-height: 1.8;
@@ -777,14 +801,14 @@
     font-size: 31px;
   }
   .merchant-section p {
-    font-size: 10px;
+    font-size: 14px;
     line-height: 1.7;
     margin-top: 7px;
   }
   .merchant-section > .button {
     margin-left: 71px;
-    font-size: 10px;
-    min-height: 41px;
+    font-size: 13px;
+    min-height: 44px;
     padding: 11px 13px;
     gap: 20px;
   }
@@ -800,13 +824,13 @@
     display: none;
   }
   .faq-list summary {
-    font-size: 11px;
+    font-size: 14px;
   }
   .faq-list details {
     padding: 16px 0;
   }
   .faq-list details > p {
-    font-size: 11px;
+    font-size: 14px;
   }
   .footer {
     padding: 32px 0 20px;
@@ -819,23 +843,23 @@
     align-items: start;
   }
   .footer-top > div > p {
-    font-size: 10px;
+    font-size: 13px;
   }
   .footer nav {
     margin: 0;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 9px;
+    gap: 0;
     justify-items: end;
   }
   .footer nav a {
-    font-size: 10px;
+    font-size: 13px;
   }
   .footer-bottom {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: 8px;
+    font-size: 13px;
     padding-top: 16px;
   }
   .modal-content {
@@ -847,7 +871,7 @@
     font-size: 32px;
   }
   .modal-description {
-    font-size: 12px;
+    font-size: 14px;
   }
   .age-modal {
     padding: 28px 25px;
@@ -863,7 +887,7 @@
     margin: 20px auto;
   }
   .age-modal p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .age-modal .button {
     font-size: 13px;
@@ -871,7 +895,7 @@
   .toast {
     bottom: 98px;
     padding: 12px 15px;
-    font-size: 10px;
+    font-size: 13px;
     gap: 8px;
     max-width: calc(100% - 30px);
   }
@@ -897,6 +921,11 @@
     gap: 6px;
     flex: 1;
     justify-content: center;
+    min-width: 0;
+    min-height: 48px;
+  }
+  .address-button > span {
+    min-width: 0;
   }
   .address-button > svg:first-child {
     width: 16px;
@@ -905,11 +934,11 @@
     display: none;
   }
   .address-button small {
-    font-size: 9px;
+    font-size: 13px;
   }
   .address-button strong {
-    font-size: 10px;
-    max-width: 190px;
+    font-size: 13px;
+    max-width: 170px;
   }
   .shop-cart-button {
     padding: 8px 9px;
@@ -919,7 +948,7 @@
     width: 17px;
   }
   .shop-cart-button > span {
-    font-size: 11px;
+    font-size: 13px;
   }
   .shop-layout {
     padding-top: 25px;
@@ -927,38 +956,41 @@
   }
   .catalog-intro {
     margin-bottom: 23px;
-    gap: 6px;
+    gap: 16px;
+    flex-wrap: wrap;
   }
   .catalog-intro .small-label {
-    font-size: 8px;
+    font-size: 13px;
     margin-bottom: 10px;
   }
   .catalog-intro h1 {
     font-size: 42px;
   }
   .catalog-intro p {
-    font-size: 10px;
+    font-size: 14px;
     margin-top: 8px;
   }
   .catalog-time {
-    width: 87px;
-    font-size: 9px;
+    width: auto;
+    font-size: 13px;
     gap: 4px;
   }
   .catalog-time svg {
     width: 13px;
   }
   .catalog-time > span {
-    font-size: 7px;
-    padding-left: 17px;
+    font-size: 13px;
+    width: auto;
+    padding-left: 3px;
   }
   .catalog-banner {
     padding: 17px 16px;
     border-radius: 8px;
     gap: 12px;
+    align-items: center;
   }
   .catalog-banner > div > span {
-    font-size: 8px;
+    font-size: 13px;
   }
   .catalog-banner h2 {
     font-size: 24px;
@@ -967,39 +999,42 @@
     margin: 7px 0 8px;
   }
   .catalog-banner p {
-    font-size: 8px;
+    font-size: 13px;
     max-width: 180px;
   }
   .banner-pack {
     padding: 9px 12px;
     flex-shrink: 0;
+    max-width: 128px;
   }
   .banner-pack > span {
     font-size: 20px;
+    white-space: normal;
+    line-height: 1.1;
   }
   .banner-pack strong {
-    font-size: 11px;
+    font-size: 13px;
     margin-top: 5px;
   }
   .catalog-controls {
-    padding-top: 20px;
+    padding-top: 12px;
   }
   .search-field {
-    height: 42px;
+    height: 48px;
   }
   .search-field input {
-    font-size: 11px;
+    font-size: 16px;
   }
   .category-chips {
     gap: 7px;
     margin-right: -20px;
     padding-right: 20px;
-    padding-block: 15px;
+    padding-block: 12px;
   }
   .category-chips button {
-    min-height: 40px;
+    min-height: 44px;
     padding: 10px 12px;
-    font-size: 10px;
+    font-size: 13px;
     gap: 5px;
   }
   .catalog-heading {
@@ -1009,13 +1044,13 @@
     font-size: 30px;
   }
   .catalog-preview {
-    font-size: 8px;
+    font-size: 13px;
     line-height: 1.7;
     margin-top: 7px;
     margin-bottom: 16px;
   }
   .catalog-heading > span {
-    font-size: 9px;
+    font-size: 13px;
   }
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1029,18 +1064,18 @@
     padding: 12px 11px;
   }
   .product-info h3 {
-    font-size: 11px;
-    min-height: 30px;
+    font-size: 14px;
+    min-height: 40px;
     line-height: 1.4;
   }
   .product-info > p {
-    font-size: 9px;
-  }
-  .product-bottom > strong {
     font-size: 14px;
   }
+  .product-bottom > strong {
+    font-size: 18px;
+  }
   .product-tag {
-    font-size: 7px;
+    font-size: 11px;
     top: 8px;
     left: 8px;
   }
@@ -1048,26 +1083,26 @@
     margin-top: 13px;
   }
   .add-button {
-    width: 38px;
-    height: 38px;
+    width: 100%;
+    height: 44px;
   }
   .quantity {
-    min-width: 81px;
-    height: 38px;
+    min-width: 112px;
+    height: 44px;
   }
   .quantity button {
-    height: 36px;
-    width: 28px;
+    height: 44px;
+    width: 44px;
   }
   .quantity span {
     min-width: 15px;
-    font-size: 11px;
+    font-size: 13px;
   }
   .quantity-compact {
-    height: 30px;
+    height: 44px;
   }
   .quantity-compact button {
-    height: 28px;
+    height: 44px;
   }
   .floating-cart {
     min-width: 0;
@@ -1077,7 +1112,7 @@
     min-height: 59px;
     padding: 12px 13px;
     gap: 9px;
-    font-size: 12px;
+    font-size: 13px;
   }
   .floating-cart small {
     display: none;
@@ -1090,7 +1125,7 @@
   }
   .cart-count {
     min-width: 26px;
-    font-size: 11px;
+    font-size: 13px;
   }
   .cart-modal {
     top: auto;
@@ -1112,16 +1147,16 @@
     height: 67px;
   }
   .cart-item-info > strong {
-    font-size: 12px;
+    font-size: 14px;
   }
   .cart-item-info > small {
-    font-size: 10px;
+    font-size: 14px;
   }
   .cart-item-price {
     font-size: 13px;
   }
   .cart-totals > div {
-    font-size: 12px;
+    font-size: 14px;
   }
   .cart-totals .cart-total {
     font-size: 18px;
@@ -1131,10 +1166,10 @@
     min-height: 50px;
   }
   .cart-disclaimer {
-    font-size: 9px;
+    font-size: 13px;
   }
   .delivery-estimate {
-    font-size: 11px;
+    font-size: 13px;
   }
   .catalog-skeleton {
     grid-template-columns: 1fr 1fr;
@@ -1151,8 +1186,11 @@
     font-size: 35px;
   }
   .checkout-header > span {
-    font-size: 8px;
+    font-size: 13px;
     gap: 5px;
+    max-width: 195px;
+    text-align: right;
+    line-height: 1.4;
   }
   .checkout-header > span > svg {
     width: 13px;
@@ -1166,30 +1204,30 @@
     min-height: calc(100dvh - 138px);
   }
   .back-link {
-    font-size: 10px;
+    font-size: 13px;
   }
   .checkout-steps {
-    gap: 17px;
-    font-size: 8px;
-    justify-content: space-between;
-    margin: 25px 0 31px;
+    gap: 12px;
+    font-size: 13px;
+    justify-content: flex-start;
+    margin: 18px 0 28px;
   }
   .checkout-steps li {
     gap: 5px;
   }
   .checkout-steps li > span,
   .checkout-steps li > svg {
-    width: 19px;
-    height: 19px;
-    font-size: 9px;
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
   }
   .checkout-main h1 {
-    font-size: 51px;
+    font-size: 48px;
     margin-bottom: 19px;
   }
   .checkout-description {
-    font-size: 12px;
-    line-height: 1.85;
+    font-size: 14px;
+    line-height: 1.7;
   }
   .checkout-icon {
     width: 45px;
@@ -1204,18 +1242,18 @@
     gap: 17px;
   }
   .form-stack > label:not(.checkbox-label) {
-    font-size: 11px;
+    font-size: 14px;
   }
   .form-stack input:not([type="checkbox"]) {
     font-size: 16px;
     min-height: 51px;
   }
   .checkout-form .button {
-    font-size: 12px;
+    font-size: 13px;
     min-height: 52px;
   }
   .checkout-form .form-footnote {
-    font-size: 9px;
+    font-size: 13px;
   }
   .checkout-summary {
     position: static;
@@ -1230,29 +1268,29 @@
     display: grid;
   }
   .checkout-summary .cart-item-info > strong {
-    font-size: 12px;
+    font-size: 14px;
   }
   .checkout-summary .cart-item-price {
     font-size: 13px;
   }
   .checkout-summary .cart-totals > div {
-    font-size: 12px;
+    font-size: 14px;
   }
   .checkout-summary .cart-totals .cart-total {
     font-size: 17px;
   }
   .checkout-footer {
-    font-size: 8px;
+    font-size: 13px;
     padding: 19px 20px;
     line-height: 1.7;
   }
   .selected-location {
-    font-size: 10px;
+    font-size: 13px;
     padding: 12px;
     gap: 6px;
   }
   .selected-location button {
-    font-size: 9px;
+    font-size: 13px;
   }
   .checkout-success-layout {
     display: block;
@@ -1268,7 +1306,7 @@
     font-size: 74px;
   }
   .success-content > p {
-    font-size: 12px;
+    font-size: 13px;
   }
   .offer-ticket {
     padding: 21px 24px;
@@ -1276,7 +1314,7 @@
     margin: 29px auto;
   }
   .offer-ticket small {
-    font-size: 8px;
+    font-size: 13px;
   }
   .offer-ticket strong {
     font-size: 47px;
@@ -1285,14 +1323,14 @@
     font-size: 13px;
   }
   .offer-ticket p {
-    font-size: 8px;
+    font-size: 13px;
   }
   .ticket-wordmark {
     font-size: 29px;
     padding-top: 10px;
   }
   .success-content > .button {
-    font-size: 12px;
+    font-size: 13px;
     min-width: 230px;
   }
   .waitlist-aside {
@@ -1307,7 +1345,7 @@
     font-size: 42px;
   }
   .waitlist-aside p {
-    font-size: 10px;
+    font-size: 13px;
     margin-bottom: 0;
   }
   .waitlist-aside > svg {
@@ -1327,10 +1365,10 @@
     max-width: 300px;
   }
   .empty-cart p {
-    font-size: 12px;
+    font-size: 13px;
   }
   .empty-cart > .button {
-    font-size: 12px;
+    font-size: 13px;
     min-height: 47px;
   }
 }
@@ -1351,7 +1389,7 @@
     height: 345px;
   }
   .hero-bottom {
-    font-size: 8px;
+    font-size: 13px;
     gap: 12px;
   }
   .catalog-time {
@@ -1361,37 +1399,37 @@
     gap: 10px;
   }
   .product-bottom > strong {
-    font-size: 12px;
+    font-size: 18px;
   }
   .quantity {
-    min-width: 73px;
+    min-width: 112px;
   }
   .quantity button {
-    width: 24px;
+    width: 44px;
   }
   .product-info {
     padding: 11px 9px;
   }
   .pack-info strong {
-    font-size: 12px;
+    font-size: 16px;
   }
   .pack-info h3 {
-    font-size: 17px;
+    font-size: 21px;
   }
   .pack-visual {
-    height: 178px;
+    height: 100%;
   }
   .pack-visual-name {
     font-size: 31px;
   }
   .checkout-header > span {
-    font-size: 7px;
+    font-size: 13px;
   }
   .checkout-main h1 {
     font-size: 46px;
   }
   .chat-message p {
-    font-size: 11px;
+    font-size: 13px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

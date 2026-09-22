@@ -129,6 +129,12 @@ export async function saveLead(input: LeadInput) {
         Object.assign(previous, lead, {
           id: previous.id,
           created_at: previous.created_at,
+          basket_items: lead.basket_items.length
+            ? lead.basket_items
+            : previous.basket_items,
+          basket_total: lead.basket_items.length
+            ? lead.basket_total
+            : previous.basket_total,
         });
       else db.leads.push(lead);
       if (order.items.length) {
@@ -157,11 +163,12 @@ export async function saveMerchant(merchant: Merchant) {
   if (supabase) {
     const { error } = await supabase
       .from("merchant_interests")
-      .insert(merchant);
+      .upsert(merchant, { onConflict: "id", ignoreDuplicates: true });
     if (error) throw error;
   } else
     await localWrite((db) => {
-      db.merchant_interests.push(merchant);
+      if (!db.merchant_interests.some((entry) => entry.id === merchant.id))
+        db.merchant_interests.push(merchant);
     });
 }
 export async function readDatabase(): Promise<Database> {
@@ -169,7 +176,7 @@ export async function readDatabase(): Promise<Database> {
   if (!supabase) {
     if (!isLocalStorage())
       throw new Error("Configura o Supabase para começar a recolher procura.");
-    await globalQueue.jolaWrites;
+    await globalQueue.jolaWrites?.catch(() => undefined);
     return localRead();
   }
   const db = empty();

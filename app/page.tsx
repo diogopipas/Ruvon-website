@@ -28,7 +28,7 @@ export default function Home() {
           <div className="hero-copy">
             <span className="launch-badge">
               <span />
-              Em breve em Lisboa
+              A preparar o lançamento em Lisboa
               <ArrowUpRight size={14} />
             </span>
             <h1>
@@ -45,7 +45,8 @@ export default function Home() {
               className="button button-primary hero-cta"
             />
             <p className="hero-microcopy">
-              Entrega rápida. Sem ninguém ter de abandonar a festa.
+              Monta a tua noite e ajuda-nos a escolher onde começar.
+              <span>Ainda sem entregas. Sem pagamento.</span>
             </p>
           </div>
           <div className="hero-visual">
@@ -54,14 +55,14 @@ export default function Home() {
               alt="Saco Jola cheio de bebidas geladas, gelo e snacks para a tua noite"
               width={1100}
               height={1100}
-              priority
+              preload
               sizes="(max-width: 700px) 100vw, 55vw"
             />
             <div className="time-sticker">
               <Clock3 size={22} />
               <div>
                 <strong>~25 min</strong>
-                <span>é o plano.</span>
+                <span>objetivo no lançamento</span>
               </div>
             </div>
             <div className="hero-note">
@@ -120,12 +121,13 @@ export default function Home() {
               <h2>
                 Não queres pensar?
                 <br />
-                Nós pensamos por ti.
+                Está tudo no saco.
               </h2>
             </div>
             <p className="section-aside">
-              Escolhe a companhia.
-              <br />O resto vem no saco.
+              Compara o tamanho do grupo.
+              <br />
+              Escolhe uma vez. Está feito.
             </p>
           </div>
           <PackCards />
@@ -138,9 +140,8 @@ export default function Home() {
           <div className="container">
             <div className="section-heading">
               <h2>
-                Três passos.
-                <br />
-                Zero saídas de casa.
+                Da tua lista
+                <br />à tua porta.
               </h2>
               <p className="section-aside">
                 É assim que queremos

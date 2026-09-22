@@ -1,30 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LockKeyhole, LogOut, RefreshCw } from "lucide-react";
+import { postJson } from "@/lib/client-request";
 export function AdminLogin({ configured }: { configured: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const submitting = useRef(false);
   const router = useRouter();
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     const password = new FormData(event.currentTarget).get("password");
     try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
+      await postJson("/api/admin/login", { password });
       router.refresh();
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Não foi possível entrar.",
       );
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -45,7 +44,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
           acesso.
         </p>
       ) : (
-        <form onSubmit={submit} className="form-stack">
+        <form onSubmit={submit} className="form-stack" aria-busy={busy}>
           <label>
             Palavra-passe
             <input
@@ -75,19 +74,20 @@ export function AdminActions() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [refreshing, startTransition] = useTransition();
+  const submitting = useRef(false);
   async function logout() {
+    if (submitting.current) return;
+    submitting.current = true;
     setBusy(true);
+    setError("");
     try {
-      const response = await fetch("/api/admin/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      });
-      if (!response.ok) throw new Error();
+      await postJson("/api/admin/logout", {});
       router.refresh();
     } catch {
       setError("Não foi possível sair. Tenta novamente.");
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -95,10 +95,11 @@ export function AdminActions() {
     <div className="admin-actions">
       <button
         className="button button-secondary button-small"
-        onClick={() => router.refresh()}
+        onClick={() => startTransition(() => router.refresh())}
+        disabled={refreshing || busy}
       >
         <RefreshCw size={14} />
-        Atualizar
+        {refreshing ? "A atualizar…" : "Atualizar"}
       </button>
       <button
         className="icon-button"

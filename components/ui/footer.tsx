@@ -16,7 +16,10 @@ export function Footer() {
             <Link href="/privacidade">Privacidade</Link>
             <Link href="/termos">Termos</Link>
           </nav>
-          <span className="footer-social">Instagram · em breve</span>
+          <span className="footer-social">
+            A começar em Lisboa.
+            <br />A crescer contigo.
+          </span>
         </div>
         <div className="footer-bottom">
           <span>

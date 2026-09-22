@@ -13,7 +13,7 @@
   gap: 25px;
 }
 .admin-header > div > span {
-  font-size: 11px;
+  font-size: 13px;
   color: #a9b19b;
   border-left: 1px solid #505841;
   padding-left: 25px;
@@ -47,7 +47,7 @@
   gap: 15px;
 }
 .admin-actions .button {
-  font-size: 11px;
+  font-size: 13px;
   gap: 10px;
 }
 .dashboard-intro {
@@ -61,7 +61,7 @@
   font-size: 65px;
 }
 .dashboard-intro p {
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 14px;
 }
 .data-badge {
@@ -72,7 +72,7 @@
   background: #324427;
   border: 1px solid #50723c;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 13px;
   white-space: nowrap;
 }
 .data-badge > span {
@@ -90,7 +90,7 @@
 }
 .admin-notice {
   padding: 13px 17px;
-  font-size: 11px;
+  font-size: 13px;
   background: #42392355;
   border: 1px solid #63532e;
   border-radius: 6px;
@@ -114,7 +114,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 11px;
+  font-size: 13px;
   color: #c0c9ae;
 }
 .metric-card > div > svg {
@@ -130,7 +130,7 @@
   color: var(--amber);
 }
 .metric-card > small {
-  font-size: 9px;
+  font-size: 13px;
   color: #8c9b7c;
   line-height: 1.6;
   display: block;
@@ -158,7 +158,7 @@
   line-height: 1.35;
 }
 .dashboard-panel > p {
-  font-size: 10px;
+  font-size: 13px;
   margin-top: 10px;
   line-height: 1.7;
 }
@@ -173,12 +173,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  font-size: 11px;
+  font-size: 13px;
   margin-bottom: 9px;
   color: #c2ceb0;
 }
 .bar-chart strong {
-  font-size: 12px;
+  font-size: 13px;
   color: #e6eddb;
 }
 .bar-track {
@@ -204,11 +204,11 @@ table {
   border-collapse: collapse;
   width: 100%;
   text-align: left;
-  font-size: 11px;
+  font-size: 13px;
   white-space: nowrap;
 }
 th {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 400;
   color: #8fa37a;
   padding: 10px 14px;
@@ -228,7 +228,7 @@ td:last-child {
 }
 td small {
   display: block;
-  font-size: 9px;
+  font-size: 13px;
   color: #92a77a;
   margin-top: 5px;
 }
@@ -239,7 +239,7 @@ td small {
   line-height: 1.8;
 }
 .dashboard-footnote {
-  font-size: 10px;
+  font-size: 13px;
   padding-top: 30px;
   text-align: center;
   color: #8a9d77;
@@ -314,7 +314,7 @@ td small {
     gap: 8px;
   }
   .admin-actions .button {
-    font-size: 9px;
+    font-size: 13px;
     min-height: 35px;
     padding: 8px 10px;
   }
@@ -328,7 +328,7 @@ td small {
     font-size: 48px;
   }
   .admin-login > p {
-    font-size: 12px;
+    font-size: 13px;
   }
   .dashboard-intro {
     display: block;
@@ -338,15 +338,15 @@ td small {
     font-size: 53px;
   }
   .dashboard-intro p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .data-badge {
     display: inline-flex;
     margin-top: 20px;
-    font-size: 9px;
+    font-size: 13px;
   }
   .admin-notice {
-    font-size: 10px;
+    font-size: 13px;
     padding: 12px 14px;
   }
   .metric-grid {
@@ -357,7 +357,7 @@ td small {
     padding: 17px 13px 15px;
   }
   .metric-card > div {
-    font-size: 9px;
+    font-size: 13px;
     align-items: flex-start;
     gap: 7px;
     min-height: 29px;
@@ -373,7 +373,7 @@ td small {
     margin: 15px 0 13px;
   }
   .metric-card > small {
-    font-size: 8px;
+    font-size: 13px;
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -386,25 +386,25 @@ td small {
     font-size: 16px;
   }
   .dashboard-panel > p {
-    font-size: 9px;
+    font-size: 13px;
   }
   .bar-chart > div > div:first-child {
-    font-size: 10px;
+    font-size: 13px;
   }
   .bar-chart {
     gap: 17px;
   }
   table {
-    font-size: 10px;
+    font-size: 13px;
   }
   th {
-    font-size: 9px;
+    font-size: 13px;
   }
   td {
     padding: 13px 12px;
   }
   .dashboard-footnote {
-    font-size: 8px;
+    font-size: 13px;
   }
   .legal-page {
     padding-block: 40px 60px;
@@ -417,12 +417,12 @@ td small {
   }
   .legal-page p,
   .legal-page li {
-    font-size: 12px;
+    font-size: 13px;
   }
   .error-page h1 {
     font-size: 55px;
   }
   .error-page p {
-    font-size: 12px;
+    font-size: 13px;
   }
 }

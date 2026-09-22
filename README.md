@@ -19,18 +19,18 @@ npm run dev
 
 Open **http://localhost:3000**. The dashboard is **http://localhost:3000/admin**.
 
-In this prepared workspace, `.env.local` already enables local storage and sets the local-only dashboard password to `jola-local-2026`. Replace it before deployment; it is not a production default in the code.
+Keep real credentials in the ignored `.env.local` file or your hosting provider's environment settings. `.env.example` contains placeholders only. The application has no default admin password.
 
 Local records persist in `.data/jola.json`, which is excluded from Git. A successful local submission really writes the lead, basket and attribution to disk. The dashboard labels these records as local demonstration data. Test contacts use `example.com` and no notifications are sent. To start a clean local dataset, stop the server and move `.data/jola.json` to a backup filename. Browser state is separate: use a private window for a new funnel or clear the `jola_*` local-storage entries.
 
 ## What is implemented
 
 - Mobile-first branded homepage with custom photography-inspired hero, category cards, four party packs, how it works, launch cities, merchant form and FAQ.
-- `/pedir`: 32 demo products, filters in the URL, search, quantity controls, feedback toasts, sticky desktop cart and floating mobile cart.
-- `/checkout`: basket review → city/postcode → launch invitation → email or Portuguese phone → persisted confirmation and optional native sharing.
+- `/pedir`: 32 demo products and all four packs, sticky search/categories, filters in the URL, accent-insensitive search, selected-item states, 44 px quantity controls, sticky desktop cart and floating mobile cart.
+- `/checkout`: basket review → city/postcode → transparent early-access invitation → email or Portuguese phone → persisted confirmation and optional native sharing. Progress belongs to the basket/zone; contact drafts stay in tab-scoped session storage.
 - Initial age confirmation, saved locally; negative response blocks the catalogue.
 - `/admin`: signed, HTTP-only password session; visitors, CTA clicks, started orders, checkout attempts, leads, simulated GMV, average basket, conversion, product/category selections, geography, campaigns and merchant interests.
-- Server validation, canonical prices, atomic/retry-safe lead capture, origin checks, request-size limits, honeypot and basic rate limiting.
+- Server validation, canonical prices, atomic/retry-safe lead capture, idempotent merchant submissions, bounded network requests, origin checks, request-size limits, honeypot and basic rate limiting.
 - Local fonts, optimized WebP, branded OpenGraph image, sitemap, metadata, accessible dialogs, focus treatment and reduced-motion support.
 
 All product-facing copy is European Portuguese. Prices, ETA and products are clearly marked as previews. The chat example is explicitly fictional. There are no invented testimonials, operational claims or analytics numbers.
@@ -38,7 +38,7 @@ All product-facing copy is European Portuguese. Prices, ETA and products are cle
 ## Supabase setup
 
 1. Create a Supabase project.
-2. Open its SQL editor and run [supabase/migrations/001_jola.sql](supabase/migrations/001_jola.sql), or apply it through your Supabase CLI workflow.
+2. Apply the SQL migrations in filename order: [001_jola.sql](supabase/migrations/001_jola.sql), then [002_preserve_lead_basket.sql](supabase/migrations/002_preserve_lead_basket.sql). Existing installations only need 002. It preserves the previous basket when a browser later submits city-only interest.
 3. Set the server-side variables:
 
 ```dotenv
@@ -47,6 +47,8 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_SERVICE_ROLE_KEY
 ADMIN_PASSWORD=YOUR_LONG_RANDOM_PASSWORD
 NEXT_PUBLIC_SITE_URL=https://YOUR_DEPLOYED_DOMAIN
 NEXT_PUBLIC_CONTACT_EMAIL=YOUR_REAL_PRIVACY_CONTACT
+JOLA_OPERATOR_NAME=YOUR_ACTUAL_LEGAL_NAME_OR_COMPANY
+JOLA_RETENTION_MONTHS=12
 JOLA_LOCAL_DEMO=false
 ```
 
@@ -55,7 +57,9 @@ JOLA_LOCAL_DEMO=false
 
 The service-role key must never use a `NEXT_PUBLIC_` prefix. Browser code only calls the application's server routes. RLS is enabled with no anonymous or authenticated policies. Table and RPC access is granted only to `service_role`. `capture_lead` stores the lead and basket in one transaction; unique session IDs make retries idempotent. Merchant interests are separate.
 
-**Supabase credentials were not supplied for this workspace.** The full local flow and PostgreSQL migration were tested; a live Supabase connection still needs the configuration above. Missing production storage returns a retryable error instead of a fake success. Local JSON storage is explicitly disabled on Vercel.
+The full local flow and PostgreSQL migrations are tested without touching production data. Live Supabase and hosted Vercel behavior still require deployment verification. Missing or partial production storage configuration returns a retryable error; local JSON storage is disabled on Vercel.
+
+**Credential rotation required:** an earlier commit contained a service-role key in `.env.example`. The template is now blank, but the old value remains in Git history. Revoke/rotate that credential in Supabase and replace it in Vercel and `.env.local`; do not reuse it. No credential was rotated by this code change.
 
 ## Deploy on Vercel
 
@@ -65,7 +69,9 @@ The service-role key must never use a `NEXT_PUBLIC_` prefix. Browser code only c
 4. Deploy. After choosing the domain, set `NEXT_PUBLIC_SITE_URL` to that origin and redeploy so metadata is correct.
 5. Complete the [QA checklist](docs/QA.md) against the deployment with a synthetic contact, then verify the Supabase rows and protected dashboard.
 
-Before inviting public traffic, add the actual operator identity, privacy contact and retention period to `app/privacidade/page.tsx`, and confirm the final promotional terms. These business details cannot be inferred from the brief. The UI currently describes its prelaunch status honestly. The supplied contact variable populates a direct privacy contact if configured.
+Before inviting public traffic, set `JOLA_OPERATOR_NAME` to the real person or company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` to an inbox you control, then rebuild. A brand name alone is not the operator identity. If the project is operated personally, use your actual legal name; do not invent a company or mailbox. See [launch requirements](docs/LAUNCH.md).
+
+The privacy page contains a proposed 12-month prelaunch retention policy, configurable through `JOLA_RETENTION_MONTHS` (1–24). Set up a recurring deletion/anonymisation process before collecting public contacts; this MVP does not automatically purge records. Confirm your hosting/database region, processing terms and final promotional terms. The €5 launch incentive is explicitly planned, with conditions still to be confirmed.
 
 The application is prepared for Vercel; no public deployment was made as part of this implementation.
 
@@ -107,7 +113,7 @@ tests/                Domain, PostgreSQL and server integration tests
 docs/                 Analytics, manual QA, design and asset provenance
 ```
 
-The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide, Framer Motion and Supabase. Dialogs use Radix, the accessible primitive used by shadcn/ui, with Jola's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. No CMS, accounts, payment, delivery, merchant dashboard or inventory systems are included.
+The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and Supabase. Dialogs use Radix with Jola's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. Small CSS transitions replace Framer Motion, and the optional merchant form loads on demand. No CMS, accounts, payment, delivery, merchant dashboard or inventory systems are included.
 
 ## Metric definitions and operating limits
 
@@ -116,9 +122,13 @@ The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide, Fr
 - One simulated order per identifier is created after the first item is added. Clearing the cart preserves the started-order record. A converted order remains converted after later edits.
 - GMV sums current nonempty order totals, including fees. Average basket excludes fees and empty baskets.
 - Order-to-lead conversion uses converted order sessions / started order sessions. City-only waitlist leads count in the lead total but do not inflate order conversion.
-- Product/category charts count additions, including re-additions. Packs count as packs; they do not inflate individual-product selections.
+- Product/category charts sum units in current saved baskets, including removals. Packs count as packs; they do not inflate individual-product selections.
 - Geography combines orders and leads and deduplicates by session within each city/postcode.
 - Campaigns use the latest explicitly tagged visit, persisted until replaced by another tagged visit. Untagged navigation preserves attribution. Source, medium, campaign and content are stored.
+- Campaign conversion requires a converted order and its saved lead to share campaign/source/medium. A later tagged visit cannot inherit an earlier campaign's conversion. This is current-state demand reporting, not historical multi-touch attribution.
+- Funnel dropoff uses started orders → checkout → converted orders. City-only waitlist leads are shown separately from this denominator. Each browser has one durable record, not a record per visit or unique person.
+- Landing/product impression events are deduplicated per tab session, including reloads. Product impressions wait for age confirmation. Real add/remove clicks remain individual events.
+- Server storage requests have an 8-second deadline; browser submissions have a 12-second deadline. Cart writes coalesce to the latest state, avoiding a backlog during outages. Failed submissions preserve the form and offer retry.
 - Analytics delivery is best effort. Contact and order saves report errors and can be retried; analytics loss does not prevent using the product. There is no advertising pixel configured.
 - Request limits are in-process and suitable for an MVP; use a shared rate limiter or Vercel firewall rules when traffic scales. The dashboard pages through all stored rows and aggregates on the server; use SQL aggregation when volume justifies it.
 - Local disk storage is intended for one local server process. Use Supabase for multi-instance deployments.

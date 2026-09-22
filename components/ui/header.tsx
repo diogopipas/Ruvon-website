@@ -17,7 +17,7 @@ export function Header() {
             source="navbar"
             className="button button-primary button-small"
           >
-            Pedir
+            Pedir uma Jola
           </OrderLink>
         </nav>
       </div>

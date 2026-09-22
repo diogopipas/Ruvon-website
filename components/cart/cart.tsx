@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Clock3, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers";
@@ -8,13 +9,27 @@ import { Quantity } from "./quantity";
 import { getCatalogItem, productById } from "@/lib/products";
 import { money, priceBasket } from "@/lib/pricing";
 import { ProductArt } from "@/components/ui/product-art";
-import { track } from "@/lib/analytics";
-export function CartContents({ review = false }: { review?: boolean }) {
-  const { items, closeCart, syncOrder, notify, storageError } = useCart();
+import { trackOnce } from "@/lib/analytics";
+export function CartContents({
+  review = false,
+  editingDisabled = false,
+}: {
+  review?: boolean;
+  editingDisabled?: boolean;
+}) {
+  const { items, ageConfirmed, closeCart, syncOrder, notify, storageError } =
+    useCart();
+  const [busy, setBusy] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const inFlight = useRef(false);
+  const retryInFlight = useRef(false);
   const router = useRouter();
   const priced = priceBasket(items);
   async function checkout() {
-    track("checkout_started", {
+    if (inFlight.current || !ageConfirmed || !items.length) return;
+    inFlight.current = true;
+    setBusy(true);
+    trackOnce("checkout_started", {
       basket_value: priced.subtotal / 100,
       item_count: priced.item_count,
     });
@@ -23,8 +38,28 @@ export function CartContents({ review = false }: { review?: boolean }) {
     } catch {
       notify("Ligação instável. O teu carrinho fica guardado.");
     }
+    inFlight.current = false;
+    setBusy(false);
     closeCart();
     router.push("/checkout");
+  }
+  async function retry() {
+    if (retryInFlight.current) return;
+    retryInFlight.current = true;
+    setRetrying(true);
+    try {
+      await syncOrder();
+      notify("Carrinho guardado.");
+    } catch (error) {
+      notify(
+        error instanceof Error
+          ? error.message
+          : "Ainda sem ligação. Tenta novamente.",
+      );
+    } finally {
+      retryInFlight.current = false;
+      setRetrying(false);
+    }
   }
   if (!items.length)
     return (
@@ -64,7 +99,12 @@ export function CartContents({ review = false }: { review?: boolean }) {
                 <small>
                   {"size" in product ? product.size : product.people}
                 </small>
-                <Quantity id={item.id} name={product.name} compact />
+                <Quantity
+                  id={item.id}
+                  name={product.name}
+                  compact
+                  disabled={editingDisabled}
+                />
               </div>
               <strong className="cart-item-price">
                 {money(product.price * item.quantity)}
@@ -95,34 +135,36 @@ export function CartContents({ review = false }: { review?: boolean }) {
         <Clock3 size={15} />
         <span>Entrega estimada: 22–32 min*</span>
       </div>
-      {!review && (
-        <button
-          className="button button-primary checkout-button"
-          onClick={checkout}
-        >
-          Continuar
-          <ArrowRight size={18} />
-        </button>
-      )}
-      <p className="cart-disclaimer">
-        Simulação. Sem pagamento.
-        <br />* Estimativa para o futuro lançamento.
-      </p>
-      {storageError && (
-        <p role="status" className="form-error">
-          Ligação instável. O carrinho está guardado neste dispositivo.{" "}
+      <div className="cart-actions">
+        {!review && (
           <button
-            className="inline-button"
-            onClick={() =>
-              void syncOrder().catch(() =>
-                notify("Ainda sem ligação. Tenta novamente."),
-              )
-            }
+            className="button button-primary checkout-button"
+            onClick={checkout}
+            disabled={busy || !ageConfirmed}
+            aria-busy={busy}
           >
-            Tentar guardar
+            {busy ? "A guardar o carrinho…" : "Continuar para a minha zona"}
+            <ArrowRight size={18} />
           </button>
+        )}
+        <p className="cart-disclaimer">
+          O teu carrinho ajuda-nos a preparar o lançamento.
+          <br />
+          Simulação sem pagamento. * Objetivo de entrega no lançamento.
         </p>
-      )}
+        {storageError && (
+          <p role="status" className="form-error">
+            Ligação instável. O carrinho está guardado neste dispositivo.{" "}
+            <button
+              className="inline-button"
+              disabled={retrying}
+              onClick={retry}
+            >
+              {retrying ? "A guardar…" : "Tentar guardar"}
+            </button>
+          </p>
+        )}
+      </div>
     </>
   );
 }

@@ -67,20 +67,25 @@ export async function parseRequest<T>(
     );
   return parsed.data;
 }
-export function apiError(error: unknown) {
+export function apiError(
+  error: unknown,
+  message = "Não conseguimos guardar agora. Os teus dados continuam no formulário. Tenta novamente.",
+) {
   if (error instanceof RequestError)
     return NextResponse.json(
       { error: error.message },
-      { status: error.status },
+      {
+        status: error.status,
+        ...(error.status === 429 ? { headers: { "Retry-After": "60" } } : {}),
+      },
     );
   console.error(
-    "[Jola] Storage request failed:",
-    error instanceof Error ? error.message : "Database error",
+    "[Jola] Request failed:",
+    error instanceof Error ? error.name : "StorageError",
   );
   return NextResponse.json(
     {
-      error:
-        "Não conseguimos guardar agora. O teu carrinho está seguro. Tenta novamente.",
+      error: message,
     },
     { status: 503 },
   );

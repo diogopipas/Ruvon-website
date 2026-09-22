@@ -210,20 +210,21 @@ test("city-only waitlist and merchant interests remain separate from orders", as
   });
   expect(result.status()).toBe(200);
   const store_name = `Loja QA ${randomUUID()}`;
-  expect(
-    (
-      await request.post("/api/merchants", {
-        headers,
-        data: {
-          store_name,
-          city: "Porto",
-          contact_name: "Pessoa de teste",
-          contact: "loja@example.com",
-          consent: true,
-        },
-      })
-    ).status(),
-  ).toBe(200);
+  const submission_id = randomUUID();
+  for (let retry = 0; retry < 2; retry++) {
+    const response = await request.post("/api/merchants", {
+      headers,
+      data: {
+        submission_id,
+        store_name,
+        city: "Porto",
+        contact_name: "Pessoa de teste",
+        contact: "loja@example.com",
+        consent: true,
+      },
+    });
+    expect(response.status()).toBe(200);
+  }
   const db = await database();
   expect(db.simulated_orders.some((o) => o.session_id === session_id)).toBe(
     false,
@@ -233,9 +234,9 @@ test("city-only waitlist and merchant interests remain separate from orders", as
     basket_total: 0,
     phone: "+351912345678",
   });
-  expect(db.merchant_interests.some((m) => m.store_name === store_name)).toBe(
-    true,
-  );
+  expect(
+    db.merchant_interests.filter((m) => m.id === submission_id),
+  ).toHaveLength(1);
 });
 test("all public routes and the OpenGraph asset render in production", async ({
   request,

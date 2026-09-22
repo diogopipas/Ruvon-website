@@ -33,7 +33,10 @@ export const locationSchema = z.object({
   postcode: z
     .string()
     .trim()
-    .regex(/^\d{4}-\d{3}$/, "Usa o formato 1000-001."),
+    .transform((value) =>
+      value.replace(/\s/g, "").replace(/^(\d{4})(\d{3})$/, "$1-$2"),
+    )
+    .pipe(z.string().regex(/^\d{4}-\d{3}$/, "Usa o formato 1000-001.")),
 });
 export const contactSchema = z
   .string()
@@ -55,15 +58,18 @@ export const orderSchema = z.object({
 export const leadSchema = orderSchema.extend({
   location: locationSchema,
   contact: contactSchema,
-  consent: z.literal(true),
+  consent: z.literal(true, {
+    error: "Aceita o contacto para entrar na lista.",
+  }),
   website: z.string().max(0).optional(),
 });
 export const merchantSchema = z.object({
-  store_name: z.string().trim().min(2).max(120),
-  city: z.string().trim().min(2).max(80),
-  contact_name: z.string().trim().min(2).max(120),
+  submission_id: z.uuid().optional(),
+  store_name: z.string().trim().min(2, "Indica o nome da loja.").max(120),
+  city: z.string().trim().min(2, "Indica a cidade da loja.").max(80),
+  contact_name: z.string().trim().min(2, "Indica o teu nome.").max(120),
   contact: contactSchema,
-  consent: z.literal(true),
+  consent: z.literal(true, { error: "Aceita o contacto sobre a parceria." }),
   website: z.string().max(0).optional(),
 });
 export const eventSchema = z.object({

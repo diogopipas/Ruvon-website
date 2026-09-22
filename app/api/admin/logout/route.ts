@@ -14,6 +14,6 @@ export async function POST(request: Request) {
     });
     return response;
   } catch (error) {
-    return apiError(error);
+    return apiError(error, "Não foi possível sair. Tenta novamente.");
   }
 }

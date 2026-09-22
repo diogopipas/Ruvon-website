@@ -1,31 +1,42 @@
-import type { Database } from "@/types";
+import type { Attribution, Database } from "@/types";
 import { categories, getCatalogItem } from "./products";
+function campaignKey(entry: Attribution) {
+  return JSON.stringify([
+    entry.utm_campaign || "Sem campanha",
+    entry.utm_source || "Direto",
+    entry.utm_medium || "—",
+  ]);
+}
 export function summarize(db: Database) {
   const events = db.analytics_events;
   const orders = db.simulated_orders;
   const currentBaskets = orders.filter((o) => o.items.length > 0);
+  const leadsBySession = new Map(
+    db.leads.map((lead) => [lead.session_id, lead]),
+  );
   const visitors = new Set(
     events.filter((e) => e.name === "landing_view").map((e) => e.session_id),
   ).size;
-  const checkout = orders.filter((o) => o.reached_checkout).length;
+  const checkout = orders.filter(
+    (o) => o.reached_checkout || o.converted_to_lead,
+  ).length;
   const converted = orders.filter((o) => o.converted_to_lead).length;
   const gmv = currentBaskets.reduce((sum, o) => sum + o.total, 0);
   const subtotal = currentBaskets.reduce((sum, o) => sum + o.subtotal, 0);
   const productCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();
-  for (const event of events.filter((e) => e.name === "product_added")) {
-    const id = String(event.properties.product || "");
-    const category = String(event.properties.category || "");
-    productCounts.set(
-      id,
-      (productCounts.get(id) || 0) + Number(event.properties.quantity || 1),
-    );
-    categoryCounts.set(
-      category,
-      (categoryCounts.get(category) || 0) +
-        Number(event.properties.quantity || 1),
-    );
-  }
+  // Saved basket lines measure current intent; repeated add/remove clicks do not.
+  for (const order of currentBaskets)
+    for (const item of order.items) {
+      productCounts.set(
+        item.id,
+        (productCounts.get(item.id) || 0) + item.quantity,
+      );
+      categoryCounts.set(
+        item.category,
+        (categoryCounts.get(item.category) || 0) + item.quantity,
+      );
+    }
   const locations = new Map<
     string,
     {
@@ -55,6 +66,8 @@ export function summarize(db: Database) {
       source: string;
       medium: string;
       orders: number;
+      checkout: number;
+      converted: number;
       leads: number;
       gmv: number;
     }
@@ -63,18 +76,26 @@ export function summarize(db: Database) {
     const name = entry.utm_campaign || "Sem campanha";
     const source = entry.utm_source || "Direto";
     const medium = entry.utm_medium || "—";
-    const key = JSON.stringify([name, source, medium]);
+    const key = campaignKey(entry);
     const row = campaigns.get(key) || {
       name,
       source,
       medium,
       orders: 0,
+      checkout: 0,
+      converted: 0,
       leads: 0,
       gmv: 0,
     };
     if ("email" in entry) row.leads++;
     else {
       row.orders++;
+      if (entry.reached_checkout || entry.converted_to_lead) row.checkout++;
+      const lead = leadsBySession.get(entry.session_id);
+      // A later campaign visit can change this browser's current basket;
+      // its earlier signup must not become a conversion for that campaign.
+      if (entry.converted_to_lead && lead && campaignKey(lead) === key)
+        row.converted++;
       row.gmv += entry.total;
     }
     campaigns.set(key, row);
@@ -83,6 +104,10 @@ export function summarize(db: Database) {
     visitors,
     started: orders.length,
     checkout,
+    converted,
+    beforeCheckout: orders.length - checkout,
+    withoutContact: checkout - converted,
+    checkoutConversion: checkout ? (converted / checkout) * 100 : 0,
     leads: db.leads.length,
     gmv,
     average: currentBaskets.length
@@ -111,6 +136,11 @@ export function summarize(db: Database) {
         demand: row.sessions.size,
         leads: row.leads.size,
       })),
-    campaigns: [...campaigns.values()].sort((a, b) => b.leads - a.leads),
+    campaigns: [...campaigns.values()]
+      .map((row) => ({
+        ...row,
+        conversion: row.orders ? (row.converted / row.orders) * 100 : 0,
+      }))
+      .sort((a, b) => b.converted - a.converted || b.orders - a.orders),
   };
 }

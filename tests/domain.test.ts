@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { priceBasket } from "@/lib/pricing";
-import { contactSchema, leadSchema, orderSchema } from "@/lib/validation";
+import {
+  contactSchema,
+  leadSchema,
+  locationSchema,
+  orderSchema,
+} from "@/lib/validation";
 import { summarize } from "@/lib/dashboard";
 import { products, packs } from "@/lib/products";
 import { getSiteUrl } from "@/lib/site-url";
@@ -52,6 +57,15 @@ describe("prices and catalog", () => {
   });
 });
 describe("server input boundaries", () => {
+  it.each(["1000001", "1000 001", "1000-001", " 1000 - 001 "])(
+    "normalizes Portuguese postcode %s",
+    (postcode) => {
+      expect(locationSchema.parse({ city: " Lisboa ", postcode })).toEqual({
+        city: "Lisboa",
+        postcode: "1000-001",
+      });
+    },
+  );
   it.each([
     "teste@example.com",
     "912 345 678",
@@ -173,7 +187,182 @@ describe("demand metrics", () => {
       conversion: 100,
     });
     expect(summarize(db).locations[0]).toMatchObject({ demand: 2, leads: 2 });
+    expect(summarize(db).campaigns[0]).toMatchObject({
+      orders: 1,
+      checkout: 1,
+      converted: 1,
+      leads: 2,
+      conversion: 100,
+    });
   });
+  it("measures saved basket intent and dropoff without inflated click counts or homepage cohorts", () => {
+    const priced = priceBasket([{ id: "gelo", quantity: 2 }]);
+    const order: SimulatedOrder = {
+      id: session,
+      session_id: session,
+      created_at: "2026-09-21",
+      updated_at: "2026-09-21",
+      city: "Lisboa",
+      postcode: "1000-001",
+      ...priced,
+      reached_checkout: true,
+      converted_to_lead: true,
+      utm_campaign: "night",
+    };
+    const db: Database = {
+      simulated_orders: [
+        order,
+        { ...order, id: "two", session_id: "two", converted_to_lead: false },
+        {
+          ...order,
+          id: "three",
+          session_id: "three",
+          reached_checkout: false,
+          converted_to_lead: false,
+          ...priceBasket([]),
+        },
+      ],
+      leads: [
+        {
+          id: "converted-lead",
+          session_id: session,
+          created_at: order.created_at,
+          email: "converted@example.com",
+          phone: null,
+          city: order.city,
+          postcode: order.postcode,
+          basket_total: order.total,
+          basket_items: order.items,
+          consent_at: order.created_at,
+          utm_campaign: order.utm_campaign,
+        },
+      ],
+      merchant_interests: [],
+      analytics_events: Array.from({ length: 12 }, (_, index) => ({
+        id: String(index),
+        session_id: session,
+        created_at: "2026-09-21",
+        name: "product_added",
+        properties: { product: "gelo", category: "gelo", quantity: 1 },
+      })),
+    };
+    const stats = summarize(db);
+    expect(stats).toMatchObject({
+      visitors: 0,
+      started: 3,
+      checkout: 2,
+      converted: 1,
+      beforeCheckout: 1,
+      withoutContact: 1,
+      checkoutConversion: 50,
+      products: [
+        { name: products.find((item) => item.id === "gelo")!.name, value: 4 },
+      ],
+    });
+    expect(stats.conversion).toBeCloseTo(100 / 3);
+    expect(stats.campaigns[0]).toMatchObject({
+      orders: 3,
+      checkout: 2,
+      converted: 1,
+    });
+    expect(stats.campaigns[0].conversion).toBeCloseTo(100 / 3);
+  });
+  it("reports an empty dashboard without NaN conversion rates", () => {
+    expect(
+      summarize({
+        leads: [],
+        simulated_orders: [],
+        merchant_interests: [],
+        analytics_events: [],
+      }),
+    ).toMatchObject({
+      started: 0,
+      checkout: 0,
+      converted: 0,
+      beforeCheckout: 0,
+      withoutContact: 0,
+      checkoutConversion: 0,
+      conversion: 0,
+      average: 0,
+      campaigns: [],
+      products: [],
+    });
+  });
+  it.each([
+    {
+      utm_campaign: "returning",
+      utm_source: "instagram",
+      utm_medium: "paid_social",
+    },
+    {
+      utm_campaign: "original",
+      utm_source: "newsletter",
+      utm_medium: "paid_social",
+    },
+    {
+      utm_campaign: "original",
+      utm_source: "instagram",
+      utm_medium: "organic",
+    },
+  ])(
+    "does not credit a previous signup to a later campaign visit: %j",
+    (laterAttribution) => {
+      const priced = priceBasket([{ id: "gelo", quantity: 1 }]);
+      const originalAttribution = {
+        utm_campaign: "original",
+        utm_source: "instagram",
+        utm_medium: "paid_social",
+      };
+      const order: SimulatedOrder = {
+        id: session,
+        session_id: session,
+        created_at: "2026-09-21",
+        updated_at: "2026-09-22",
+        city: "Lisboa",
+        postcode: "1000-001",
+        ...priced,
+        reached_checkout: true,
+        converted_to_lead: true,
+        ...laterAttribution,
+      };
+      const stats = summarize({
+        simulated_orders: [order],
+        leads: [
+          {
+            id: "original-lead",
+            session_id: session,
+            created_at: order.created_at,
+            email: "converted@example.com",
+            phone: null,
+            city: order.city,
+            postcode: order.postcode,
+            basket_total: order.total,
+            basket_items: order.items,
+            consent_at: order.created_at,
+            ...originalAttribution,
+          },
+        ],
+        merchant_interests: [],
+        analytics_events: [],
+      });
+      expect(stats).toMatchObject({
+        started: 1,
+        converted: 1,
+        conversion: 100,
+      });
+      expect(stats.campaigns.find((row) => row.orders === 1)).toMatchObject({
+        checkout: 1,
+        leads: 0,
+        converted: 0,
+        conversion: 0,
+      });
+      expect(stats.campaigns.find((row) => row.leads === 1)).toMatchObject({
+        name: "original",
+        orders: 0,
+        converted: 0,
+      });
+    },
+  );
 });
 
 describe("deployment URL", () => {
@@ -206,6 +395,7 @@ describe("deployment URL", () => {
     process.env.NEXT_PUBLIC_SITE_URL = "localhost:3000";
     process.env.VERCEL = "1";
     process.env.VERCEL_URL = "jola-preview.vercel.app";
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
     expect(getSiteUrl().toString()).toBe("https://jola-preview.vercel.app/");
   });
 

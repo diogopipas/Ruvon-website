@@ -7,6 +7,9 @@ export async function POST(request: Request) {
     await saveOrder(await parseRequest(request, orderSchema, 120));
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return apiError(error);
+    return apiError(
+      error,
+      "Não conseguimos guardar o pedido. O carrinho continua neste dispositivo. Tenta novamente.",
+    );
   }
 }

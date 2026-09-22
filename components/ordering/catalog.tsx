@@ -5,15 +5,16 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowUpRight,
-  Clock3,
+  Check,
   MapPin,
   Search,
   ShoppingBag,
   X,
 } from "lucide-react";
-import { categories, packs, products } from "@/lib/products";
+import { categories, products } from "@/lib/products";
 import { money, priceBasket } from "@/lib/pricing";
-import { track } from "@/lib/analytics";
+import { track, trackOnce } from "@/lib/analytics";
+import { PackCards } from "@/components/landing/landing-actions";
 import { Wordmark } from "@/components/ui/wordmark";
 import { ProductArt } from "@/components/ui/product-art";
 import { Quantity } from "@/components/cart/quantity";
@@ -24,16 +25,21 @@ import { locationSchema } from "@/lib/validation";
 import type { Product } from "@/types";
 function ProductCard({ product }: { product: Product }) {
   const ref = useRef<HTMLElement>(null);
-  const viewed = useRef(false);
+  const { items, ageConfirmed } = useCart();
+  const quantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
   useEffect(() => {
+    if (!ageConfirmed) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting) && !viewed.current) {
-          viewed.current = true;
-          track("product_viewed", {
-            product: product.id,
-            category: product.category,
-          });
+        if (entries.some((entry) => entry.isIntersecting)) {
+          trackOnce(
+            "product_viewed",
+            {
+              product: product.id,
+              category: product.category,
+            },
+            `product_viewed:${product.id}`,
+          );
           observer.disconnect();
         }
       },
@@ -41,9 +47,12 @@ function ProductCard({ product }: { product: Product }) {
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [product]);
+  }, [product, ageConfirmed]);
   return (
-    <article className="product-card" ref={ref}>
+    <article
+      className={`product-card ${quantity ? "is-selected" : ""}`}
+      ref={ref}
+    >
       {product.tag && <span className="product-tag">{product.tag}</span>}
       <div className="product-picture">
         <ProductArt product={product} />
@@ -51,6 +60,15 @@ function ProductCard({ product }: { product: Product }) {
       <div className="product-info">
         <h3>{product.name}</h3>
         <p>{product.size}</p>
+        <span className="product-selection-note" aria-hidden="true">
+          {quantity ? (
+            <>
+              <Check size={13} /> {quantity} no carrinho
+            </>
+          ) : (
+            "\u00a0"
+          )}
+        </span>
         <div className="product-bottom">
           <strong>{money(product.price)}</strong>
           <Quantity id={product.id} name={product.name} />
@@ -63,24 +81,55 @@ export function Catalog() {
   const params = useSearchParams();
   const router = useRouter();
   const requested = params.get("categoria") || "todos";
-  const active = categories.some((c) => c.id === requested)
-    ? requested
-    : "todos";
+  const active =
+    requested === "packs" || categories.some((c) => c.id === requested)
+      ? requested
+      : "todos";
   const [search, setSearch] = useState("");
   const [addressOpen, setAddressOpen] = useState(false);
   const [addressError, setAddressError] = useState("");
-  const { location, setLocation, openCart, items, add } = useCart();
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const categoryChanged = useRef(false);
+  const { location, setLocation, openCart, items } = useCart();
   const priced = priceBasket(items);
+  const normalizeSearch = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLocaleLowerCase("pt")
+      .trim();
   const filtered = products.filter(
     (p) =>
       (active === "todos" || p.category === active) &&
-      `${p.name} ${p.size}`
-        .toLocaleLowerCase("pt")
-        .includes(search.toLocaleLowerCase("pt")),
+      normalizeSearch(`${p.name} ${p.size}`).includes(normalizeSearch(search)),
   );
+  useEffect(() => {
+    if (!categoryChanged.current || !resultsRef.current) return;
+    categoryChanged.current = false;
+    const header =
+      document.querySelector(".shop-header")?.getBoundingClientRect().height ??
+      83;
+    const controls = controlsRef.current?.getBoundingClientRect().height ?? 140;
+    window.scrollTo({
+      top:
+        window.scrollY +
+        resultsRef.current.getBoundingClientRect().top -
+        header -
+        controls -
+        16,
+      behavior: "instant",
+    });
+  }, [active]);
   function chooseCategory(id: string) {
+    if (id === active) return;
+    categoryChanged.current = true;
     track("category_clicked", { category: id, source: "catalog" });
-    router.replace(id === "todos" ? "/pedir" : `/pedir?categoria=${id}`, {
+    setSearch("");
+    const next = new URLSearchParams(params.toString());
+    if (id === "todos") next.delete("categoria");
+    else next.set("categoria", id);
+    router.replace(`/pedir${next.size ? `?${next}` : ""}`, {
       scroll: false,
     });
   }
@@ -113,15 +162,18 @@ export function Catalog() {
           </div>
           <button
             className="address-button"
-            onClick={() => setAddressOpen(true)}
+            onClick={() => {
+              setAddressError("");
+              setAddressOpen(true);
+            }}
           >
             <MapPin size={20} />
             <span>
-              <small>Entregar em…</small>
+              <small>A tua zona</small>
               <strong>
                 {location
                   ? `${location.city}, ${location.postcode}`
-                  : "Rua, zona ou código postal"}
+                  : "Escolher cidade"}
               </strong>
             </span>
             <ArrowUpRight size={17} />
@@ -144,11 +196,11 @@ export function Catalog() {
                 O botão de emergência da tua noite.
               </span>
               <h1>O que é que falta?</h1>
-              <p>Tu ficas. A Jola trata do resto.</p>
+              <p>Monta a tua noite. Ajuda-nos a escolher onde lançar.</p>
             </div>
             <span className="catalog-time">
-              <Clock3 size={16} />
-              22–32 min<span>no lançamento</span>
+              <MapPin size={16} />
+              Acesso antecipado<span>Ainda sem entregas</span>
             </span>
           </div>
           <div className="catalog-banner">
@@ -158,24 +210,28 @@ export function Catalog() {
               <p>De um pré tranquilo a uma casa cheia.</p>
             </div>
             <button
-              onClick={() => {
-                add(packs[1].id);
-              }}
+              onClick={() => chooseCategory("packs")}
               className="banner-pack"
             >
               <ShoppingBag size={34} />
               <span>
-                A Clássica<strong>{money(packs[1].price)} +</strong>
+                Ver os packs<strong>4 noites à escolha ↗</strong>
               </span>
             </button>
           </div>
-          <div className="catalog-controls">
+          <div className="catalog-controls" ref={controlsRef}>
             <div className="search-field">
               <Search size={18} />
               <input
                 aria-label="Procurar produtos"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  if (active === "packs") chooseCategory("todos");
+                  setSearch(event.target.value);
+                }}
+                type="search"
+                autoComplete="off"
+                enterKeyHint="search"
                 placeholder="Procuras alguma coisa?"
               />
               {search && (
@@ -187,13 +243,20 @@ export function Catalog() {
                 </button>
               )}
             </div>
-            <div className="category-chips" aria-label="Categorias">
+            <nav className="category-chips" aria-label="Categorias de produtos">
               <button
                 className={active === "todos" ? "active" : ""}
                 aria-pressed={active === "todos"}
                 onClick={() => chooseCategory("todos")}
               >
                 Tudo para a noite
+              </button>
+              <button
+                className={active === "packs" ? "active" : ""}
+                aria-pressed={active === "packs"}
+                onClick={() => chooseCategory("packs")}
+              >
+                <ShoppingBag size={16} /> Packs
               </button>
               {categories.map((c) => (
                 <button
@@ -202,31 +265,44 @@ export function Catalog() {
                   aria-pressed={active === c.id}
                   onClick={() => chooseCategory(c.id)}
                 >
-                  <span>{c.emoji}</span>
+                  <span aria-hidden="true">{c.emoji}</span>
                   {c.name}
                 </button>
               ))}
-            </div>
+            </nav>
           </div>
-          <div className="catalog-heading">
+          <div className="catalog-heading" ref={resultsRef}>
             <h2>
               {search
                 ? `Resultados para “${search}”`
-                : active === "todos"
-                  ? "Os essenciais"
-                  : categories.find((c) => c.id === active)?.name}
+                : active === "packs"
+                  ? "A noite resolvida"
+                  : active === "todos"
+                    ? "Os essenciais"
+                    : categories.find((c) => c.id === active)?.name}
             </h2>
-            <span>{filtered.length} produtos</span>
+            <span role="status" aria-live="polite">
+              {active === "packs" ? "4 packs" : `${filtered.length} produtos`}
+            </span>
           </div>
           <p className="catalog-preview">
-            Catálogo de antevisão · preços ilustrativos · sem vendas reais
+            {active === "packs"
+              ? "Escolhe pelo grupo e pelo que te apetece. "
+              : ""}
+            Preços de antevisão. Não há pagamentos nem entregas nesta fase.
           </p>
-          <div className="product-grid" key={active}>
-            {filtered.map((product) => (
-              <ProductCard product={product} key={product.id} />
-            ))}
-          </div>
-          {!filtered.length && (
+          {active === "packs" ? (
+            <div className="catalog-packs">
+              <PackCards />
+            </div>
+          ) : (
+            <div className="product-grid">
+              {filtered.map((product) => (
+                <ProductCard product={product} key={product.id} />
+              ))}
+            </div>
+          )}
+          {active !== "packs" && !filtered.length && (
             <div className="search-empty">
               <Search size={32} />
               <h3>Ainda não temos isso no saco.</h3>
@@ -273,12 +349,16 @@ export function Catalog() {
               required
               name="postcode"
               defaultValue={location?.postcode}
-              pattern="[0-9]{4}-[0-9]{3}"
+              pattern="[0-9]{4}-?[0-9]{3}"
               inputMode="numeric"
               maxLength={8}
               placeholder="1000-001"
               autoComplete="postal-code"
+              aria-describedby="postcode-hint"
             />
+            <small id="postcode-hint">
+              7 algarismos, por exemplo 1000-001.
+            </small>
           </label>
           {addressError && (
             <p role="alert" className="form-error">

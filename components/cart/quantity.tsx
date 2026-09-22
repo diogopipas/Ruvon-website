@@ -5,12 +5,14 @@ export function Quantity({
   id,
   name,
   compact = false,
+  disabled = false,
 }: {
   id: string;
   name: string;
   compact?: boolean;
+  disabled?: boolean;
 }) {
-  const { items, add, remove, ready } = useCart();
+  const { items, add, remove, ageConfirmed } = useCart();
   const quantity = items.find((i) => i.id === id)?.quantity ?? 0;
   return quantity ? (
     <div className={`quantity ${compact ? "quantity-compact" : ""}`}>
@@ -18,21 +20,24 @@ export function Quantity({
         aria-label={`Retirar ${name}`}
         title={`Retirar ${name}`}
         onClick={() => remove(id)}
+        disabled={disabled || !ageConfirmed}
       >
         <Minus size={15} />
       </button>
-      <span aria-live="polite">{quantity}</span>
+      <span aria-live="polite" aria-label={`${quantity} no carrinho`}>
+        {quantity}
+      </span>
       <button
         aria-label={`Adicionar ${name}`}
         onClick={() => add(id)}
-        disabled={quantity >= 30}
+        disabled={disabled || !ageConfirmed || quantity >= 30}
       >
         <Plus size={15} />
       </button>
     </div>
   ) : (
     <button
-      disabled={!ready}
+      disabled={disabled || !ageConfirmed}
       className="add-button"
       aria-label={`Adicionar ${name}`}
       onClick={() => add(id)}

@@ -11,6 +11,7 @@
   --amber: #efb735;
   --line: #36372f;
   --radius: 12px;
+  --shop-header-height: 83px;
 }
 * {
   box-sizing: border-box;
@@ -27,6 +28,10 @@ body {
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+body:has(.floating-cart) {
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
 }
 button,
 input {
@@ -147,7 +152,7 @@ input {
   color: var(--muted);
 }
 .button-small {
-  min-height: 41px;
+  min-height: 44px;
   padding: 10px 20px;
 }
 .text-link {
@@ -156,6 +161,7 @@ input {
   gap: 22px;
   font-size: 14px;
   font-weight: 700;
+  min-height: 44px;
 }
 .text-link:hover {
   color: var(--amber);
@@ -167,8 +173,9 @@ input {
   color: var(--muted);
 }
 .icon-button {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;

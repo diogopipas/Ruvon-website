@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #afbba0;
 }
 .checkout-layout {
@@ -28,8 +28,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #b3bea4;
+  min-height: 44px;
 }
 .checkout-steps {
   padding: 0;
@@ -38,8 +39,8 @@
   align-items: center;
   gap: 19px;
   list-style: none;
-  font-size: 10px;
-  white-space: nowrap;
+  font-size: 13px;
+  flex-wrap: wrap;
   color: #77856a;
 }
 .checkout-steps li {
@@ -57,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1;
 }
 .checkout-steps .done {
@@ -65,6 +66,17 @@
 }
 .checkout-steps .current {
   color: var(--cream);
+}
+.checkout-step {
+  animation: overlay-in 0.2s ease;
+}
+.checkout-explainer,
+.checkout-zone-note {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #c4ccb7;
+  margin-top: 16px;
+  max-width: 440px;
 }
 .checkout-steps .current > span {
   background: var(--amber);
@@ -81,7 +93,7 @@
   margin-bottom: 22px;
 }
 .checkout-description {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.85;
   max-width: 430px;
 }
@@ -122,7 +134,7 @@
   top: 35px;
 }
 .checkout-offer-note {
-  font-size: 11px;
+  font-size: 13px;
   color: #a3b18e;
   margin-top: 26px;
   padding-top: 21px;
@@ -138,19 +150,23 @@
   align-items: center;
   gap: 7px;
   margin-top: 24px;
-  font-size: 11px;
+  font-size: 13px;
   padding: 12px 14px;
   background: #262f20;
   border-radius: 5px;
   color: #b4c29d;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 .selected-location button {
   margin-left: auto;
   background: transparent;
   color: var(--cream);
   text-decoration: underline;
-  font-size: 10px;
+  font-size: 13px;
   padding: 4px;
+  min-width: 54px;
+  min-height: 44px;
 }
 .contact-tabs {
   display: grid;
@@ -166,10 +182,11 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 4px;
   padding: 10px;
   color: #a9b895;
+  min-height: 44px;
 }
 .contact-tabs button.active {
   background: #455434;
@@ -228,7 +245,7 @@
   right: -11px;
 }
 .offer-ticket small {
-  font-size: 10px;
+  font-size: 13px;
   color: #768565;
   display: block;
 }
@@ -244,7 +261,7 @@
   font-weight: 400;
 }
 .offer-ticket p {
-  font-size: 9px;
+  font-size: 13px;
   color: #697b57;
 }
 .ticket-wordmark {
@@ -262,11 +279,11 @@
   display: flex;
   justify-content: center;
   margin-top: 23px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .checkout-footer {
   text-align: center;
-  font-size: 9px;
+  font-size: 13px;
   padding: 25px 20px;
   border-top: 1px solid #333c27;
   color: #879775;
@@ -287,7 +304,7 @@
   line-height: 1.05;
 }
 .waitlist-aside p {
-  font-size: 12px;
+  font-size: 13px;
   margin: 25px 0;
   color: #abbe90;
 }

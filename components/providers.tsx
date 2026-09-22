@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { Check, ShoppingBag } from "lucide-react";
 import {
   attribution,
@@ -20,12 +19,15 @@ import {
 } from "@/lib/analytics";
 import { getCatalogItem } from "@/lib/products";
 import { priceBasket } from "@/lib/pricing";
-import { cartSchema, locationSchema } from "@/lib/validation";
+import { cartSchema, locationSchema, type OrderInput } from "@/lib/validation";
 import { Modal } from "@/components/ui/modal";
+import { createLatestWriter, postJson } from "@/lib/client-request";
+import { readJourney, writeJourney } from "@/lib/journey";
 import type { CartItem, Location } from "@/types";
 type CartContextValue = {
   items: CartItem[];
   ready: boolean;
+  ageConfirmed: boolean;
   add: (id: string) => void;
   remove: (id: string) => void;
   location: Location | null;
@@ -52,9 +54,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [storageError, setStorageError] = useState(false);
+  const ageConfirmed = ready && !ageOpen && !denied;
   const pathname = usePathname();
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const writeQueue = useRef<Promise<void>>(Promise.resolve());
+  const writeQueue = useRef<((payload: OrderInput) => Promise<void>) | null>(
+    null,
+  );
+  const itemsRef = useRef<CartItem[]>([]);
+  const locationRef = useRef<Location | null>(null);
+  const allowedRef = useRef(false);
+  const savedPayload = useRef("");
   const checkoutReached = useRef(false);
   const started = useRef(false);
   useEffect(() => {
@@ -65,12 +74,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
       readLocal("jola_location", null),
     );
     // Hydrate browser-persisted state once after the server render.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setItems(cart.success ? cart.data : []);
-    if (savedLocation.success) setDelivery(savedLocation.data);
-    checkoutReached.current = readLocal("jola_checkout_started", false);
+    itemsRef.current = cart.success ? cart.data : [];
+    setItems(itemsRef.current);
+    if (savedLocation.success) {
+      locationRef.current = savedLocation.data;
+      setDelivery(savedLocation.data);
+    }
+    checkoutReached.current =
+      readLocal<boolean>("jola_checkout_started", false) === true;
     started.current = !!cart.success && cart.data.length > 0;
-    setAgeOpen(readLocal<boolean>("jola_age", false) !== true);
+    const refused = readJourney<boolean>("jola_age_denied", false) === true;
+    allowedRef.current =
+      readLocal<boolean>("jola_age", false) === true && !refused;
+    setDenied(refused);
+    setAgeOpen(!allowedRef.current);
     setReady(true);
   }, []);
   const notify = useCallback((message: string) => {
@@ -79,43 +96,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
     timer.current = setTimeout(() => setToast(""), 2400);
   }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
-  const syncOrder = useCallback(
-    (checkout = false, delivery?: Location) => {
-      if (checkout) {
-        checkoutReached.current = true;
-        writeLocal("jola_checkout_started", true);
-      }
-      const payload = {
-        session_id: getSession(),
-        items,
-        location: delivery ?? location ?? undefined,
-        attribution: attribution(),
-        reached_checkout: checkoutReached.current,
-      };
-      const task = writeQueue.current
-        .catch(() => undefined)
-        .then(async () => {
-          const response = await fetch("/api/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-            keepalive: true,
-          });
-          if (!response.ok) {
-            setStorageError(true);
-            throw new Error(
-              "Não conseguimos guardar o pedido. Tenta novamente.",
-            );
-          }
+  const syncOrder = useCallback((checkout = false, delivery?: Location) => {
+    if (!allowedRef.current) return Promise.resolve();
+    if (checkout) {
+      checkoutReached.current = true;
+      writeLocal("jola_checkout_started", true);
+    }
+    if (delivery) locationRef.current = delivery;
+    if (!writeQueue.current)
+      writeQueue.current = createLatestWriter<OrderInput>(async (payload) => {
+        const signature = JSON.stringify(payload);
+        if (signature === savedPayload.current) return;
+        try {
+          await postJson("/api/orders", payload);
+          savedPayload.current = signature;
           setStorageError(false);
-        });
-      writeQueue.current = task;
-      return task;
-    },
-    [items, location],
-  );
+        } catch (error) {
+          savedPayload.current = "";
+          setStorageError(true);
+          throw error;
+        }
+      });
+    return writeQueue.current({
+      session_id: getSession(),
+      items: itemsRef.current,
+      location: locationRef.current ?? undefined,
+      attribution: attribution(),
+      reached_checkout: checkoutReached.current,
+    });
+  }, []);
   useEffect(() => {
-    if (!ready) return;
+    if (!ageConfirmed) return;
     writeLocal("jola_cart", items);
     if (!started.current && !items.length) return;
     started.current = true;
@@ -123,20 +134,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
       void syncOrder().catch(() => undefined);
     }, 350);
     return () => clearTimeout(timeout);
-  }, [items, ready, syncOrder]);
+  }, [items, location, ageConfirmed, syncOrder]);
   const add = (id: string) => {
-    if (!ready) return;
-    const current = items.find((i) => i.id === id);
+    const product = getCatalogItem(id);
+    if (!allowedRef.current || !product) return;
+    const currentItems = itemsRef.current;
+    const current = currentItems.find((i) => i.id === id);
     if ((current?.quantity ?? 0) >= 30) {
       notify("Máximo de 30 por artigo.");
       return;
     }
     const next = current
-      ? items.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
-      : [...items, { id, quantity: 1 }];
+      ? currentItems.map((i) =>
+          i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
+        )
+      : [...currentItems, { id, quantity: 1 }];
+    itemsRef.current = next;
     setItems(next);
     writeLocal("jola_cart", next);
-    const product = getCatalogItem(id)!;
     const priced = priceBasket(next);
     track("product_added", {
       product: id,
@@ -148,13 +163,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     notify(`${product.name} no carrinho`);
   };
   const remove = (id: string) => {
-    const next = items.flatMap((i) =>
+    if (!allowedRef.current || !itemsRef.current.some((item) => item.id === id))
+      return;
+    const next = itemsRef.current.flatMap((i) =>
       i.id !== id
         ? [i]
         : i.quantity > 1
           ? [{ ...i, quantity: i.quantity - 1 }]
           : [],
     );
+    itemsRef.current = next;
     setItems(next);
     writeLocal("jola_cart", next);
     const product = getCatalogItem(id);
@@ -168,11 +186,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     });
   };
   const setLocation = (value: Location) => {
+    if (!allowedRef.current) return;
+    locationRef.current = value;
     setDelivery(value);
     writeLocal("jola_location", value);
   };
   const openCart = () => {
-    const priced = priceBasket(items);
+    if (!allowedRef.current) return;
+    const priced = priceBasket(itemsRef.current);
     track("cart_opened", {
       basket_value: priced.subtotal / 100,
       item_count: priced.item_count,
@@ -184,87 +205,84 @@ export function Providers({ children }: { children: React.ReactNode }) {
     pathname === "/privacidade" ||
     pathname === "/termos";
   return (
-    <MotionConfig reducedMotion="user">
-      <CartContext.Provider
-        value={{
-          items,
-          ready,
-          add,
-          remove,
-          location,
-          setLocation,
-          cartOpen,
-          openCart,
-          closeCart: () => setCartOpen(false),
-          notify,
-          syncOrder,
-          storageError,
-        }}
+    <CartContext.Provider
+      value={{
+        items,
+        ready,
+        ageConfirmed,
+        add,
+        remove,
+        location,
+        setLocation,
+        cartOpen,
+        openCart,
+        closeCart: () => setCartOpen(false),
+        notify,
+        syncOrder,
+        storageError,
+      }}
+    >
+      {children}
+      <Modal
+        open={ready && ageOpen && !isPrivate}
+        onOpenChange={() => {}}
+        title={denied ? "Ficamos por aqui." : "Só uma coisa…"}
+        locked
+        className="age-modal"
       >
-        {children}
-        <Modal
-          open={ready && ageOpen && !isPrivate}
-          onOpenChange={() => {}}
-          title={denied ? "Ficamos por aqui." : "Só uma coisa…"}
-          locked
-          className="age-modal"
-        >
-          <div className="age-emblem" aria-hidden="true">
-            {denied ? "—" : "18+"}
-          </div>
-          <h2>
-            {denied
-              ? "Esta noite é para maiores de 18."
-              : "Tens 18 anos ou mais?"}
-          </h2>
-          <p>
-            {denied
-              ? "A Jola destina-se a adultos. Não podes continuar para o catálogo."
-              : "Boas noites, com responsabilidade. Confirma a tua idade para entrares."}
-          </p>
-          {!denied ? (
-            <>
-              <button
-                className="button button-primary"
-                onClick={() => {
-                  writeLocal("jola_age", true);
-                  setAgeOpen(false);
-                }}
-              >
-                Sim, tenho 18+ <Check size={18} />
-              </button>
-              <button
-                className="button button-quiet"
-                onClick={() => setDenied(true)}
-              >
-                Não
-              </button>
-            </>
-          ) : (
+        <div className="age-emblem" aria-hidden="true">
+          {denied ? "—" : "18+"}
+        </div>
+        <h2>
+          {denied
+            ? "Esta noite é para maiores de 18."
+            : "Tens 18 anos ou mais?"}
+        </h2>
+        <p>
+          {denied
+            ? "A Jola destina-se a adultos. Não podes continuar para o catálogo."
+            : "Boas noites, com responsabilidade. Confirma a tua idade para entrares."}
+        </p>
+        {!denied ? (
+          <>
             <button
-              className="button button-secondary"
-              onClick={() => setDenied(false)}
+              className="button button-primary"
+              onClick={() => {
+                writeLocal("jola_age", true);
+                writeJourney("jola_age_denied", false);
+                allowedRef.current = true;
+                setAgeOpen(false);
+              }}
             >
-              Voltar à confirmação
+              Sim, tenho 18+ <Check size={18} />
             </button>
-          )}
-          <small>Conceito em validação. Sem vendas ou entregas reais.</small>
-        </Modal>
-        <AnimatePresence>
-          {toast && (
-            <motion.div
-              role="status"
-              className="toast"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
+            <button
+              className="button button-quiet"
+              onClick={() => {
+                allowedRef.current = false;
+                writeJourney("jola_age_denied", true);
+                setDenied(true);
+              }}
             >
-              <ShoppingBag size={17} />
-              {toast}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </CartContext.Provider>
-    </MotionConfig>
+              Não
+            </button>
+          </>
+        ) : (
+          <button
+            className="button button-secondary"
+            onClick={() => setDenied(false)}
+          >
+            Voltar à confirmação
+          </button>
+        )}
+        <small>Conceito em validação. Sem vendas ou entregas reais.</small>
+      </Modal>
+      {toast && (
+        <div role="status" className="toast">
+          <ShoppingBag size={17} />
+          {toast}
+        </div>
+      )}
+    </CartContext.Provider>
   );
 }

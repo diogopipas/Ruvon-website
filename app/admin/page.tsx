@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   ArrowUpRight,
   BarChart3,
   MapPin,
-  MousePointer2,
   ShoppingBag,
   Users,
 } from "lucide-react";
@@ -58,7 +58,15 @@ export default async function Admin() {
       </header>
       <main id="main" className="container admin-main">
         {authorized ? (
-          <Dashboard />
+          <Suspense
+            fallback={
+              <p className="dashboard-empty" role="status">
+                A carregar a procura…
+              </p>
+            }
+          >
+            <Dashboard />
+          </Suspense>
         ) : (
           <AdminLogin configured={adminConfigured()} />
         )}
@@ -73,10 +81,10 @@ async function Dashboard() {
   } catch {
     return (
       <div className="admin-login">
-        <h1>A ligação ainda não está pronta.</h1>
+        <h1>Os dados não chegaram.</h1>
         <p>
-          Confirma as variáveis do Supabase e executa a migração SQL. Depois,
-          atualiza esta página.
+          Não conseguimos carregar os dados. Tenta atualizar. Se continuar,
+          confirma a ligação ao Supabase e as migrações SQL.
         </p>
       </div>
     );
@@ -105,18 +113,6 @@ async function Dashboard() {
       <div className="metric-grid">
         {[
           {
-            label: "Visitantes",
-            value: stats.visitors,
-            detail: "Dispositivos únicos na página inicial",
-            icon: Users,
-          },
-          {
-            label: "Cliques em pedir",
-            value: stats.cta,
-            detail: "Todos os botões de pedido",
-            icon: MousePointer2,
-          },
-          {
             label: "Pedidos iniciados",
             value: stats.started,
             detail: "Sessões que adicionaram artigos",
@@ -127,6 +123,18 @@ async function Dashboard() {
             value: stats.checkout,
             detail: "Pedidos com intenção de continuar",
             icon: ArrowUpRight,
+          },
+          {
+            label: "Ainda sem checkout",
+            value: stats.beforeCheckout,
+            detail: "Carrinhos que ainda não avançaram",
+            icon: ShoppingBag,
+          },
+          {
+            label: "Checkout sem contacto",
+            value: stats.withoutContact,
+            detail: "Chegaram ao checkout, sem inscrição",
+            icon: Users,
           },
           {
             label: "Contactos recebidos",
@@ -148,7 +156,7 @@ async function Dashboard() {
           },
           {
             label: "Pedido → contacto",
-            value: `stats`,
+            value: `${stats.conversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
             detail: "Pedidos convertidos / iniciados",
             icon: ArrowUpRight,
           },
@@ -158,11 +166,7 @@ async function Dashboard() {
               <span>{metric.label}</span>
               <metric.icon size={16} />
             </div>
-            <strong>
-              {metric.value === "stats"
-                ? `${stats.conversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`
-                : metric.value}
-            </strong>
+            <strong>{metric.value}</strong>
             <small>{metric.detail}</small>
           </article>
         ))}
@@ -170,12 +174,15 @@ async function Dashboard() {
       <div className="dashboard-grid">
         <section className="dashboard-panel">
           <h2>Os favoritos da noite</h2>
-          <p>Artigos adicionados ao carrinho, incluindo repetições.</p>
-          <Bars data={stats.products} />
+          <p>Unidades nos carrinhos atuais. Remoções já descontadas.</p>
+          <Bars
+            data={stats.products}
+            empty="Os primeiros carrinhos mostram o que faz falta."
+          />
         </section>
         <section className="dashboard-panel">
           <h2>O que anda a faltar</h2>
-          <p>Seleções por categoria. Os packs contam separadamente.</p>
+          <p>Unidades nos carrinhos atuais, por categoria. Packs à parte.</p>
           <Bars data={stats.categories} />
         </section>
         <section className="dashboard-panel">
@@ -216,25 +223,33 @@ async function Dashboard() {
         <section className="dashboard-panel">
           <h2>Da curiosidade à primeira Jola</h2>
           <p>
-            Contagens únicas, exceto cliques. Inclui entradas diretas no
-            catálogo.
+            Uma contagem por dispositivo que iniciou um pedido. Inclui entradas
+            diretas no catálogo.
           </p>
           <Bars
             data={[
-              { name: "Visitantes na página inicial", value: stats.visitors },
               { name: "Pedidos iniciados", value: stats.started },
               { name: "Chegaram ao checkout", value: stats.checkout },
               {
                 name: "Pedidos convertidos",
-                value: db.simulated_orders.filter((o) => o.converted_to_lead)
-                  .length,
+                value: stats.converted,
               },
             ]}
           />
+          <p>
+            {stats.checkout
+              ? `${stats.checkoutConversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% dos que chegaram ao checkout deixaram contacto.`
+              : "A conversão aparece quando alguém chega ao checkout."}{" "}
+            Inscrições só por cidade ficam fora deste funil.
+          </p>
         </section>
         <section className="dashboard-panel full-width">
           <h2>De onde vêm as boas noites</h2>
-          <p>Campanhas, origem e meio preservados até à inscrição.</p>
+          <p>
+            Última campanha guardada em cada pedido. Só conta como conversão
+            quando o contacto tem a mesma campanha, origem e meio. Inscrições só
+            por cidade contam apenas em contactos.
+          </p>
           <div className="table-scroll">
             <table>
               <thead>
@@ -242,7 +257,9 @@ async function Dashboard() {
                   <th>Campanha</th>
                   <th>Origem / meio</th>
                   <th>Pedidos</th>
+                  <th>Checkout</th>
                   <th>Contactos</th>
+                  <th>Pedido → contacto</th>
                   <th>Volume simulado</th>
                 </tr>
               </thead>
@@ -255,7 +272,13 @@ async function Dashboard() {
                       <small>{row.medium}</small>
                     </td>
                     <td>{row.orders}</td>
+                    <td>{row.checkout}</td>
                     <td>{row.leads}</td>
+                    <td>
+                      {row.orders
+                        ? `${row.conversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`
+                        : "—"}
+                    </td>
                     <td>{money(row.gmv)}</td>
                   </tr>
                 ))}
@@ -351,8 +374,10 @@ async function Dashboard() {
       </div>
       <p className="dashboard-footnote">
         Dados desde o início da validação. Sem testemunhos, vendas ou números
-        inventados. Visitantes medidos por identificador local, sem fornecedor
-        externo de analytics.
+        inventados. Um identificador por dispositivo, até limpar os dados do
+        navegador; não equivale a pessoas únicas. {stats.visitors} dispositivos
+        passaram pela página inicial. Os valores representam intenção, não
+        receita.
       </p>
     </>
   );
