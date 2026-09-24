@@ -4,8 +4,6 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
   Check,
   Mail,
   MapPin,
@@ -16,6 +14,7 @@ import {
 import { useCart } from "@/components/providers";
 import { Wordmark } from "@/components/ui/wordmark";
 import { CartContents } from "@/components/cart/cart";
+import { basketPackEvents } from "@/lib/packs";
 import { attribution, getSession, track, trackOnce } from "@/lib/analytics";
 import { postJson } from "@/lib/client-request";
 import {
@@ -207,6 +206,7 @@ export function CheckoutFlow() {
       trackOnce(
         "waitlist_submitted",
         {
+          ...basketPackEvents(interest ? [] : items),
           city: location.city,
           postcode: location.postcode,
           basket_value: interest ? 0 : priced.subtotal / 100,
@@ -410,7 +410,6 @@ export function CheckoutFlow() {
                         {busy
                           ? "A guardar a tua zona…"
                           : "Guardar zona e continuar"}
-                        <ArrowRight size={18} />
                       </button>
                       <p className="form-footnote">
                         Podes alterar a zona no próximo passo.
@@ -555,7 +554,6 @@ export function CheckoutFlow() {
                         {busy
                           ? "A guardar o teu lugar…"
                           : "Quero acesso antecipado"}
-                        <ArrowUpRight size={18} />
                       </button>
                       <p className="form-footnote">
                         Só boas notícias. Podes retirar o consentimento a
@@ -600,7 +598,6 @@ export function CheckoutFlow() {
                     </button>
                     <Link href="/" className="text-link">
                       Até à próxima Jola
-                      <ArrowUpRight size={17} />
                     </Link>
                   </div>
                 )}

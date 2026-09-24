@@ -1,0 +1,91 @@
+{
+  "mode": "built-in image_gen",
+  "promptTemplate": "Photorealistic isolated ecommerce product preview; portrait 2:3; full packaging with breathing room; realistic retail proportions; studio lighting; subtle condensation; transparent alpha background; no surface, shadow, price or watermark. Illustrative prelaunch mock packshot, not a supplied manufacturer photograph.",
+  "sources": [
+    {
+      "id": "super-bock",
+      "subject": "a shrinkwrapped six-pack of Super Bock Original Portuguese beer, six 33cl brown bottles with red and white labels",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-43fd28f2-8ed1-40f6-add3-5e95c17f33f9.png"
+    },
+    {
+      "id": "sagres",
+      "subject": "a shrinkwrapped six-pack of Sagres Original Portuguese beer, six 33cl brown bottles with white and red labels",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-2aef53c3-19ad-4fa4-a92c-b17f4d350c0a.png"
+    },
+    {
+      "id": "somersby",
+      "subject": "four 33cl Somersby apple cider bottles, golden liquid, green tree labels, grouped as a four-pack",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-e1b67da2-3044-4d84-83f2-8644b757e402.png"
+    },
+    {
+      "id": "super-bock-zero",
+      "subject": "six 33cl Super Bock 0.0 alcohol-free brown beer bottles, blue and white labels, grouped as a six-pack",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-e27788e3-9ced-4e88-ae03-ecf98ec9f804.png"
+    },
+    {
+      "id": "coca-cola",
+      "subject": "one Coca-Cola Original 1.5 litre plastic bottle with classic red label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-4dfb349d-a330-4a11-99e9-6b2c7c9b10b6.png"
+    },
+    {
+      "id": "coca-cola-zero",
+      "subject": "one Coca-Cola Zero Sugar 1.5 litre plastic bottle with red and black label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-0befb62d-72c2-4e02-b4df-90b4d403848b.png"
+    },
+    {
+      "id": "red-bull",
+      "subject": "four Red Bull 25cl silver and blue cans grouped as a four-pack",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-7c847837-3634-4522-a149-f3308ff3173d.png"
+    },
+    {
+      "id": "tonic",
+      "subject": "one Schweppes Indian Tonic 1 litre clear plastic bottle, bright yellow label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-de1a4efa-198c-4c8d-922f-fb5f98ddefa2.png"
+    },
+    {
+      "id": "gin",
+      "subject": "one Gordon's London Dry Gin 70cl green glass bottle with cream front label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-400bf36b-ad9c-4ab5-ab2e-7b004006b5f5.png"
+    },
+    {
+      "id": "vodka",
+      "subject": "one Absolut Vodka 70cl clear glass bottle, blue lettering",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-58b8f4c1-4d26-42a6-99c9-c8c45886c54d.png"
+    },
+    {
+      "id": "doritos",
+      "subject": "one Doritos Tex-Mex 140g sealed orange-red crisps bag",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-4d6be3ed-adb1-4e6c-afe1-3d621a13caa1.png"
+    },
+    {
+      "id": "pringles",
+      "subject": "one Pringles Original 165g red tall cardboard tube",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-4b39b647-0f04-4362-9b91-e46c82ee50f0.png"
+    },
+    {
+      "id": "agua",
+      "subject": "one Luso Portuguese natural mineral water 1.5 litre clear plastic bottle with blue cap and pale blue label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-65ad47a6-5867-4e73-a7f9-2ce0f6640cfd.png"
+    },
+    {
+      "id": "amendoins",
+      "subject": "one simple kraft pouch of roasted peanuts 200g, natural peanut window, small Portuguese label AMENDOINS",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-f85984b4-6588-4c63-9b69-7a5c3e6cd953.png"
+    },
+    {
+      "id": "gelo",
+      "subject": "one clear blue-printed crinkled bag filled with realistic ice cubes, Portuguese label GELO 2 kg",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-fe4cb118-e742-409f-b9ad-f7dad666c898.png"
+    },
+    {
+      "id": "copos",
+      "subject": "a stack of twenty simple warm cream paper party cups, 33cl",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-128f71a4-c2c8-4a23-a6aa-ccdc587012b1.png"
+    },
+    {
+      "id": "seven-up",
+      "subject": "one 7UP 1.5 litre green plastic bottle with green label",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-9e0ad0da-fd09-4afd-9bee-f72973e5cec4.png"
+    }
+  ]
+}

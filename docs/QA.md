@@ -10,8 +10,8 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 4. Click “Pedir uma Jola”. Add one each: Super Bock Original 6 × 33 cl, Saco de gelo 2 kg, Coca-Cola Original 1,5 L, Doritos Tex-Mex 140 g.
 5. Verify the floating cart shows four articles. Open it.
 6. Confirm subtotal **14,46 €**, delivery **2,99 €**, Jola fee **0,89 €**, total **18,34 €**. Increment/decrement and check the total changes.
-7. Continue, enter **Lisboa / 1000-001**, and check availability.
-8. Confirm the launch message and 5 € offer. Refresh; the location, basket and contact step must survive.
+7. Choose “Continuar para a minha zona”, enter **Lisboa / 1000-001**, and continue to early access.
+8. Confirm the zone-by-zone launch message and planned 5 € incentive. Refresh; the location, basket and contact step must survive.
 9. Enter a synthetic email or valid-format Portuguese phone, check consent, submit.
 10. Confirm “Estás dentro.” and the 5 € ticket. Refresh: success persists. Sharing opens native share where available or copies the URL; do not send a test message to anyone.
 11. Open `/admin`, authenticate with the configured password, verify the lead, basket, postcode, conversion, products and `qa_mobile` campaign.
@@ -21,7 +21,7 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 
 - [ ] Landing category links open the correct filtered catalogue; filters survive refresh.
 - [ ] Search matches product names and displays a helpful empty state. Clear search restores results.
-- [ ] All four party packs add correctly and expose the cart on the homepage.
+- [ ] All six validation packs add correctly; the three homepage features expose the same detail/cart flow.
 - [ ] Remove the last item: zero fees, useful empty-cart state, no checkout submission.
 - [ ] Direct empty `/checkout` offers a route back to the catalogue.
 - [ ] Each city button preselects its city; “Outra” permits an arbitrary city. A city-only signup does not create a fake order.
@@ -30,7 +30,7 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 - [ ] A failed submission stays on the form, preserves the basket and permits retry; never show success on a non-200 response.
 - [ ] Keyboard focus is visible. Dialog Escape/close/backdrop behavior works; the age gate cannot be dismissed accidentally.
 - [ ] Reduced-motion preference disables nonessential animations.
-- [ ] Review at 320, 390, 768, 1280 and 1440 px. No page-level horizontal scrolling. Category rows and dashboard tables may scroll within themselves.
+- [ ] Review at 390 × 844, 430 × 932, 768 × 1024 and 1440 × 900, at standard page zoom. No page-level horizontal scrolling. Category rows and dashboard tables may scroll within themselves.
 - [ ] Desktop catalogue cart remains visible while scrolling. Mobile bottom cart does not cover the last product.
 - [ ] OG image, sitemap, not-found page and privacy/terms render correctly.
 - [ ] Anonymous `/admin` shows no leads. Invalid login fails; logout removes access. Change the password to invalidate prior sessions.
@@ -38,10 +38,39 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 ## Checks performed in this workspace
 
 - Production build, strict TypeScript and ESLint pass.
-- 21 automated tests cover prices, validation, metric definitions and the PostgreSQL migration, including transaction rollback and anonymous access denial.
-- Four production HTTP integration tests cover the complete storage funnel, canonical prices, UTM preservation, retries, auth, error boundaries, separate merchant/city flows and public routes/OG.
-- Safari: desktop homepage and 390 × 844 customer flow reviewed. Age gate accepted, all four acceptance products added, mobile drawer totals verified, Lisboa/postcode saved, contact step refreshed successfully, synthetic contact submitted and success confirmed. The desktop dashboard then showed the same lead, 18,34 € order, 1000-001 postcode and qa_mobile/night_2347 attribution.
-- Dependency audit reports no known vulnerabilities after updates.
-- Browser testing uses synthetic local records. Automated integration data is isolated in `.data/integration`.
-- A hosted Supabase instance and a public Vercel deployment were not available for verification. Run the same acceptance journey after configuring them.
-- No Lighthouse score is claimed; public deployment performance remains to be measured under realistic network conditions.
+- **66 automated tests** cover canonical prices, validation, URL configuration, funnel/campaign metrics, request deadlines, coalesced writes, draft storage, attribution, event deduplication, pack options and pack demand. PostgreSQL tests include rollback, anonymous access denial, merchant retries and preserving a lead basket after a city-only signup.
+- **Five production HTTP integration tests** cover the full funnel, canonical prices, UTM preservation, retries, auth, error boundaries, separate merchant/city flows, public routes/OG and pack substitutions through order, lead and analytics. These exercise real HTTP endpoints; they do not automate a browser.
+- Safari responsive previews were inspected at all four requested sizes. The 390 px customer journey included age acceptance, all four acceptance products, sticky catalogue filters, quantity controls, mobile cart and the **18,34 €** total.
+- Checkout preserved the contact step and email draft through reload, and retained the email when switching to phone and back. Seven postcode digits formatted as `1000-001`.
+- An intentional local storage outage returned HTTP 503. The form showed a retryable error, preserved the contact/consent/basket and did not display success. Restoring storage and retrying produced “Estás dentro.” without a duplicate lead.
+- A synthetic merchant submission at 430 px completed successfully and was stored separately. Local records confirmed the customer basket, Lisboa postcode, conversion and `polish_mobile` campaign, plus the separate merchant record.
+- Browser testing uses synthetic local records in `.data/polish`; automated integration data is isolated in `.data/integration`. No production records were changed.
+- A hosted Supabase instance and public Vercel deployment were not verified. Apply the launch requirements in `LAUNCH.md`, then repeat this acceptance journey against the deployment.
+
+## Performance measurement
+
+These measurements describe the previous reliability/polish pass, before the final pack imagery and pack-detail UI were added. They are retained as a historical baseline, not a claim about the final pack build.
+
+Compared production HTML script references before and after the polish pass, summing the gzip size of each unique initially referenced JavaScript chunk per route:
+
+| Route     |  Before |   After | Reduction |
+| --------- | ------: | ------: | --------: |
+| Homepage  | 337 KiB | 294 KiB |       13% |
+| Catalogue | 332 KiB | 292 KiB |       12% |
+| Checkout  | 333 KiB | 291 KiB |       13% |
+
+Removing Framer Motion and loading the merchant form on demand accounts for the main reduction. These are local build transfer-size estimates, not Lighthouse or Core Web Vitals results. Measure the hosted deployment on a realistic mobile network before increasing paid traffic.
+
+## Final pack pass — 24 September 2026
+
+- `/pedir` defaults to Packs and exposes exactly six validation packs. The homepage features three by default, with at most three after optional group filtering.
+- Six additional unit tests check agreed names/prices, nonempty group choices, canonical substitutions, invalid-option rejection, checkout identity, event metadata and dashboard definitions. The fifth HTTP integration test verifies options/contents through order, lead, analytics and duplicate-submit recovery.
+- Safari at 390 × 844: selected 2–3 (Só Mais Uma) and 7+ (A Clássica with an explicit 5–7-person limit), opened complete contents, chose Sagres and Zero, added the whole pack, added ordinary ice through quick extras, opened the cart and continued into checkout.
+- The cart and checkout retained Sagres/Zero. Lisboa + `1000001` normalized correctly. Synthetic email signup succeeded. Local storage confirmed exactly one lead, two basket lines, canonical total **56,77 €**, both substitutions, full contents and `packs_final` attribution. Pack impression/add/cart/checkout/waitlist event payloads were present.
+- Essential modal and product content no longer depends on an entry fade. Active categories stay visible after changing viewport size; mobile packs have a compact introduction.
+- Final Safari checks covered 390 × 844 and 430 × 932 catalogue/detail layouts, the 430 px homepage and the 1440 × 900 flagship composition. Beer packshots loaded, empty search recovered, and searching from Packs switched to matching individual products.
+- The local dashboard displayed A Clássica as one selected pack reaching checkout, a €52.89 pack-basket subtotal versus €14.46 without packs, 50% of the two local checkouts containing a pack, and one ice add-on. These are synthetic QA records, not customer demand.
+- Safari's inspector showed an error-count badge but no message in the console, including after clearing and reloading. The source could not be identified through the native controls. Console validation remains unconfirmed; no claim of a clean console or Lighthouse result is made.
+- Final generated assets were visually inspected. Packaging is illustrative, not a claim of manufacturer approval or exact supplier appearance.
+
+Repeat the pack journey against hosted Supabase/Vercel before paid traffic. Browser automation is not part of the test suite.

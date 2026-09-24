@@ -17,18 +17,20 @@ import {
   track,
   writeLocal,
 } from "@/lib/analytics";
-import { getCatalogItem } from "@/lib/products";
+import { getCatalogItem, packById } from "@/lib/products";
+import { basketPackEvents, packEvent, packOptions } from "@/lib/packs";
 import { priceBasket } from "@/lib/pricing";
 import { cartSchema, locationSchema, type OrderInput } from "@/lib/validation";
 import { Modal } from "@/components/ui/modal";
 import { createLatestWriter, postJson } from "@/lib/client-request";
 import { readJourney, writeJourney } from "@/lib/journey";
-import type { CartItem, Location } from "@/types";
+import type { CartItem, Location, PackOptions } from "@/types";
 type CartContextValue = {
   items: CartItem[];
   ready: boolean;
   ageConfirmed: boolean;
-  add: (id: string) => void;
+  add: (id: string, options?: PackOptions) => void;
+  updateOptions: (id: string, options: PackOptions) => void;
   remove: (id: string) => void;
   location: Location | null;
   setLocation: (location: Location) => void;
@@ -135,7 +137,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }, 350);
     return () => clearTimeout(timeout);
   }, [items, location, ageConfirmed, syncOrder]);
-  const add = (id: string) => {
+  const add = (id: string, options?: PackOptions) => {
     const product = getCatalogItem(id);
     if (!allowedRef.current || !product) return;
     const currentItems = itemsRef.current;
@@ -144,16 +146,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
       notify("Máximo de 30 por artigo.");
       return;
     }
+    const pack = packById.get(id);
+    const selected = pack
+      ? packOptions(pack, options ?? current?.options)
+      : undefined;
     const next = current
       ? currentItems.map((i) =>
-          i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
+          i.id === id
+            ? {
+                ...i,
+                quantity: i.quantity + 1,
+                ...(pack ? { options: selected } : {}),
+              }
+            : i,
         )
-      : [...currentItems, { id, quantity: 1 }];
+      : [
+          ...currentItems,
+          { id, quantity: 1, ...(pack ? { options: selected } : {}) },
+        ];
     itemsRef.current = next;
     setItems(next);
     writeLocal("jola_cart", next);
     const priced = priceBasket(next);
     track("product_added", {
+      ...packEvent(id, selected),
+      after_pack: !pack && currentItems.some((item) => packById.has(item.id)),
       product: id,
       category: "category" in product ? product.category : "packs",
       basket_value: priced.subtotal / 100,
@@ -165,6 +182,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const remove = (id: string) => {
     if (!allowedRef.current || !itemsRef.current.some((item) => item.id === id))
       return;
+    const previous = itemsRef.current.find((item) => item.id === id);
     const next = itemsRef.current.flatMap((i) =>
       i.id !== id
         ? [i]
@@ -178,12 +196,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const product = getCatalogItem(id);
     const priced = priceBasket(next);
     track("product_removed", {
+      ...packEvent(id, previous?.options),
       product: id,
       category: product && "category" in product ? product.category : "packs",
       basket_value: priced.subtotal / 100,
       item_count: priced.item_count,
       quantity: 1,
     });
+  };
+  const updateOptions = (id: string, options: PackOptions) => {
+    const pack = packById.get(id);
+    if (
+      !allowedRef.current ||
+      !pack ||
+      !itemsRef.current.some((item) => item.id === id)
+    )
+      return;
+    const selected = packOptions(pack, options);
+    const next = itemsRef.current.map((item) =>
+      item.id === id ? { ...item, options: selected } : item,
+    );
+    itemsRef.current = next;
+    setItems(next);
+    writeLocal("jola_cart", next);
+    track("pack_options_changed", { product: id, ...packEvent(id, selected) });
+    notify("Pack atualizado.");
   };
   const setLocation = (value: Location) => {
     if (!allowedRef.current) return;
@@ -195,6 +232,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (!allowedRef.current) return;
     const priced = priceBasket(itemsRef.current);
     track("cart_opened", {
+      ...basketPackEvents(itemsRef.current),
       basket_value: priced.subtotal / 100,
       item_count: priced.item_count,
     });
@@ -211,6 +249,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         ready,
         ageConfirmed,
         add,
+        updateOptions,
         remove,
         location,
         setLocation,

@@ -49,33 +49,6 @@
     left: 2%;
     bottom: 17%;
   }
-  .pack-grid {
-    gap: 14px;
-  }
-  .pack-visual {
-    height: 220px;
-  }
-  .pack-people {
-    left: 9px;
-    top: 9px;
-    font-size: 13px;
-  }
-  .pack-tag {
-    top: 49px;
-    font-size: 13px;
-  }
-  .pack-info {
-    padding: 17px 13px;
-  }
-  .pack-info h3 {
-    font-size: 18px;
-  }
-  .pack-info strong {
-    font-size: 13px;
-  }
-  .pack-objects .product-art {
-    width: 100px;
-  }
   .category-grid {
     gap: 9px;
   }
@@ -121,15 +94,6 @@
     font-size: 48px;
   }
   .catalog-time {
-    display: none;
-  }
-  .catalog-banner {
-    padding: 20px;
-  }
-  .catalog-banner h2 {
-    font-size: 28px;
-  }
-  .banner-pack > svg {
     display: none;
   }
   .checkout-layout {
@@ -200,35 +164,6 @@
     scrollbar-width: none;
     margin-right: -32px;
     padding-right: 32px;
-  }
-  .pack-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-  .pack-visual {
-    height: 250px;
-  }
-  .pack-tag {
-    top: 49px;
-    font-size: 13px;
-  }
-  .pack-people {
-    top: 13px;
-    left: 13px;
-    font-size: 13px;
-  }
-  .pack-objects .product-art {
-    width: 125px;
-    height: 200px;
-  }
-  .pack-info {
-    padding: 21px 18px;
-  }
-  .pack-info h3 {
-    font-size: 22px;
-  }
-  .pack-info strong {
-    font-size: 16px;
   }
   .steps-grid {
     gap: 20px;
@@ -520,101 +455,6 @@
     font-size: 13px;
     margin-bottom: 11px;
   }
-  .pack-grid,
-  .catalog-packs .pack-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .pack-card {
-    display: grid;
-    grid-template-columns: 35% minmax(0, 1fr);
-  }
-  .pack-visual,
-  .catalog-packs .pack-visual {
-    height: 100%;
-    min-height: 275px;
-  }
-  .pack-people {
-    font-size: 11px;
-    top: 10px;
-    left: 6px;
-    right: 6px;
-    justify-content: center;
-    padding: 4px 3px;
-    white-space: nowrap;
-  }
-  .pack-people svg {
-    width: 11px;
-  }
-  .pack-tag {
-    font-size: 10px;
-    top: 45px;
-    right: 6px;
-    padding: 3px 5px;
-  }
-  .pack-objects {
-    bottom: 60px;
-    height: 160px;
-    left: -20%;
-    width: 140%;
-    overflow: visible;
-  }
-  .pack-objects > div {
-    width: 75px;
-    margin-left: -30px;
-  }
-  .pack-objects .product-art {
-    height: 160px;
-    width: 94px;
-    margin-left: -13px;
-  }
-  .pack-visual-name {
-    font-size: 33px;
-    bottom: 19px;
-    padding-inline: 5px;
-  }
-  .pack-info {
-    padding: 18px 14px;
-  }
-  .pack-info > div:first-child {
-    gap: 6px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .pack-info h3 {
-    font-size: 23px;
-    line-height: 1.2;
-  }
-  .pack-info strong {
-    font-size: 16px;
-    margin-top: 2px;
-  }
-  .pack-info p {
-    font-size: 14px;
-    line-height: 1.6;
-    margin-top: 8px;
-    min-height: 0;
-  }
-  .pack-info .pack-contents {
-    font-size: 13px;
-    min-height: 0;
-    margin: 12px 0 18px;
-    gap: 2px;
-  }
-  .pack-add {
-    min-height: 44px;
-    font-size: 13px;
-    padding: 9px;
-    gap: 7px;
-    margin-top: auto;
-  }
-  .pack-in-basket {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .pack-add svg {
-    width: 14px;
-  }
   .preview-note {
     font-size: 13px;
     line-height: 1.8;
@@ -638,64 +478,6 @@
     grid-template-columns: 118px 1fr;
     column-gap: 20px;
     grid-template-rows: auto auto;
-  }
-  .step-illustration {
-    grid-row: 1/3;
-    height: 118px;
-    margin: 0;
-  }
-  .step-illustration > span:first-child {
-    width: 20px;
-    height: 20px;
-    top: 8px;
-    left: 8px;
-    font-size: 9px;
-    z-index: 1;
-  }
-  .mini-phone {
-    width: 88px;
-    height: 125px;
-    padding: 11px 6px;
-    border-width: 3px;
-    border-radius: 10px;
-    transform: rotate(-10deg) translate(9px, 20px);
-  }
-  .mini-phone b {
-    font-size: 10px;
-  }
-  .mini-phone > div {
-    font-size: 14px;
-    padding: 10px 0;
-  }
-  .mini-phone i {
-    font-size: 6px;
-    padding: 6px;
-  }
-  .mini-bag {
-    font-size: 30px;
-    padding: 22px 8px 16px;
-    box-shadow: 7px 7px 0 #ce9c31;
-  }
-  .mini-bag:before {
-    width: 28px;
-    height: 18px;
-    left: 20px;
-    top: -15px;
-    border-width: 4px;
-  }
-  .bag-zap {
-    width: 24px;
-    right: 7px;
-    top: 20px;
-  }
-  .step-cheers > div {
-    font-size: 59px;
-  }
-  .step-cheers i {
-    font-size: 8px;
-    bottom: 12px;
-    right: 3px;
-    padding: 3px 5px;
   }
   .steps-grid h3 {
     align-self: end;
@@ -955,13 +737,12 @@
     gap: 0;
   }
   .catalog-intro {
-    margin-bottom: 23px;
-    gap: 16px;
+    margin-bottom: 16px;
+    gap: 8px;
     flex-wrap: wrap;
   }
   .catalog-intro .small-label {
-    font-size: 13px;
-    margin-bottom: 10px;
+    display: none;
   }
   .catalog-intro h1 {
     font-size: 42px;
@@ -982,39 +763,6 @@
     font-size: 13px;
     width: auto;
     padding-left: 3px;
-  }
-  .catalog-banner {
-    padding: 17px 16px;
-    border-radius: 8px;
-    gap: 12px;
-    align-items: center;
-  }
-  .catalog-banner > div > span {
-    font-size: 13px;
-  }
-  .catalog-banner h2 {
-    font-size: 24px;
-    max-width: 190px;
-    line-height: 1;
-    margin: 7px 0 8px;
-  }
-  .catalog-banner p {
-    font-size: 13px;
-    max-width: 180px;
-  }
-  .banner-pack {
-    padding: 9px 12px;
-    flex-shrink: 0;
-    max-width: 128px;
-  }
-  .banner-pack > span {
-    font-size: 20px;
-    white-space: normal;
-    line-height: 1.1;
-  }
-  .banner-pack strong {
-    font-size: 13px;
-    margin-top: 5px;
   }
   .catalog-controls {
     padding-top: 12px;
@@ -1409,18 +1157,6 @@
   }
   .product-info {
     padding: 11px 9px;
-  }
-  .pack-info strong {
-    font-size: 16px;
-  }
-  .pack-info h3 {
-    font-size: 21px;
-  }
-  .pack-visual {
-    height: 100%;
-  }
-  .pack-visual-name {
-    font-size: 31px;
   }
   .checkout-header > span {
     font-size: 13px;

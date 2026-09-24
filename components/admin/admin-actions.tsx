@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, LockKeyhole, LogOut, RefreshCw } from "lucide-react";
+import { LockKeyhole, LogOut, RefreshCw } from "lucide-react";
 import { postJson } from "@/lib/client-request";
 export function AdminLogin({ configured }: { configured: boolean }) {
   const [busy, setBusy] = useState(false);
@@ -63,7 +63,6 @@ export function AdminLogin({ configured }: { configured: boolean }) {
           )}
           <button className="button button-primary" disabled={busy}>
             {busy ? "A entrar…" : "Entrar no painel"}
-            <ArrowRight size={17} />
           </button>
         </form>
       )}

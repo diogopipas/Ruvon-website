@@ -1,5 +1,12 @@
 export type Category =
-  "cerveja" | "vinho" | "spirits" | "gelo" | "mixers" | "snacks" | "festa";
+  | "cerveja"
+  | "cidra"
+  | "vinho"
+  | "spirits"
+  | "gelo"
+  | "mixers"
+  | "snacks"
+  | "festa";
 export type Product = {
   id: string;
   name: string;
@@ -16,16 +23,31 @@ export type Pack = {
   name: string;
   price: number;
   people: string;
+  peopleMin: number;
+  peopleMax: number;
   description: string;
   contents: string[];
   color: string;
   items: string[];
+  summary: string;
+  image: string;
+  options?: ("beer" | "mixer")[];
+  featured?: boolean;
 };
-export type CartItem = { id: string; quantity: number };
+export type PackOptions = {
+  beer?: "super-bock" | "sagres";
+  mixer?: "coca-cola" | "coca-cola-zero";
+};
+export type CartItem = { id: string; quantity: number; options?: PackOptions };
 export type BasketItem = CartItem & {
   name: string;
   category: string;
   price: number;
+  product_type?: "pack" | "individual";
+  pack_name?: string;
+  people_min?: number;
+  people_max?: number;
+  contents?: string[];
 };
 export type Attribution = {
   utm_source?: string;

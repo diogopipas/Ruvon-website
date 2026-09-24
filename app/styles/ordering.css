@@ -105,52 +105,6 @@
   padding-left: 22px;
   color: #969f86;
 }
-.catalog-banner {
-  display: flex;
-  background: #d5dab5;
-  color: #242b1b;
-  border-radius: 10px;
-  justify-content: space-between;
-  padding: 24px 25px;
-  gap: 15px;
-  overflow: hidden;
-}
-.catalog-banner > div > span {
-  font-size: 13px;
-}
-.catalog-banner h2 {
-  font-size: 31px;
-  margin: 7px 0 9px;
-}
-.catalog-banner p {
-  font-size: 13px;
-  color: #5d684b;
-}
-.banner-pack {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #c2c89b;
-  border: 1px solid #a8b180;
-  padding: 16px 13px;
-  border-radius: 8px;
-  transform: rotate(-3deg);
-  transition: transform 0.2s;
-}
-.banner-pack:hover {
-  transform: rotate(0);
-}
-.banner-pack > span {
-  font-family: var(--font-display);
-  font-size: 23px;
-  text-align: left;
-  white-space: nowrap;
-}
-.banner-pack strong {
-  display: block;
-  font-family: var(--font-body);
-  font-size: 13px;
-}
 .catalog-controls {
   padding-top: 18px;
   position: sticky;
@@ -249,7 +203,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 15px;
-  animation: overlay-in 0.15s;
 }
 .product-card {
   position: relative;
@@ -267,6 +220,9 @@
   border-color: var(--amber);
 }
 .product-selection-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   min-height: 20px;
   margin-top: 8px;
   color: #565b38;
@@ -582,12 +538,6 @@
   background: #22251d;
   padding-top: 12px;
   margin-top: 4px;
-}
-.catalog-packs .pack-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.catalog-packs .pack-visual {
-  height: 220px;
 }
 .floating-cart {
   position: fixed;

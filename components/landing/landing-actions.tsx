@@ -2,13 +2,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { ArrowUpRight, MapPin, Plus, Store, Users } from "lucide-react";
-import { categories, packs, productById } from "@/lib/products";
+import { MapPin, Store } from "lucide-react";
+import { categories, productById } from "@/lib/products";
 import { captureAttribution, track, trackOnce } from "@/lib/analytics";
-import { money } from "@/lib/pricing";
 import { ProductArt } from "@/components/ui/product-art";
-import { Quantity } from "@/components/cart/quantity";
-import { useCart } from "@/components/providers";
 const MerchantForm = dynamic(() => import("./merchant-form"));
 export function LandingView() {
   useEffect(() => {
@@ -37,77 +34,9 @@ export function CategoryCards() {
           <div className="category-art">
             <ProductArt product={productById.get(category.product)!} />
           </div>
-          <span>
-            {category.name}
-            <ArrowUpRight size={17} />
-          </span>
+          <span>{category.name}</span>
         </button>
       ))}
-    </div>
-  );
-}
-export function PackCards() {
-  const { add, items, ready, ageConfirmed } = useCart();
-  return (
-    <div className="pack-grid">
-      {packs.map((pack, index) => {
-        const quantity =
-          items.find((item) => item.id === pack.id)?.quantity ?? 0;
-        return (
-          <article
-            className={`pack-card ${quantity ? "is-selected" : ""}`}
-            key={pack.id}
-            style={{ "--pack-color": pack.color } as React.CSSProperties}
-          >
-            <div className="pack-visual">
-              <span className="pack-people">
-                <Users size={13} />
-                {pack.people}
-              </span>
-              {index === 1 && <span className="pack-tag">A nossa escolha</span>}
-              <div className="pack-objects">
-                {pack.items.map((id, i) => (
-                  <div key={id} style={{ "--i": i } as React.CSSProperties}>
-                    <ProductArt product={productById.get(id)!} />
-                  </div>
-                ))}
-              </div>
-              <span className="pack-visual-name">{pack.name}</span>
-            </div>
-            <div className="pack-info">
-              <div>
-                <h3>{pack.name}</h3>
-                <strong>{money(pack.price)}</strong>
-              </div>
-              <p>{pack.description}</p>
-              <ul
-                className="pack-contents"
-                aria-label={`O que inclui ${pack.name}`}
-              >
-                {pack.contents.map((content) => (
-                  <li key={content}>{content}</li>
-                ))}
-              </ul>
-              {quantity ? (
-                <div className="pack-in-basket">
-                  <span>No carrinho</span>
-                  <Quantity id={pack.id} name={pack.name} compact />
-                </div>
-              ) : (
-                <button
-                  className="button pack-add"
-                  disabled={!ready || !ageConfirmed}
-                  onClick={() => add(pack.id)}
-                  aria-label={`Juntar ${pack.name} ao carrinho`}
-                >
-                  <span>Juntar à noite</span>
-                  <Plus size={18} />
-                </button>
-              )}
-            </div>
-          </article>
-        );
-      })}
     </div>
   );
 }
@@ -132,7 +61,6 @@ export function CityPicker() {
             >
               <MapPin size={16} />
               {name}
-              <ArrowUpRight size={14} />
             </button>
           ),
         )}
@@ -165,7 +93,6 @@ export function MerchantSection() {
       </div>
       <button className="button button-secondary" onClick={() => setOpen(true)}>
         Quero vender na Jola
-        <ArrowUpRight size={18} />
       </button>
       {open && <MerchantForm open={open} onOpenChange={setOpen} />}
     </section>

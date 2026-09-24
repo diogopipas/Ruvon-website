@@ -37,8 +37,8 @@ describe("prices and catalog", () => {
   });
   it("prices a bundle as one catalog item", () => {
     expect(priceBasket([{ id: "pack-classica", quantity: 2 }])).toMatchObject({
-      subtotal: 6980,
-      total: 7368,
+      subtotal: 9980,
+      total: 10368,
       item_count: 2,
     });
   });
@@ -49,8 +49,8 @@ describe("prices and catalog", () => {
   });
   it("has unique ids and valid pack illustration references", () => {
     expect(products).toHaveLength(32);
-    expect(packs).toHaveLength(4);
-    expect(new Set([...products, ...packs].map((p) => p.id)).size).toBe(36);
+    expect(packs).toHaveLength(6);
+    expect(new Set([...products, ...packs].map((p) => p.id)).size).toBe(38);
     for (const pack of packs)
       for (const id of pack.items)
         expect(products.some((p) => p.id === id)).toBe(true);

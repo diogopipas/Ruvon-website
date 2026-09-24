@@ -2,19 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  MapPin,
-  Search,
-  ShoppingBag,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Check, MapPin, Search, ShoppingBag, X } from "lucide-react";
 import { categories, products } from "@/lib/products";
 import { money, priceBasket } from "@/lib/pricing";
 import { track, trackOnce } from "@/lib/analytics";
-import { PackCards } from "@/components/landing/landing-actions";
+import { packEvent } from "@/lib/packs";
+import { PackBrowser } from "@/components/packs/pack-browser";
 import { Wordmark } from "@/components/ui/wordmark";
 import { ProductArt } from "@/components/ui/product-art";
 import { Quantity } from "@/components/cart/quantity";
@@ -35,6 +28,7 @@ function ProductCard({ product }: { product: Product }) {
           trackOnce(
             "product_viewed",
             {
+              ...packEvent(product.id),
               product: product.id,
               category: product.category,
             },
@@ -60,7 +54,7 @@ function ProductCard({ product }: { product: Product }) {
       <div className="product-info">
         <h3>{product.name}</h3>
         <p>{product.size}</p>
-        <span className="product-selection-note" aria-hidden="true">
+        <span className="product-selection-note" aria-hidden={!quantity}>
           {quantity ? (
             <>
               <Check size={13} /> {quantity} no carrinho
@@ -80,15 +74,19 @@ function ProductCard({ product }: { product: Product }) {
 export function Catalog() {
   const params = useSearchParams();
   const router = useRouter();
-  const requested = params.get("categoria") || "todos";
+  const requested = params.get("categoria") || "packs";
   const active =
-    requested === "packs" || categories.some((c) => c.id === requested)
+    requested === "packs" ||
+    requested === "todos" ||
+    requested === "gelo-mixers" ||
+    categories.some((c) => c.id === requested)
       ? requested
-      : "todos";
+      : "packs";
   const [search, setSearch] = useState("");
   const [addressOpen, setAddressOpen] = useState(false);
   const [addressError, setAddressError] = useState("");
   const controlsRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const categoryChanged = useRef(false);
   const { location, setLocation, openCart, items } = useCart();
@@ -101,9 +99,30 @@ export function Catalog() {
       .trim();
   const filtered = products.filter(
     (p) =>
-      (active === "todos" || p.category === active) &&
+      (active === "todos" ||
+        p.category === active ||
+        (active === "gelo-mixers" &&
+          ["gelo", "mixers"].includes(p.category))) &&
       normalizeSearch(`${p.name} ${p.size}`).includes(normalizeSearch(search)),
   );
+  useEffect(() => {
+    const row = categoriesRef.current;
+    const selected = row?.querySelector<HTMLElement>("[aria-pressed='true']");
+    if (!row || !selected) return;
+    const reveal = () =>
+      row.scrollTo({
+        left:
+          row.scrollLeft +
+          selected.getBoundingClientRect().left -
+          row.getBoundingClientRect().left -
+          8,
+        behavior: "instant",
+      });
+    reveal();
+    const resize = new ResizeObserver(reveal);
+    resize.observe(row);
+    return () => resize.disconnect();
+  }, [active]);
   useEffect(() => {
     if (!categoryChanged.current || !resultsRef.current) return;
     categoryChanged.current = false;
@@ -127,7 +146,7 @@ export function Catalog() {
     track("category_clicked", { category: id, source: "catalog" });
     setSearch("");
     const next = new URLSearchParams(params.toString());
-    if (id === "todos") next.delete("categoria");
+    if (id === "packs") next.delete("categoria");
     else next.set("categoria", id);
     router.replace(`/pedir${next.size ? `?${next}` : ""}`, {
       scroll: false,
@@ -176,7 +195,6 @@ export function Catalog() {
                   : "Escolher cidade"}
               </strong>
             </span>
-            <ArrowUpRight size={17} />
           </button>
           <button
             className="shop-cart-button"
@@ -189,35 +207,25 @@ export function Catalog() {
         </div>
       </header>
       <main id="main" className="container shop-layout">
-        <div className="catalog-main">
+        <div
+          className={`catalog-main ${active === "packs" ? "is-pack-view" : ""}`}
+        >
           <div className="catalog-intro">
             <div>
               <span className="small-label">
                 O botão de emergência da tua noite.
               </span>
-              <h1>O que é que falta?</h1>
+              <h1>
+                {active === "packs"
+                  ? "A noite, resolvida."
+                  : "O que é que falta?"}
+              </h1>
               <p>Monta a tua noite. Ajuda-nos a escolher onde lançar.</p>
             </div>
             <span className="catalog-time">
               <MapPin size={16} />
               Acesso antecipado<span>Ainda sem entregas</span>
             </span>
-          </div>
-          <div className="catalog-banner">
-            <div>
-              <span>Poupa nas decisões.</span>
-              <h2>A noite toda, num pack.</h2>
-              <p>De um pré tranquilo a uma casa cheia.</p>
-            </div>
-            <button
-              onClick={() => chooseCategory("packs")}
-              className="banner-pack"
-            >
-              <ShoppingBag size={34} />
-              <span>
-                Ver os packs<strong>4 noites à escolha ↗</strong>
-              </span>
-            </button>
           </div>
           <div className="catalog-controls" ref={controlsRef}>
             <div className="search-field">
@@ -243,35 +251,55 @@ export function Catalog() {
                 </button>
               )}
             </div>
-            <nav className="category-chips" aria-label="Categorias de produtos">
-              <button
-                className={active === "todos" ? "active" : ""}
-                aria-pressed={active === "todos"}
-                onClick={() => chooseCategory("todos")}
-              >
-                Tudo para a noite
-              </button>
+            <nav
+              className="category-chips"
+              aria-label="Categorias de produtos"
+              ref={categoriesRef}
+            >
               <button
                 className={active === "packs" ? "active" : ""}
                 aria-pressed={active === "packs"}
                 onClick={() => chooseCategory("packs")}
               >
-                <ShoppingBag size={16} /> Packs
+                Packs
               </button>
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  className={active === c.id ? "active" : ""}
-                  aria-pressed={active === c.id}
-                  onClick={() => chooseCategory(c.id)}
-                >
-                  <span aria-hidden="true">{c.emoji}</span>
-                  {c.name}
-                </button>
-              ))}
+              <button
+                className={active === "todos" ? "active" : ""}
+                aria-pressed={active === "todos"}
+                onClick={() => chooseCategory("todos")}
+              >
+                Avulso
+              </button>
+              {[
+                "cerveja",
+                "cidra",
+                "spirits",
+                "vinho",
+                "gelo-mixers",
+                "snacks",
+                "festa",
+              ]
+                .map((id) =>
+                  id === "gelo-mixers"
+                    ? { id, name: "Gelo & Mixers" }
+                    : categories.find((c) => c.id === id)!,
+                )
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    className={active === c.id ? "active" : ""}
+                    aria-pressed={active === c.id}
+                    onClick={() => chooseCategory(c.id)}
+                  >
+                    {c.name}
+                  </button>
+                ))}
             </nav>
           </div>
-          <div className="catalog-heading" ref={resultsRef}>
+          <div
+            className="catalog-heading"
+            ref={active === "packs" ? undefined : resultsRef}
+          >
             <h2>
               {search
                 ? `Resultados para “${search}”`
@@ -279,21 +307,23 @@ export function Catalog() {
                   ? "A noite resolvida"
                   : active === "todos"
                     ? "Os essenciais"
-                    : categories.find((c) => c.id === active)?.name}
+                    : active === "gelo-mixers"
+                      ? "Gelo & Mixers"
+                      : categories.find((c) => c.id === active)?.name}
             </h2>
             <span role="status" aria-live="polite">
-              {active === "packs" ? "4 packs" : `${filtered.length} produtos`}
+              {active === "packs" ? "6 packs" : `${filtered.length} produtos`}
             </span>
           </div>
           <p className="catalog-preview">
             {active === "packs"
               ? "Escolhe pelo grupo e pelo que te apetece. "
               : ""}
-            Preços de antevisão. Não há pagamentos nem entregas nesta fase.
+            Imagens e preços de antevisão. Ainda sem pagamentos ou entregas.
           </p>
           {active === "packs" ? (
-            <div className="catalog-packs">
-              <PackCards />
+            <div className="catalog-packs" ref={resultsRef}>
+              <PackBrowser />
             </div>
           ) : (
             <div className="product-grid">
@@ -365,15 +395,9 @@ export function Catalog() {
               {addressError}
             </p>
           )}
-          <button className="button button-primary">
-            Guardar zona
-            <ArrowRightIcon />
-          </button>
+          <button className="button button-primary">Guardar zona</button>
         </form>
       </Modal>
     </>
   );
-}
-function ArrowRightIcon() {
-  return <ArrowUpRight size={18} />;
 }

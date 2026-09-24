@@ -6,6 +6,92 @@ const headers = { origin: "http://localhost:3100" };
 async function database(): Promise<Database> {
   return JSON.parse(await readFile(".data/integration/jola.json", "utf8"));
 }
+test("pack substitutions survive order, lead, analytics and retry with canonical prices", async ({
+  request,
+}) => {
+  const session_id = randomUUID();
+  const items = [
+    {
+      id: "pack-classica",
+      quantity: 1,
+      options: { beer: "sagres", mixer: "coca-cola-zero" },
+      price: 1,
+    },
+    { id: "gelo", quantity: 1 },
+  ];
+  const data = {
+    session_id,
+    items,
+    reached_checkout: true,
+    location: { city: "Lisboa", postcode: "1000001" },
+    attribution: { utm_campaign: "packs-validation" },
+  };
+  expect((await request.post("/api/orders", { headers, data })).status()).toBe(
+    200,
+  );
+  for (let i = 0; i < 2; i++)
+    expect(
+      (
+        await request.post("/api/leads", {
+          headers,
+          data: {
+            ...data,
+            contact: `pack-${session_id}@example.com`,
+            consent: true,
+          },
+        })
+      ).status(),
+    ).toBe(200);
+  const db = await database();
+  const lead = db.leads.find((row) => row.session_id === session_id)!;
+  const order = db.simulated_orders.find(
+    (row) => row.session_id === session_id,
+  )!;
+  expect(order).toMatchObject({
+    subtotal: 5289,
+    total: 5677,
+    converted_to_lead: true,
+  });
+  expect(lead.basket_total).toBe(5677);
+  expect(lead.basket_items).toEqual(order.items);
+  expect(lead.basket_items[0]).toMatchObject({
+    product_type: "pack",
+    price: 4990,
+    options: { beer: "sagres", mixer: "coca-cola-zero" },
+  });
+  expect(lead.basket_items[0].contents).toContain("24 × Sagres 33 cl");
+  expect(db.leads.filter((row) => row.session_id === session_id)).toHaveLength(
+    1,
+  );
+  const properties = {
+    product: "pack-classica",
+    product_type: "pack",
+    pack_id: "pack-classica",
+    pack_name: "A Clássica",
+    pack_price: 49.9,
+    people_min: 5,
+    people_max: 7,
+    selected_options: items[0].options,
+  };
+  expect(
+    (
+      await request.post("/api/events", {
+        headers,
+        data: {
+          id: randomUUID(),
+          session_id,
+          name: "product_added",
+          properties,
+        },
+      })
+    ).status(),
+  ).toBe(200);
+  expect(
+    (await database()).analytics_events.find(
+      (row) => row.session_id === session_id,
+    )?.properties,
+  ).toEqual(properties);
+});
 test("complete demand funnel persists canonical basket, location, attribution and lead, with retry-safe conversion", async ({
   request,
 }) => {

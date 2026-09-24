@@ -31,7 +31,10 @@ export function checkoutKey(
   return interest
     ? `interest:${chosenCity.trim().toLocaleLowerCase("pt")}`
     : `basket:${items
-        .map(({ id, quantity }) => `${id}:${quantity}`)
+        .map(
+          ({ id, quantity, options }) =>
+            `${id}:${quantity}${options ? `:${options.beer ?? ""}:${options.mixer ?? ""}` : ""}`,
+        )
         .sort()
         .join(",")}`;
 }

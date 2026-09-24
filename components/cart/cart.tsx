@@ -1,8 +1,11 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
+import { PackOptionsPicker } from "@/components/packs/pack-browser";
+import { basketPackEvents, packOptions } from "@/lib/packs";
 import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Clock3, ShoppingBag } from "lucide-react";
+import { Clock3, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers";
 import { Modal } from "@/components/ui/modal";
 import { Quantity } from "./quantity";
@@ -10,6 +13,7 @@ import { getCatalogItem, productById } from "@/lib/products";
 import { money, priceBasket } from "@/lib/pricing";
 import { ProductArt } from "@/components/ui/product-art";
 import { trackOnce } from "@/lib/analytics";
+import { checkoutKey } from "@/lib/journey";
 export function CartContents({
   review = false,
   editingDisabled = false,
@@ -17,8 +21,15 @@ export function CartContents({
   review?: boolean;
   editingDisabled?: boolean;
 }) {
-  const { items, ageConfirmed, closeCart, syncOrder, notify, storageError } =
-    useCart();
+  const {
+    items,
+    ageConfirmed,
+    closeCart,
+    syncOrder,
+    notify,
+    storageError,
+    updateOptions,
+  } = useCart();
   const [busy, setBusy] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const inFlight = useRef(false);
@@ -29,10 +40,15 @@ export function CartContents({
     if (inFlight.current || !ageConfirmed || !items.length) return;
     inFlight.current = true;
     setBusy(true);
-    trackOnce("checkout_started", {
-      basket_value: priced.subtotal / 100,
-      item_count: priced.item_count,
-    });
+    trackOnce(
+      "checkout_started",
+      {
+        ...basketPackEvents(items),
+        basket_value: priced.subtotal / 100,
+        item_count: priced.item_count,
+      },
+      `checkout_started:${checkoutKey(items, false)}`,
+    );
     try {
       await syncOrder(true);
     } catch {
@@ -79,7 +95,6 @@ export function CartContents({
           onClick={closeCart}
         >
           Explorar a Jola
-          <ArrowUpRight size={18} />
         </Link>
       </div>
     );
@@ -92,13 +107,36 @@ export function CartContents({
           return (
             <div className="cart-item" key={item.id}>
               <div className="cart-item-art">
-                {art ? <ProductArt product={art} /> : <ShoppingBag size={26} />}
+                {art ? (
+                  <ProductArt product={art} />
+                ) : "image" in product ? (
+                  <Image
+                    src={product.image}
+                    alt=""
+                    width={100}
+                    height={100}
+                    sizes="64px"
+                  />
+                ) : (
+                  <ShoppingBag size={26} />
+                )}
               </div>
               <div className="cart-item-info">
                 <strong>{product.name}</strong>
                 <small>
                   {"size" in product ? product.size : product.people}
                 </small>
+                {"people" in product && (
+                  <>
+                    <p className="cart-pack-summary">{product.summary}</p>
+                    <PackOptionsPicker
+                      pack={product}
+                      value={packOptions(product, item.options)}
+                      onChange={(options) => updateOptions(item.id, options)}
+                      disabled={editingDisabled || busy}
+                    />
+                  </>
+                )}
                 <Quantity
                   id={item.id}
                   name={product.name}
@@ -144,7 +182,6 @@ export function CartContents({
             aria-busy={busy}
           >
             {busy ? "A guardar o carrinho…" : "Continuar para a minha zona"}
-            <ArrowRight size={18} />
           </button>
         )}
         <p className="cart-disclaimer">
@@ -212,7 +249,6 @@ export function CartLayer() {
             Ver carrinho <small>· {priced.item_count} artigos</small>
           </span>
           <strong>{money(priced.total)}</strong>
-          <ArrowRight size={18} />
         </button>
       )}
     </>

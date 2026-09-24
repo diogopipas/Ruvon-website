@@ -1,4 +1,6 @@
 import { useId } from "react";
+import Image from "next/image";
+import { productImages } from "@/lib/product-images";
 import type { Product } from "@/types";
 export function ProductArt({
   product,
@@ -8,6 +10,19 @@ export function ProductArt({
   className?: string;
 }) {
   const id = useId().replace(/:/g, "");
+  const photo = productImages[product.id];
+  if (photo)
+    return (
+      <Image
+        src={photo}
+        alt=""
+        aria-hidden="true"
+        width={400}
+        height={600}
+        className={`product-art product-packshot ${className}`}
+        sizes="(max-width: 700px) 42vw, 240px"
+      />
+    );
   const { art, color, label } = product;
   const bottle =
     art === "beer" || art === "wine" || art === "spirit" || art === "soda";

@@ -1,13 +1,7 @@
 import Image from "next/image";
+import { PackBrowser } from "@/components/packs/pack-browser";
 import { Suspense } from "react";
-import {
-  ArrowDown,
-  ArrowUpRight,
-  Clock3,
-  MapPin,
-  Snowflake,
-  Zap,
-} from "lucide-react";
+import { ArrowDown, Clock3, MapPin, Snowflake, Zap } from "lucide-react";
 import { Header } from "@/components/ui/header";
 import { Footer } from "@/components/ui/footer";
 import { OrderLink } from "@/components/ui/order-link";
@@ -16,7 +10,6 @@ import {
   CityPicker,
   LandingView,
   MerchantSection,
-  PackCards,
 } from "@/components/landing/landing-actions";
 export default function Home() {
   return (
@@ -27,9 +20,7 @@ export default function Home() {
         <section className="hero container">
           <div className="hero-copy">
             <span className="launch-badge">
-              <span />
-              A preparar o lançamento em Lisboa
-              <ArrowUpRight size={14} />
+              <span />A preparar o lançamento em Lisboa
             </span>
             <h1>
               Acabou <br />a bebida?
@@ -102,6 +93,27 @@ export default function Home() {
           <span>A NOITE NÃO ACABA AQUI.</span>
           <span>✳</span>
         </div>
+        <section className="section packs-section container" id="packs">
+          <div className="section-heading">
+            <div>
+              <h2>
+                Não queres pensar?
+                <br />
+                Há um pack para isso.
+              </h2>
+            </div>
+            <p className="section-aside">
+              Escolhe quantos são.
+              <br />
+              Nós tratamos do resto.
+            </p>
+          </div>
+          <PackBrowser featured />
+          <p className="preview-note">
+            Uma antevisão das boas noites que aí vêm. Packs e preços
+            ilustrativos.
+          </p>
+        </section>
         <section className="section container" id="o-que-falta">
           <div className="section-heading">
             <div>
@@ -113,28 +125,6 @@ export default function Home() {
             </OrderLink>
           </div>
           <CategoryCards />
-        </section>
-        <section className="section packs-section container" id="packs">
-          <div className="section-heading">
-            <div>
-              <span className="small-label">Os packs da noite</span>
-              <h2>
-                Não queres pensar?
-                <br />
-                Está tudo no saco.
-              </h2>
-            </div>
-            <p className="section-aside">
-              Compara o tamanho do grupo.
-              <br />
-              Escolhe uma vez. Está feito.
-            </p>
-          </div>
-          <PackCards />
-          <p className="preview-note">
-            Uma antevisão das boas noites que aí vêm. Packs e preços
-            ilustrativos.
-          </p>
         </section>
         <section className="how-section" id="como-funciona">
           <div className="container">
@@ -151,14 +141,6 @@ export default function Home() {
             </div>
             <div className="steps-grid">
               <article>
-                <div className="step-illustration step-phone">
-                  <span>1</span>
-                  <div className="mini-phone">
-                    <b>O que falta?</b>
-                    <div>🍺 🧊 🥤</div>
-                    <i>Pedir uma Jola ↗</i>
-                  </div>
-                </div>
                 <h3>Diz-nos o que falta</h3>
                 <p>
                   Cerveja? Gelo? Mixers? Snacks?
@@ -167,11 +149,6 @@ export default function Home() {
                 </p>
               </article>
               <article>
-                <div className="step-illustration step-bag">
-                  <span>2</span>
-                  <div className="mini-bag">JOLA</div>
-                  <Zap className="bag-zap" size={35} />
-                </div>
                 <h3>Nós tratamos disso</h3>
                 <p>
                   Encontramos uma loja perto de ti.
@@ -179,11 +156,6 @@ export default function Home() {
                 </p>
               </article>
               <article>
-                <div className="step-illustration step-cheers">
-                  <span>3</span>
-                  <div>🍻</div>
-                  <i>+ uma boa noite</i>
-                </div>
                 <h3>A festa continua</h3>
                 <p>
                   Recebes tudo sem ninguém ter de sair.

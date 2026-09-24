@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowUpRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { readLocal, writeLocal } from "@/lib/analytics";
 import { postJson } from "@/lib/client-request";
@@ -159,7 +159,6 @@ export default function MerchantForm({
           )}
           <button disabled={busy} className="button button-primary">
             {busy ? "A guardar…" : "Quero ser parceiro"}
-            <ArrowUpRight size={18} />
           </button>
         </form>
       )}

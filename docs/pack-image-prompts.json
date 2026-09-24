@@ -1,0 +1,62 @@
+{
+  "mode": "built-in image_gen",
+  "usage": "Illustrative prelaunch pack compositions; replace with approved supplier photographs for sales.",
+  "prompts": [
+    [
+      "classica",
+      "A Clássica",
+      "Warm Jola mustard yellow #efb735 seamless tabletop and backdrop. Abundant asymmetrical arrangement: two shrinkwrapped twelve-bottle blocks of Super Bock beer 33cl, one tall clear Absolut vodka 70cl bottle at back right, two Coca-Cola Original 1.5L bottles, two clear blue-accent ice bags, Doritos red bag and Pringles red tube, small bag of peanuts, a short stack of paper cups and six small water bottles. Hero beer block foreground left. Product labels legible but no added typography."
+    ],
+    [
+      "pre",
+      "O Pré",
+      "Very dark charcoal #20211d studio backdrop and table, cold silver side light with a small warm yellow bounce. Energetic diagonal composition: one tall Absolut vodka bottle 70cl, six blue and silver Red Bull cans in a staggered row, one Coca-Cola 1.5L, two blue-accent bags of ice, one red Doritos bag, paper cup stack, four small water bottles. Ice and condensation. Products fully readable against dark ground."
+    ],
+    [
+      "somersby",
+      "Só Somersby",
+      "Muted light apple green #cbd19a seamless studio backdrop and surface. Twelve Somersby apple cider 33cl bottles grouped as two six-packs, golden liquid and green labels dominating a loose low wide composition. Two blue-accent ice bags, red Doritos bag and Pringles tube, six small water bottles. One green apple beside bottles. Fresh cold condensation."
+    ],
+    [
+      "mais-uma",
+      "Só Mais Uma",
+      "Warm pale sand #e8dcc0 seamless studio backdrop and table. Compact friendly arrangement of a twelve-bottle Super Bock beer block, one clear blue-accent 2kg ice bag, one red Doritos bag, a small peanut pouch, two 50cl water bottles. Low front three-quarter camera angle, compact but materially abundant."
+    ],
+    [
+      "gin",
+      "Gin & Chill",
+      "Pale muted mint #bdd1c4 seamless studio backdrop and surface. Clean asymmetrical composition, tall green Gordon's London Dry Gin 70cl bottle prominently at right, three Schweppes tonic bottles yellow labels left, two clear ice bags at back, fresh green limes foreground, a stack of paper cups, one small Pringles Original tube, four small water bottles. Crisp, casual, approachable not luxury."
+    ],
+    [
+      "sem-ressacas",
+      "Sem Ressacas",
+      "Fresh warm sky blue #b8d7dd seamless studio backdrop and table. Energetic generous alcohol-free party collection: six blue-label Super Bock 0.0 beer bottles, Coca-Cola Original and green 7UP 1.5L, two silver-blue Red Bull cans, six small water bottles, a blue-accent clear ice bag, Doritos red bag and Pringles red tube, short stack of paper cups. Bold arrangement with bright crisp highlights, equal visual value to other packs."
+    ]
+  ],
+  "sources": [
+    {
+      "id": "classica",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-cd79f5a0-7271-493b-93b3-5d556375de51.png"
+    },
+    {
+      "id": "pre",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-64398b3f-68f6-4b8e-b82f-536447358e70.png"
+    },
+    {
+      "id": "somersby",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-b3da6370-8482-45e1-9016-b534dba519ba.png"
+    },
+    {
+      "id": "mais-uma",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-bc4521d8-8064-4f88-b4cd-2900ad61210a.png"
+    },
+    {
+      "id": "gin",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-42d49961-86ed-48e2-88b6-82b6fc5eda13.png"
+    },
+    {
+      "id": "sem-ressacas",
+      "path": "/Users/diogoporto/.codex/generated_images/01a0c554-c151-7753-8055-449adb68418f/exec-b4d5a9ef-89a6-4f07-bc12-29d9469b8db7.png"
+    }
+  ]
+}

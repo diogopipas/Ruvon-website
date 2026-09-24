@@ -5,7 +5,6 @@
   z-index: 90;
   background: #0a0d07ba;
   backdrop-filter: blur(5px);
-  animation: overlay-in 0.18s ease;
 }
 .modal-content {
   position: fixed;
@@ -21,7 +20,6 @@
   overflow: auto;
   padding: 33px;
   box-shadow: 0 25px 100px #0007;
-  animation: dialog-in 0.2s ease;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }

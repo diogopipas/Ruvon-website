@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { getCatalogItem } from "./products";
+import { getCatalogItem, packById } from "./products";
+import { packOptions } from "./packs";
 export const eventNames = [
   "landing_view",
   "order_cta_clicked",
@@ -12,6 +13,8 @@ export const eventNames = [
   "location_entered",
   "waitlist_submitted",
   "share_clicked",
+  "pack_group_selected",
+  "pack_options_changed",
 ] as const;
 export const attributionSchema = z.object({
   utm_source: z.string().max(160).optional(),
@@ -19,12 +22,40 @@ export const attributionSchema = z.object({
   utm_campaign: z.string().max(160).optional(),
   utm_content: z.string().max(160).optional(),
 });
+export const packOptionsSchema = z
+  .object({
+    beer: z.enum(["super-bock", "sagres"]).optional(),
+    mixer: z.enum(["coca-cola", "coca-cola-zero"]).optional(),
+  })
+  .strict();
 export const cartSchema = z
   .array(
-    z.object({
-      id: z.string().refine((id) => !!getCatalogItem(id)),
-      quantity: z.number().int().min(1).max(30),
-    }),
+    z
+      .object({
+        id: z.string().refine((id) => !!getCatalogItem(id)),
+        quantity: z.number().int().min(1).max(30),
+        options: packOptionsSchema.optional(),
+      })
+      .superRefine((item, ctx) => {
+        const pack = packById.get(item.id);
+        if (
+          item.options &&
+          Object.keys(item.options).some(
+            (key) => !pack?.options?.includes(key as "beer" | "mixer"),
+          )
+        )
+          ctx.addIssue({
+            code: "custom",
+            message: "Opção indisponível para este artigo.",
+            path: ["options"],
+          });
+      })
+      .transform((item) => {
+        const pack = packById.get(item.id);
+        return pack
+          ? { ...item, options: packOptions(pack, item.options) }
+          : item;
+      }),
   )
   .max(50)
   .refine((items) => new Set(items.map((i) => i.id)).size === items.length);
@@ -86,6 +117,31 @@ export const eventSchema = z.object({
       city: z.string().max(80).optional(),
       postcode: z.string().max(12).optional(),
       source: z.string().max(50).optional(),
+      product_type: z.enum(["pack", "individual"]).optional(),
+      pack_id: z.string().max(100).optional(),
+      pack_name: z.string().max(100).optional(),
+      pack_price: z.number().min(0).max(1000).optional(),
+      people_min: z.number().int().min(1).max(50).optional(),
+      people_max: z.number().int().min(1).max(50).optional(),
+      selected_options: packOptionsSchema.optional(),
+      contains_pack: z.boolean().optional(),
+      after_pack: z.boolean().optional(),
+      group_size: z.enum(["all", "2-3", "4-6", "7+"]).optional(),
+      packs: z
+        .array(
+          z.object({
+            product_type: z.literal("pack"),
+            pack_id: z.string().max(100),
+            pack_name: z.string().max(100),
+            pack_price: z.number().min(0).max(1000),
+            people_min: z.number().int().min(1).max(50),
+            people_max: z.number().int().min(1).max(50),
+            selected_options: packOptionsSchema,
+            quantity: z.number().int().min(1).max(30),
+          }),
+        )
+        .max(6)
+        .optional(),
       ...attributionSchema.shape,
     })
     .default({}),

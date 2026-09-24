@@ -25,8 +25,8 @@ Local records persist in `.data/jola.json`, which is excluded from Git. A succes
 
 ## What is implemented
 
-- Mobile-first branded homepage with custom photography-inspired hero, category cards, four party packs, how it works, launch cities, merchant form and FAQ.
-- `/pedir`: 32 demo products and all four packs, sticky search/categories, filters in the URL, accent-insensitive search, selected-item states, 44 px quantity controls, sticky desktop cart and floating mobile cart.
+- Mobile-first branded homepage with a photographic hero, three featured packs, product categories, how it works, launch cities, merchant form and FAQ.
+- `/pedir`: six validation packs and 32 individual products, sticky search/categories, filters in the URL, accent-insensitive search, selected-item states, 44 px quantity controls, sticky desktop cart and floating mobile cart.
 - `/checkout`: basket review → city/postcode → transparent early-access invitation → email or Portuguese phone → persisted confirmation and optional native sharing. Progress belongs to the basket/zone; contact drafts stay in tab-scoped session storage.
 - Initial age confirmation, saved locally; negative response blocks the catalogue.
 - `/admin`: signed, HTTP-only password session; visitors, CTA clicks, started orders, checkout attempts, leads, simulated GMV, average basket, conversion, product/category selections, geography, campaigns and merchant interests.
@@ -87,7 +87,7 @@ npm run build
 npm run test:e2e          # Production server/API integration suite; build first
 ```
 
-The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation and public routes/OG rendering. It does not automate a browser. The 390 px browser journey was verified manually in Safari; see [QA notes](docs/QA.md).
+The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation and public routes/OG rendering. It does not automate a browser. The 66 unit/database tests and five HTTP integration tests pass. Safari checks cover the mobile customer journey, a failed-save/retry recovery, merchant submission and responsive previews; see [QA notes and bundle measurements](docs/QA.md).
 
 PostgreSQL tests use PGlite, a local PostgreSQL engine. They run the migration with only the optional `pgcrypto` extension declaration omitted, since `gen_random_uuid` is already available in the engine. No external database or credentials are needed for these tests.
 
@@ -102,7 +102,7 @@ components/checkout/  Location, contact, success and sharing
 components/admin/     Login and dashboard controls
 components/ui/        Shared accessible dialogs, navigation and product artwork
 components/providers.tsx  Persistent cart, age gate and feedback
-lib/products.ts       32 products + 4 bundles; authoritative local catalogue
+lib/products.ts       32 products + 6 packs; authoritative local catalogue
 lib/pricing.ts        Integer-cent arithmetic shared by server and client
 lib/analytics.ts      Attribution capture and provider-neutral event transport
 lib/validation.ts     Shared Zod boundaries
@@ -134,3 +134,13 @@ The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and
 - Local disk storage is intended for one local server process. Use Supabase for multi-instance deployments.
 
 More detail: [analytics events](docs/ANALYTICS.md), [QA](docs/QA.md), [design and generated asset](docs/DESIGN.md).
+
+## Six-pack validation catalogue
+
+`/pedir` opens on Packs. The public set is Só Mais Uma (€24.90), A Clássica (€49.90), O Pré (€44.90), Só Somersby (€32.90), Gin & Chill (€42.90) and Sem Ressacas (€29.90). The homepage features A Clássica, O Pré and Só Somersby. Optional group-size filtering never blocks browsing; individual products remain available.
+
+Pack configuration lives in `lib/products.ts`. Beer substitutions are available on Só Mais Uma and A Clássica; A Clássica also offers Original/Zero mixer selection. A pack stays one basket line, with one option combination per pack ID; quantity changes apply to that combination. Canonical contents/options are preserved in the existing order/lead JSON fields. No additional SQL migration is needed for packs.
+
+The dashboard separates pack views, additions, checkout share, current pack demand, basket values, group sizes and add-on actions. Definitions are in [the analytics contract](docs/ANALYTICS.md).
+
+Six local pack compositions and 17 transparent product packshots were generated as illustrative prelaunch assets, not sourced from manufacturers. Remaining SKUs use a replaceable SVG fallback. See [art direction](docs/ART-DIRECTION.md) and [asset provenance/prompts](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).

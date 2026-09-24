@@ -13,6 +13,7 @@ import { adminConfigured, isAdmin } from "@/lib/server/auth";
 import { isLocalStorage } from "@/lib/server/supabase";
 import { readDatabase } from "@/lib/server/storage";
 import { summarize } from "@/lib/dashboard";
+import { summarizePacks } from "@/lib/pack-demand";
 import { money } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -90,6 +91,7 @@ async function Dashboard() {
     );
   }
   const stats = summarize(db);
+  const demand = summarizePacks(db);
   const local = isLocalStorage();
   return (
     <>
@@ -172,6 +174,81 @@ async function Dashboard() {
         ))}
       </div>
       <div className="dashboard-grid">
+        <section className="dashboard-panel full-width">
+          <h2>Os packs estão a resolver a noite?</h2>
+          <p>
+            Perfis de navegador observados, incluindo entradas diretas no
+            catálogo. Valores de carrinhos simulados, sem taxas.
+          </p>
+          <div className="pack-kpis">
+            {[
+              [
+                "Viram packs",
+                `${demand.viewRate.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
+                `${demand.viewed} de ${demand.profiles} perfis`,
+              ],
+              [
+                "Adicionaram um pack",
+                `${demand.addRate.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
+                `${demand.added} ${demand.added === 1 ? "perfil" : "perfis"}`,
+              ],
+              [
+                "Checkouts com pack",
+                `${demand.checkoutShare.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
+                "Pelo menos um pack no carrinho",
+              ],
+              [
+                "Carrinho médio com pack",
+                money(demand.packAov),
+                "Subtotal, inclui extras",
+              ],
+              [
+                "Carrinho médio sem pack",
+                money(demand.nonPackAov),
+                "Subtotal de artigos avulsos",
+              ],
+            ].map(([label, value, detail]) => (
+              <div key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+                <small>{detail}</small>
+              </div>
+            ))}
+          </div>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pack</th>
+                  <th>Unidades nos carrinhos</th>
+                  <th>Chegaram ao checkout</th>
+                </tr>
+              </thead>
+              <tbody>
+                {demand.packs.map((pack) => (
+                  <tr key={pack.id}>
+                    <td>{pack.name}</td>
+                    <td>{pack.units}</td>
+                    <td>{pack.checkouts}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section className="dashboard-panel">
+          <h2>Quantos são?</h2>
+          <p>Última escolha de tamanho por perfil de navegador.</p>
+          <Bars data={demand.groups} />
+        </section>
+        <section className="dashboard-panel">
+          <h2>O que faltou depois do pack?</h2>
+          <p>
+            Adições de artigos avulsos com um pack já no carrinho. Não desconta
+            remoções.
+          </p>
+          <Bars data={demand.addons} />
+        </section>
         <section className="dashboard-panel">
           <h2>Os favoritos da noite</h2>
           <p>Unidades nos carrinhos atuais. Remoções já descontadas.</p>
