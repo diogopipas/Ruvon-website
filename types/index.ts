@@ -18,6 +18,24 @@ export type Product = {
   label: string;
   tag?: string;
 };
+export type PackOptionKey =
+  | "beer" | "vodka" | "gin" | "alcoholFreeBeer"
+  | "mixer" | "snack" | "ice" | "water" | "cups" | "peanuts" | "limes";
+export type PackOptions = Partial<Record<PackOptionKey, string>>;
+export type PackChoice = {
+  value: string;
+  label: string;
+  content: string;
+  /** Total contribution for this component, in euro cents. */
+  price: number;
+};
+export type PackComponent = {
+  key?: PackOptionKey;
+  label: string;
+  /** First choice is the default. Core choices cannot be removed. */
+  choices: PackChoice[];
+};
+export type PackExtra = PackComponent & { key: PackOptionKey };
 export type Pack = {
   id: string;
   name: string;
@@ -26,17 +44,13 @@ export type Pack = {
   peopleMin: number;
   peopleMax: number;
   description: string;
-  contents: string[];
+  core: PackComponent[];
+  extras: PackExtra[];
+  tier: "primary" | "secondary";
   color: string;
   items: string[];
   summary: string;
   image: string;
-  options?: ("beer" | "mixer")[];
-  featured?: boolean;
-};
-export type PackOptions = {
-  beer?: "super-bock" | "sagres";
-  mixer?: "coca-cola" | "coca-cola-zero";
 };
 export type CartItem = { id: string; quantity: number; options?: PackOptions };
 export type BasketItem = CartItem & {
@@ -48,6 +62,9 @@ export type BasketItem = CartItem & {
   people_min?: number;
   people_max?: number;
   contents?: string[];
+  core_contents?: string[];
+  extra_contents?: string[];
+  removed_extras?: PackOptionKey[];
 };
 export type Attribution = {
   utm_source?: string;
