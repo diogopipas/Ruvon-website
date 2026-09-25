@@ -20,10 +20,10 @@ const items = [
 describe("prices and catalog", () => {
   it("prices the exact acceptance basket in integer cents", () => {
     expect(priceBasket(items)).toMatchObject({
-      subtotal: 1446,
+      subtotal: 1316,
       delivery_fee: 299,
       service_fee: 89,
-      total: 1834,
+      total: 1704,
       item_count: 4,
     });
   });
@@ -37,8 +37,8 @@ describe("prices and catalog", () => {
   });
   it("prices a bundle as one catalog item", () => {
     expect(priceBasket([{ id: "pack-classica", quantity: 2 }])).toMatchObject({
-      subtotal: 11980,
-      total: 12368,
+      subtotal: 9330,
+      total: 9718,
       item_count: 2,
     });
   });
@@ -48,9 +48,9 @@ describe("prices and catalog", () => {
       expect(() => priceBasket([{ id: "gelo", quantity }])).toThrow();
   });
   it("has unique ids and valid pack illustration references", () => {
-    expect(products).toHaveLength(32);
+    expect(products).toHaveLength(42);
     expect(packs).toHaveLength(6);
-    expect(new Set([...products, ...packs].map((p) => p.id)).size).toBe(38);
+    expect(new Set([...products, ...packs].map((p) => p.id)).size).toBe(48);
     for (const pack of packs)
       for (const id of pack.items)
         expect(products.some((p) => p.id === id)).toBe(true);
@@ -141,7 +141,7 @@ describe("demand metrics", () => {
       phone: null,
       city: "Lisboa",
       postcode: "1000-001",
-      basket_total: 1834,
+      basket_total: 1704,
       basket_items: priced.items,
       consent_at: "2026-09-21",
       utm_campaign: "night",
@@ -182,8 +182,8 @@ describe("demand metrics", () => {
       started: 1,
       checkout: 1,
       leads: 2,
-      gmv: 1834,
-      average: 1446,
+      gmv: 1704,
+      average: 1316,
       conversion: 100,
     });
     expect(summarize(db).locations[0]).toMatchObject({ demand: 2, leads: 2 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { packs } from "@/lib/products";
+import { packs, productById } from "@/lib/products";
 import {
   configurePack,
   packChangeEvent,
@@ -24,13 +24,135 @@ describe("validation packs", () => {
       "Sem Ressacas",
     ]);
     expect(packs.map((pack) => pack.price)).toEqual([
-      2190, 5990, 3990, 3490, 3990, 3490,
+      1470, 4665, 3503, 3115, 3322, 3431,
     ]);
     for (const group of ["2-3", "4-6", "7+"] as const)
       expect(packs.some((pack) => fitsGroup(pack, group))).toBe(true);
     expect(
       packs.filter((pack) => fitsGroup(pack, "7+")).map((pack) => pack.id),
     ).toEqual(["pack-classica"]);
+  });
+  it("matches each default pack to the listed product values and quantities", () => {
+    expect(
+      Object.fromEntries(
+        [
+          "super-bock-mini-6",
+          "super-bock-mini-12",
+          "super-bock-mini-24",
+          "eristoff",
+          "gin",
+          "somersby",
+          "somersby-8",
+          "somersby-16",
+          "super-bock-zero",
+          "super-bock-zero-12",
+          "coca-cola",
+          "coca-cola-zero",
+          "seven-up",
+          "tonic",
+          "red-bull-single",
+          "red-bull",
+          "doritos",
+          "pringles",
+          "gelo",
+          "agua-6",
+          "copos-10",
+          "copos",
+          "limas",
+        ].map((id) => [id, productById.get(id)?.price]),
+      ),
+    ).toEqual({
+      "super-bock-mini-6": 375,
+      "super-bock-mini-12": 750,
+      "super-bock-mini-24": 1499,
+      eristoff: 1569,
+      gin: 1749,
+      somersby: 499,
+      "somersby-8": 998,
+      "somersby-16": 1996,
+      "super-bock-zero": 599,
+      "super-bock-zero-12": 1198,
+      "coca-cola": 239,
+      "coca-cola-zero": 199,
+      "seven-up": 209,
+      tonic: 215,
+      "red-bull-single": 159,
+      "red-bull": 636,
+      doritos: 329,
+      pringles: 299,
+      gelo: 99,
+      "agua-6": 192,
+      "copos-10": 100,
+      copos: 200,
+      limas: 108,
+    });
+    const defaultItems: Record<string, [string, number][]> = {
+      "pack-mais-uma": [
+        ["super-bock-mini-12", 1],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["agua-6", 1],
+        ["copos-10", 1],
+      ],
+      "pack-classica": [
+        ["super-bock-mini-24", 1],
+        ["eristoff", 1],
+        ["coca-cola", 2],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["pringles", 1],
+        ["agua-6", 1],
+        ["copos", 1],
+      ],
+      "pack-pre": [
+        ["eristoff", 1],
+        ["red-bull", 1],
+        ["coca-cola", 2],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["agua-6", 1],
+        ["copos", 1],
+      ],
+      "pack-somersby": [
+        ["somersby-16", 1],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["pringles", 1],
+        ["agua-6", 1],
+        ["copos", 1],
+      ],
+      "pack-gin": [
+        ["gin", 1],
+        ["tonic", 3],
+        ["limas", 1],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["agua-6", 1],
+        ["copos", 1],
+      ],
+      "pack-sem-ressacas": [
+        ["super-bock-zero-12", 1],
+        ["red-bull", 1],
+        ["coca-cola", 2],
+        ["gelo", 1],
+        ["doritos", 1],
+        ["pringles", 1],
+        ["agua-6", 1],
+        ["copos", 1],
+      ],
+    };
+    for (const pack of packs) {
+      expect(configurePack(pack).price).toBe(pack.price);
+      expect(
+        defaultItems[pack.id].reduce(
+          (sum, [id, quantity]) => sum + productById.get(id)!.price * quantity,
+          0,
+        ),
+      ).toBe(pack.price);
+    }
+    expect(configurePack(packs[1]).extras).toContain("1 × Pringles 175 g");
+    expect(configurePack(packs[1]).extras).toContain("1 × Doritos 225 g");
+    expect(configurePack(packs[1], { snack2: "none" }).price).toBe(4366);
   });
   it("keeps substitutions in one canonical pack line and through a JSON round trip", () => {
     const cart = cartSchema.parse([
@@ -45,19 +167,19 @@ describe("validation packs", () => {
     const basket = priceBasket(JSON.parse(JSON.stringify(cart)));
     expect(basket.items).toHaveLength(2);
     expect(basket).toMatchObject({
-      subtotal: 12279,
-      total: 12667,
+      subtotal: 9269,
+      total: 9657,
       item_count: 3,
     });
     expect(basket.items[0]).toMatchObject({
-      price: 5990,
+      price: 4585,
       product_type: "pack",
       options: { beer: "sagres", mixer: "coca-cola-zero" },
       people_min: 5,
       people_max: 7,
     });
-    expect(basket.items[0].contents).toContain("24 × Sagres 33 cl");
-    expect(basket.items[0].contents).toContain("2 × Coca-Cola Zero 1,5 L");
+    expect(basket.items[0].contents).toContain("24 × Sagres Mini 20 cl");
+    expect(basket.items[0].contents).toContain("2 × Coca-Cola Zero 1,75 L");
   });
   it("rejects invented substitutions and options on individual products", () => {
     for (const item of [
@@ -102,8 +224,8 @@ describe("validation packs", () => {
     expect(packs.filter((pack) => pack.tier === "primary")).toHaveLength(4);
     expect(packs.filter((pack) => pack.tier === "secondary")).toHaveLength(2);
     const expected = [
-      ["12 × Super Bock 33 cl"],
-      ["24 × Super Bock 33 cl", "1 × Eristoff Vodka 70 cl"],
+      ["12 × Super Bock Mini 20 cl"],
+      ["24 × Super Bock Mini 20 cl", "1 × Eristoff Vodka 70 cl"],
       ["1 × Eristoff Vodka 70 cl", "4 × Red Bull 25 cl"],
       ["16 × Somersby Maçã 33 cl"],
       ["1 × Gordon’s London Dry Gin 70 cl", "3 × Schweppes Tónica 1 L"],
@@ -149,15 +271,15 @@ describe("validation packs", () => {
       },
     ]);
     const basket = priceBasket(items);
-    expect(basket.subtotal).toBe(11130);
-    expect(basket.total).toBe(11518);
+    expect(basket.subtotal).toBe(8568);
+    expect(basket.total).toBe(8956);
     expect(basket.items[0]).toMatchObject({
-      price: 5565,
-      removed_extras: ["ice", "cups", "water"],
+      price: 4284,
+      removed_extras: ["ice", "water", "cups"],
     });
     expect(basket.items[0].contents).toContain("1 × Smirnoff Vodka 70 cl");
-    expect(basket.items[0].contents).toContain("2 × 7Up 1,5 L");
-    expect(basket.items[0].contents).toContain("2 × Pringles Original 165 g");
+    expect(basket.items[0].contents).toContain("2 × 7Up 1,75 L");
+    expect(basket.items[0].contents).toContain("1 × Pringles 175 g");
     expect(
       basket.items[0].contents?.some((line) => /gelo|água|copos/.test(line)),
     ).toBe(false);
@@ -166,9 +288,9 @@ describe("validation packs", () => {
     const pack = packs.find((pack) => pack.id === "pack-classica")!;
     const removal = packChangeEvent(pack, {}, { ice: "none" }, "detail");
     expect(removal).toMatchObject({
-      price_delta: -3,
-      pack_price: 56.9,
-      default_pack_price: 59.9,
+      price_delta: -0.99,
+      pack_price: 45.66,
+      default_pack_price: 46.65,
       removed_extras: ["ice"],
       changes: [
         { option: "ice", from: "included", to: "none", action: "removed" },
@@ -204,7 +326,7 @@ describe("validation packs", () => {
     expect(summarizePacks(db).customizations).toEqual([
       {
         pack: "A Clássica",
-        option: "2 sacos de gelo · 2 kg",
+        option: "1 saco de gelo · 2 kg",
         from: "Manter",
         to: "Sem",
         source: "A explorar",
@@ -317,8 +439,8 @@ describe("validation packs", () => {
       viewRate: 50,
       addRate: 50,
       checkoutShare: 50,
-      packAov: 6289,
-      nonPackAov: 299,
+      packAov: 4764,
+      nonPackAov: 99,
       groups: [{ name: "4–6", value: 1 }],
       addons: [{ name: "Saco de gelo", value: 1 }],
     });

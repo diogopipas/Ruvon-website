@@ -1,20 +1,20 @@
 import type { PackComponent, PackExtra } from "@/types";
 
-// MVP preview contributions, per complete component (not individual retail prices).
+// Contributions match the listed product values, per complete component.
 export const beerCore = (quantity: number): PackComponent => ({
   key: "beer",
-  label: `${quantity} cervejas · 33 cl`,
+  label: `${quantity} minis · 20 cl`,
   choices: [
     {
       value: "super-bock",
       label: "Super Bock",
-      content: `${quantity} × Super Bock 33 cl`,
+      content: `${quantity} × Super Bock Mini 20 cl`,
       price: 0,
     },
     {
       value: "sagres",
       label: "Sagres",
-      content: `${quantity} × Sagres 33 cl`,
+      content: `${quantity} × Sagres Mini 20 cl`,
       price: 0,
     },
   ],
@@ -43,39 +43,43 @@ export const fixedCore = (content: string): PackComponent => ({
 });
 export const mixerExtra = (quantity: number): PackExtra => ({
   key: "mixer",
-  label: `${quantity} refrigerante${quantity === 1 ? "" : "s"} · 1,5 L`,
+  label: `${quantity} refrigerante${quantity === 1 ? "" : "s"} · 1,75 L`,
   choices: [
     {
       value: "coca-cola",
       label: "Coca-Cola",
-      content: `${quantity} × Coca-Cola Original 1,5 L`,
-      price: quantity * 150,
+      content: `${quantity} × Coca-Cola Original 1,75 L`,
+      price: quantity * 239,
     },
     {
       value: "coca-cola-zero",
       label: "Zero",
-      content: `${quantity} × Coca-Cola Zero 1,5 L`,
-      price: quantity * 150,
+      content: `${quantity} × Coca-Cola Zero 1,75 L`,
+      price: quantity * 199,
     },
     {
       value: "seven-up",
       label: "7Up",
-      content: `${quantity} × 7Up 1,5 L`,
-      price: quantity * 150,
+      content: `${quantity} × 7Up 1,75 L`,
+      price: quantity * 209,
     },
   ],
 });
-export const snackExtra = (quantity: number, pringles = false): PackExtra => ({
-  key: "snack",
-  label: `${quantity} snack${quantity === 1 ? "" : "s"}`,
-  choices: (pringles ? ["pringles", "doritos"] : ["doritos", "pringles"]).map(
-    (value) => ({
-      value,
-      label: value === "doritos" ? "Doritos" : "Pringles",
-      content: `${quantity} × ${value === "doritos" ? "Doritos Tex-Mex 140 g" : "Pringles Original 165 g"}`,
-      price: quantity * (value === "doritos" ? 150 : 200),
-    }),
-  ),
+export const snackExtra = (
+  defaultSnack: "doritos" | "pringles" = "doritos",
+  key: "snack" | "snack2" = "snack",
+): PackExtra => ({
+  key,
+  label: key === "snack2" ? "2.º snack" : "1 snack",
+  choices: (defaultSnack === "pringles"
+    ? ["pringles", "doritos"]
+    : ["doritos", "pringles"]
+  ).map((value) => ({
+    value,
+    label: value === "doritos" ? "Doritos" : "Pringles",
+    content: `1 × ${value === "doritos" ? "Doritos 225 g" : "Pringles 175 g"}`,
+    price: value === "doritos" ? 329 : 299,
+  })),
 });
 const simpleExtra = (
   key: PackExtra["key"],
@@ -92,21 +96,21 @@ export const iceExtra = (quantity: number) =>
     "ice",
     `${quantity} saco${quantity === 1 ? "" : "s"} de gelo · 2 kg`,
     `${quantity} × gelo 2 kg`,
-    quantity * 150,
+    quantity * 99,
   );
 export const waterExtra = (quantity: number) =>
   simpleExtra(
     "water",
     `${quantity} águas · 50 cl`,
     `${quantity} × água Luso 50 cl`,
-    quantity * 50,
+    quantity * 32,
   );
 export const cupsExtra = (quantity: number) =>
   simpleExtra(
     "cups",
     `${quantity} copos`,
     `${quantity} × copos de papel`,
-    quantity * 5,
+    quantity * 10,
   );
 export const peanutsExtra = simpleExtra(
   "peanuts",
@@ -118,5 +122,5 @@ export const limesExtra = simpleExtra(
   "limes",
   "4 limas",
   "4 × limas frescas",
-  100,
+  108,
 );

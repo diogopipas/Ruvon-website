@@ -56,15 +56,15 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     (row) => row.session_id === session_id,
   )!;
   expect(order).toMatchObject({
-    subtotal: 5864,
-    total: 6252,
+    subtotal: 4383,
+    total: 4771,
     converted_to_lead: true,
   });
-  expect(lead.basket_total).toBe(6252);
+  expect(lead.basket_total).toBe(4771);
   expect(lead.basket_items).toEqual(order.items);
   expect(lead.basket_items[0]).toMatchObject({
     product_type: "pack",
-    price: 5565,
+    price: 4284,
     options: {
       beer: "sagres",
       vodka: "smirnoff",
@@ -75,10 +75,10 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
       cups: "none",
     },
   });
-  expect(lead.basket_items[0].contents).toContain("24 × Sagres 33 cl");
+  expect(lead.basket_items[0].contents).toContain("24 × Sagres Mini 20 cl");
   expect(lead.basket_items[0].contents).toContain("1 × Smirnoff Vodka 70 cl");
-  expect(lead.basket_items[0].contents).toContain("2 × 7Up 1,5 L");
-  expect(lead.basket_items[0].removed_extras).toEqual(["ice", "cups", "water"]);
+  expect(lead.basket_items[0].contents).toContain("2 × 7Up 1,75 L");
+  expect(lead.basket_items[0].removed_extras).toEqual(["ice", "water", "cups"]);
   expect(
     lead.basket_items[0].extra_contents?.some((line) =>
       /gelo|água|copos/.test(line),
@@ -92,7 +92,7 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     product_type: "pack",
     pack_id: "pack-classica",
     pack_name: "A Clássica",
-    pack_price: 55.65,
+    pack_price: 42.84,
     people_min: 5,
     people_max: 7,
     selected_options: items[0].options,
@@ -163,8 +163,8 @@ test("complete demand funnel persists canonical basket, location, attribution an
   expect(order.status()).toBe(200);
   let db = await database();
   let saved = db.simulated_orders.find((o) => o.session_id === session_id)!;
-  expect(saved.subtotal).toBe(1446);
-  expect(saved.total).toBe(1834);
+  expect(saved.subtotal).toBe(1316);
+  expect(saved.total).toBe(1704);
   expect(saved.converted_to_lead).toBe(false);
   const location = { city: "Lisboa", postcode: "1000-001" };
   expect(
@@ -205,7 +205,7 @@ test("complete demand funnel persists canonical basket, location, attribution an
   db = await database();
   saved = db.simulated_orders.find((o) => o.session_id === session_id)!;
   expect(saved).toMatchObject({
-    total: 1834,
+    total: 1704,
     converted_to_lead: true,
     reached_checkout: true,
     city: "Lisboa",
@@ -214,7 +214,7 @@ test("complete demand funnel persists canonical basket, location, attribution an
   });
   expect(db.leads.filter((l) => l.session_id === session_id)).toHaveLength(1);
   expect(db.leads.find((l) => l.session_id === session_id)).toMatchObject({
-    basket_total: 1834,
+    basket_total: 1704,
     utm_source: "instagram",
     utm_campaign: attribution.utm_campaign,
     city: "Lisboa",

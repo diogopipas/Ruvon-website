@@ -102,7 +102,7 @@ components/checkout/  Location, contact, success and sharing
 components/admin/     Login and dashboard controls
 components/ui/        Shared accessible dialogs, navigation and product artwork
 components/providers.tsx  Persistent cart, age gate and feedback
-lib/products.ts       32 products + 6 packs; authoritative local catalogue
+lib/products.ts       42 products + 6 packs; authoritative local catalogue
 lib/pricing.ts        Integer-cent arithmetic shared by server and client
 lib/analytics.ts      Attribution capture and provider-neutral event transport
 lib/validation.ts     Shared Zod boundaries
@@ -137,7 +137,7 @@ More detail: [analytics events](docs/ANALYTICS.md), [QA](docs/QA.md), [design an
 
 ## Six-pack validation catalogue
 
-`/pedir` opens on Packs. Four primary packs lead: Só Mais Uma (€21.90, 12 beers), A Clássica (€59.90, 24 beers + vodka), O Pré (€39.90, vodka + 4 Red Bull), and Só Somersby (€34.90, 16 ciders). Gin & Chill (€39.90, gin + tonic) and Sem Ressacas (€34.90, 12 alcohol-free beers + 4 Red Bull) sit in a supporting section. The homepage features the four primary packs. Group-size filtering stays optional; individual products remain available.
+`/pedir` opens on Packs. Four primary packs lead: Só Mais Uma (€14.70, 12 minis), A Clássica (€46.65, 24 minis + vodka), O Pré (€35.03, vodka + 4 Red Bull), and Só Somersby (€31.15, 16 ciders). Gin & Chill (€33.22, gin + tonic) and Sem Ressacas (€34.31, 12 alcohol-free beers + 4 Red Bull) sit in a supporting section. The homepage features the four primary packs. Group-size filtering stays optional; individual products remain available.
 
 Pack configuration lives in `lib/products.ts` and reusable components in `lib/pack-components.ts`. Listed prices include default extras. Fixed drink quantities cannot be removed. Brand choices, mixer/snack swaps and extra removals update the price immediately; the server independently validates and calculates it. A pack stays one basket line, with one configuration per pack ID; quantity changes apply to that configuration. Chosen brands, core/extra contents and removals persist in the existing order/lead JSON fields. No new SQL migration is needed. See [pack pricing and configuration](docs/PACKS.md) for all provisional upgrade/removal amounts.
 

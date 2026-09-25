@@ -32,6 +32,7 @@ export const packOptionsSchema = z
       .enum(["coca-cola", "coca-cola-zero", "seven-up", "none"])
       .optional(),
     snack: z.enum(["doritos", "pringles", "none"]).optional(),
+    snack2: z.enum(["doritos", "pringles", "none"]).optional(),
     ice: z.enum(["included", "none"]).optional(),
     water: z.enum(["included", "none"]).optional(),
     cups: z.enum(["included", "none"]).optional(),
@@ -46,6 +47,7 @@ const optionKeySchema = z.enum([
   "alcoholFreeBeer",
   "mixer",
   "snack",
+  "snack2",
   "ice",
   "water",
   "cups",

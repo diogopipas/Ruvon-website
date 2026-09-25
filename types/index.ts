@@ -25,6 +25,7 @@ export type PackOptionKey =
   | "alcoholFreeBeer"
   | "mixer"
   | "snack"
+  | "snack2"
   | "ice"
   | "water"
   | "cups"
@@ -37,6 +38,7 @@ export type PackOptions = {
   alcoholFreeBeer?: "super-bock-zero" | "sagres-zero";
   mixer?: "coca-cola" | "coca-cola-zero" | "seven-up" | "none";
   snack?: "doritos" | "pringles" | "none";
+  snack2?: "doritos" | "pringles" | "none";
   ice?: "included" | "none";
   water?: "included" | "none";
   cups?: "included" | "none";

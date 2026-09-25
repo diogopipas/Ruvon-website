@@ -76,7 +76,7 @@ describe("PostgreSQL migration and transactions", () => {
     );
     expect(orders.rows).toHaveLength(1);
     expect(orders.rows[0]).toMatchObject({
-      total: 1834,
+      total: 1704,
       converted_to_lead: true,
       utm_campaign: "sql_test",
     });
@@ -180,7 +180,7 @@ describe("PostgreSQL migration and transactions", () => {
       id: lead.id,
       city: "Porto",
       basket_items: lead.basket_items,
-      basket_total: 1834,
+      basket_total: 1704,
       utm_source: "instagram",
       utm_campaign: "sql_test",
     });
