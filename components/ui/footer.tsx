@@ -16,16 +16,11 @@ export function Footer() {
             <Link href="/privacidade">Privacidade</Link>
             <Link href="/termos">Termos</Link>
           </nav>
-          <span className="footer-social">
-            A começar em Lisboa.
-            <br />A crescer contigo.
-          </span>
         </div>
         <div className="footer-bottom">
           <span>
             © {new Date().getFullYear()} Jola. Feito para boas noites.
           </span>
-          <span>Conceito em validação. Sem vendas ou entregas reais. 18+</span>
         </div>
       </div>
     </footer>

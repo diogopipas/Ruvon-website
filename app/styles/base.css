@@ -34,12 +34,14 @@ body:has(.floating-cart) {
   padding-bottom: calc(92px + env(safe-area-inset-bottom));
 }
 button,
-input {
+input,
+select {
   font: inherit;
 }
 button,
 a,
 input,
+select,
 summary {
   -webkit-tap-highlight-color: transparent;
 }
@@ -49,6 +51,7 @@ a {
 }
 button {
   cursor: pointer;
+  text-align: center;
 }
 button:disabled {
   cursor: wait;
@@ -94,7 +97,8 @@ button {
 }
 a,
 button,
-input {
+input,
+select {
   outline-offset: 5px;
 }
 *:focus-visible {
@@ -112,6 +116,7 @@ input {
   padding-block: 88px;
 }
 .button {
+  text-align: center;
   min-height: 52px;
   padding: 14px 23px;
   border-radius: 7px;
@@ -195,14 +200,4 @@ input {
   position: relative;
   font-weight: 800;
   transform: skew(-6deg);
-  padding-right: 13px;
-}
-.wordmark-dot {
-  font-family: Arial, sans-serif;
-  position: absolute;
-  right: 0;
-  top: 4px;
-  font-style: normal;
-  font-size: 10px;
-  letter-spacing: 0;
 }

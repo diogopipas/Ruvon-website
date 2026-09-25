@@ -1,5 +1,5 @@
 import { getCatalogItem } from "./products";
-import { packContents, packOptions } from "./packs";
+import { configurePack } from "./packs";
 import type { BasketItem, CartItem } from "@/types";
 export const DELIVERY_FEE = 299;
 export const SERVICE_FEE = 89;
@@ -14,23 +14,28 @@ export function priceBasket(items: CartItem[]) {
     )
       throw new Error("Artigo inválido.");
     const isPack = !("category" in product);
-    const options = isPack ? packOptions(product, item.options) : undefined;
+    const configured = isPack
+      ? configurePack(product, item.options)
+      : undefined;
     return {
       id: item.id,
       quantity: item.quantity,
       ...(isPack
         ? {
-            options,
+            options: configured!.options,
             product_type: "pack" as const,
             pack_name: product.name,
             people_min: product.peopleMin,
             people_max: product.peopleMax,
-            contents: packContents(product, options),
+            contents: [...configured!.core, ...configured!.extras],
+            core_contents: configured!.core,
+            extra_contents: configured!.extras,
+            removed_extras: configured!.removed,
           }
         : { product_type: "individual" as const }),
       name: product.name,
       category: "category" in product ? product.category : "packs",
-      price: product.price,
+      price: configured?.price ?? product.price,
     };
   });
   const subtotal = lines.reduce(

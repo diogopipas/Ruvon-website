@@ -14,7 +14,15 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     {
       id: "pack-classica",
       quantity: 1,
-      options: { beer: "sagres", mixer: "coca-cola-zero" },
+      options: {
+        beer: "sagres",
+        vodka: "smirnoff",
+        mixer: "seven-up",
+        snack: "pringles",
+        ice: "none",
+        water: "none",
+        cups: "none",
+      },
       price: 1,
     },
     { id: "gelo", quantity: 1 },
@@ -48,18 +56,34 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     (row) => row.session_id === session_id,
   )!;
   expect(order).toMatchObject({
-    subtotal: 5289,
-    total: 5677,
+    subtotal: 5864,
+    total: 6252,
     converted_to_lead: true,
   });
-  expect(lead.basket_total).toBe(5677);
+  expect(lead.basket_total).toBe(6252);
   expect(lead.basket_items).toEqual(order.items);
   expect(lead.basket_items[0]).toMatchObject({
     product_type: "pack",
-    price: 4990,
-    options: { beer: "sagres", mixer: "coca-cola-zero" },
+    price: 5565,
+    options: {
+      beer: "sagres",
+      vodka: "smirnoff",
+      mixer: "seven-up",
+      snack: "pringles",
+      ice: "none",
+      water: "none",
+      cups: "none",
+    },
   });
   expect(lead.basket_items[0].contents).toContain("24 × Sagres 33 cl");
+  expect(lead.basket_items[0].contents).toContain("1 × Smirnoff Vodka 70 cl");
+  expect(lead.basket_items[0].contents).toContain("2 × 7Up 1,5 L");
+  expect(lead.basket_items[0].removed_extras).toEqual(["ice", "cups", "water"]);
+  expect(
+    lead.basket_items[0].extra_contents?.some((line) =>
+      /gelo|água|copos/.test(line),
+    ),
+  ).toBe(false);
   expect(db.leads.filter((row) => row.session_id === session_id)).toHaveLength(
     1,
   );
@@ -68,7 +92,7 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     product_type: "pack",
     pack_id: "pack-classica",
     pack_name: "A Clássica",
-    pack_price: 49.9,
+    pack_price: 55.65,
     people_min: 5,
     people_max: 7,
     selected_options: items[0].options,

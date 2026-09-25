@@ -42,11 +42,11 @@ export function CategoryCards() {
 }
 export function CityPicker() {
   const router = useRouter();
-  const [city, setCity] = useState("Lisboa");
+  const [city, setCity] = useState("Faro");
   return (
     <div className="city-picker">
       <div className="city-options">
-        {["Lisboa", "Porto", "Faro", "Coimbra", "Braga", "Outra"].map(
+        {["Faro", "Lisboa", "Porto", "Coimbra", "Braga", "Outra"].map(
           (name) => (
             <button
               key={name}
@@ -55,7 +55,7 @@ export function CityPicker() {
               onClick={() => {
                 setCity(name);
                 router.push(
-                  `/checkout?cidade=${encodeURIComponent(name === "Outra" ? "" : name)}&interesse=1`,
+                  `/checkout?cidade=${encodeURIComponent(name === "Outra" ? "Outra zona" : name)}&interesse=1`,
                 );
               }}
             >
@@ -65,7 +65,6 @@ export function CityPicker() {
           ),
         )}
       </div>
-      <p>A tua cidade pode ser a próxima. Tu ajudas-nos a decidir.</p>
     </div>
   );
 }

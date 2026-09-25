@@ -25,9 +25,33 @@ export const attributionSchema = z.object({
 export const packOptionsSchema = z
   .object({
     beer: z.enum(["super-bock", "sagres"]).optional(),
-    mixer: z.enum(["coca-cola", "coca-cola-zero"]).optional(),
+    vodka: z.enum(["eristoff", "smirnoff"]).optional(),
+    gin: z.enum(["gordons", "beefeater"]).optional(),
+    alcoholFreeBeer: z.enum(["super-bock-zero", "sagres-zero"]).optional(),
+    mixer: z
+      .enum(["coca-cola", "coca-cola-zero", "seven-up", "none"])
+      .optional(),
+    snack: z.enum(["doritos", "pringles", "none"]).optional(),
+    ice: z.enum(["included", "none"]).optional(),
+    water: z.enum(["included", "none"]).optional(),
+    cups: z.enum(["included", "none"]).optional(),
+    peanuts: z.enum(["included", "none"]).optional(),
+    limes: z.enum(["included", "none"]).optional(),
   })
   .strict();
+const optionKeySchema = z.enum([
+  "beer",
+  "vodka",
+  "gin",
+  "alcoholFreeBeer",
+  "mixer",
+  "snack",
+  "ice",
+  "water",
+  "cups",
+  "peanuts",
+  "limes",
+]);
 export const cartSchema = z
   .array(
     z
@@ -38,17 +62,17 @@ export const cartSchema = z
       })
       .superRefine((item, ctx) => {
         const pack = packById.get(item.id);
-        if (
-          item.options &&
-          Object.keys(item.options).some(
-            (key) => !pack?.options?.includes(key as "beer" | "mixer"),
-          )
-        )
+        try {
+          if (pack) packOptions(pack, item.options);
+          else if (item.options && Object.keys(item.options).length)
+            throw new Error();
+        } catch {
           ctx.addIssue({
             code: "custom",
             message: "Opção indisponível para este artigo.",
             path: ["options"],
           });
+        }
       })
       .transform((item) => {
         const pack = packById.get(item.id);
@@ -121,9 +145,27 @@ export const eventSchema = z.object({
       pack_id: z.string().max(100).optional(),
       pack_name: z.string().max(100).optional(),
       pack_price: z.number().min(0).max(1000).optional(),
+      default_pack_price: z.number().min(0).max(1000).optional(),
+      pack_tier: z.enum(["primary", "secondary"]).optional(),
       people_min: z.number().int().min(1).max(50).optional(),
       people_max: z.number().int().min(1).max(50).optional(),
       selected_options: packOptionsSchema.optional(),
+      previous_options: packOptionsSchema.optional(),
+      removed_extras: z.array(optionKeySchema).max(11).optional(),
+      changed_options: z.array(optionKeySchema).max(11).optional(),
+      previous_pack_price: z.number().min(0).max(1000).optional(),
+      price_delta: z.number().min(-1000).max(1000).optional(),
+      changes: z
+        .array(
+          z.object({
+            option: optionKeySchema,
+            from: z.string().max(40),
+            to: z.string().max(40),
+            action: z.enum(["removed", "restored", "swapped"]),
+          }),
+        )
+        .max(11)
+        .optional(),
       contains_pack: z.boolean().optional(),
       after_pack: z.boolean().optional(),
       group_size: z.enum(["all", "2-3", "4-6", "7+"]).optional(),
@@ -134,9 +176,12 @@ export const eventSchema = z.object({
             pack_id: z.string().max(100),
             pack_name: z.string().max(100),
             pack_price: z.number().min(0).max(1000),
+            default_pack_price: z.number().min(0).max(1000).optional(),
+            pack_tier: z.enum(["primary", "secondary"]).optional(),
             people_min: z.number().int().min(1).max(50),
             people_max: z.number().int().min(1).max(50),
             selected_options: packOptionsSchema,
+            removed_extras: z.array(optionKeySchema).max(11).optional(),
             quantity: z.number().int().min(1).max(30),
           }),
         )

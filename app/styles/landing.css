@@ -76,7 +76,7 @@
   padding-inline: 25px;
   min-width: 224px;
   height: 58px;
-  justify-content: space-between;
+  justify-content: center;
 }
 .hero-microcopy {
   font-size: 13px;

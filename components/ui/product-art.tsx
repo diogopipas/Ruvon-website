@@ -1,6 +1,6 @@
 import { useId } from "react";
 import Image from "next/image";
-import { productImages } from "@/lib/product-images";
+import { productImages, sourcedProductImages } from "@/lib/product-images";
 import type { Product } from "@/types";
 export function ProductArt({
   product,
@@ -19,7 +19,7 @@ export function ProductArt({
         aria-hidden="true"
         width={400}
         height={600}
-        className={`product-art product-packshot ${className}`}
+        className={`product-art product-packshot ${sourcedProductImages.has(product.id) ? "sourced-packshot" : ""} ${className}`}
         sizes="(max-width: 700px) 42vw, 240px"
       />
     );

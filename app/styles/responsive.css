@@ -884,7 +884,6 @@
     max-height: 91dvh;
     border-radius: 18px 18px 0 0;
     padding-bottom: calc(25px + env(safe-area-inset-bottom));
-    animation: overlay-in 0.2s;
   }
   .cart-modal .modal-title {
     font-size: 37px;

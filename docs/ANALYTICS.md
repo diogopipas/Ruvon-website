@@ -44,9 +44,9 @@ Explicitly tagged visits replace the previous campaign. Visits without campaign 
 
 ## Pack validation
 
-Pack `product_viewed`, `product_added` and `product_removed` events carry `product_type: "pack"`, `pack_id`, `pack_name`, `pack_price` (euros), `people_min`, `people_max` and `selected_options`. Individual products carry `product_type: "individual"`. Pack impressions require age confirmation and 25% of the larger pack row to be visible; they are deduplicated per pack/tab.
+Pack `product_viewed`, `product_added` and `product_removed` events carry `product_type: "pack"`, `pack_id`, `pack_name`, `pack_price` (configured euros), `default_pack_price`, `pack_tier`, `people_min`, `people_max` and `selected_options`. Individual products carry `product_type: "individual"`. Pack impressions require age confirmation and 25% of the larger pack row to be visible; they are deduplicated per pack/tab.
 
-`cart_opened`, `checkout_started` and `waitlist_submitted` include `contains_pack` and a `packs` array containing the same metadata plus quantity. Checkout-start deduplication includes the basket and substitutions. `pack_options_changed` records edits. `pack_group_selected` records the optional `group_size` choice (`2-3`, `4-6`, `7+`, or reset `all`).
+`cart_opened`, `checkout_started` and `waitlist_submitted` include `contains_pack` and a `packs` array containing the same metadata plus quantity. Checkout-start deduplication includes the basket and substitutions. `pack_options_changed` records each deliberate swap/removal/restore in detail or cart, including drafts that are later closed without saving. It carries `previous_options`, `selected_options`, `changed_options`, structured `changes` (`option`, `from`, `to`, `action`), `removed_extras`, `previous_pack_price`, `pack_price` and `price_delta`. `source` distinguishes `detail` exploration from `cart` edits. Clicking an already selected choice emits nothing; saving a detail draft does not emit a duplicate change. Initial/default choices and final configurations are carried by product and basket lifecycle events. `pack_group_selected` records the optional `group_size` choice (`2-3`, `4-6`, `7+`, or reset `all`).
 
 The protected dashboard reports:
 

@@ -67,9 +67,6 @@
 .checkout-steps .current {
   color: var(--cream);
 }
-.checkout-step {
-  animation: overlay-in 0.2s ease;
-}
 .checkout-explainer,
 .checkout-zone-note {
   font-size: 14px;

@@ -33,7 +33,7 @@ export function checkoutKey(
     : `basket:${items
         .map(
           ({ id, quantity, options }) =>
-            `${id}:${quantity}${options ? `:${options.beer ?? ""}:${options.mixer ?? ""}` : ""}`,
+            `${id}:${quantity}:${JSON.stringify(Object.entries(options ?? {}).sort(([a], [b]) => a.localeCompare(b)))}`,
         )
         .sort()
         .join(",")}`;

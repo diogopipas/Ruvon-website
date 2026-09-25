@@ -219,7 +219,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     itemsRef.current = next;
     setItems(next);
     writeLocal("jola_cart", next);
-    track("pack_options_changed", { product: id, ...packEvent(id, selected) });
+    // Individual changes are tracked by the shared picker, including detail drafts.
     notify("Pack atualizado.");
   };
   const setLocation = (value: Location) => {
@@ -314,7 +314,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
             Voltar à confirmação
           </button>
         )}
-        <small>Conceito em validação. Sem vendas ou entregas reais.</small>
       </Modal>
       {toast && (
         <div role="status" className="toast">

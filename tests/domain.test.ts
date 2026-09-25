@@ -37,8 +37,8 @@ describe("prices and catalog", () => {
   });
   it("prices a bundle as one catalog item", () => {
     expect(priceBasket([{ id: "pack-classica", quantity: 2 }])).toMatchObject({
-      subtotal: 9980,
-      total: 10368,
+      subtotal: 11980,
+      total: 12368,
       item_count: 2,
     });
   });

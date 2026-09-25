@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-export const alt = "Jola — Acabou a bebida? Nós levamos. Em breve em Lisboa.";
+export const alt = "Jola — Acabou a bebida? Nós levamos. Em breve em Faro.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default async function Image() {
@@ -32,9 +32,7 @@ export default async function Image() {
         }}
       >
         <span style={{ fontSize: 61, fontStyle: "italic" }}>JOLA</span>
-        <span style={{ fontSize: 26, color: "#bbc2a6" }}>
-          Em breve em Lisboa
-        </span>
+        <span style={{ fontSize: 26, color: "#bbc2a6" }}>Em breve em Faro</span>
       </div>
       <div
         style={{

@@ -14,6 +14,7 @@ import {
 import { useCart } from "@/components/providers";
 import { Wordmark } from "@/components/ui/wordmark";
 import { CartContents } from "@/components/cart/cart";
+import { CitySelect } from "@/components/ui/city-select";
 import { basketPackEvents } from "@/lib/packs";
 import { attribution, getSession, track, trackOnce } from "@/lib/analytics";
 import { postJson } from "@/lib/client-request";
@@ -84,7 +85,7 @@ export function CheckoutFlow() {
     setCity(
       typeof address?.city === "string"
         ? address.city
-        : chosenCity || location?.city || "",
+        : chosenCity || location?.city || "Faro",
     );
     setPostcode(
       typeof address?.postcode === "string"
@@ -327,11 +328,9 @@ export function CheckoutFlow() {
                       Qual é a tua zona?
                     </h1>
                     <p className="checkout-description">
-                      A Jola está em preparação.{" "}
-                      {interest
-                        ? "A tua cidade ajuda-nos"
-                        : "O teu carrinho e a tua zona ajudam-nos"}{" "}
-                      a escolher onde lançar primeiro.
+                      Estamos a preparar o lançamento em Faro. Seleciona a tua
+                      cidade: o teu interesse também ajuda a escolher as
+                      próximas zonas.
                     </p>
                     <p className="checkout-explainer">
                       Aqui guardas o teu interesse e podes entrar na lista de
@@ -345,7 +344,7 @@ export function CheckoutFlow() {
                     >
                       <label>
                         Cidade
-                        <input
+                        <CitySelect
                           name="city"
                           value={city}
                           disabled={busy}
@@ -356,11 +355,6 @@ export function CheckoutFlow() {
                               postcode,
                             });
                           }}
-                          placeholder="Lisboa"
-                          autoComplete="address-level2"
-                          required
-                          minLength={2}
-                          maxLength={80}
                           aria-describedby={
                             error ? "checkout-error" : undefined
                           }
@@ -380,7 +374,7 @@ export function CheckoutFlow() {
                               postcode: next,
                             });
                           }}
-                          placeholder="1000-001"
+                          placeholder="8000-001"
                           autoComplete="postal-code"
                           inputMode="numeric"
                           required

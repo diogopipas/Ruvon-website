@@ -19,9 +19,30 @@ export type Product = {
   tag?: string;
 };
 export type PackOptionKey =
-  | "beer" | "vodka" | "gin" | "alcoholFreeBeer"
-  | "mixer" | "snack" | "ice" | "water" | "cups" | "peanuts" | "limes";
-export type PackOptions = Partial<Record<PackOptionKey, string>>;
+  | "beer"
+  | "vodka"
+  | "gin"
+  | "alcoholFreeBeer"
+  | "mixer"
+  | "snack"
+  | "ice"
+  | "water"
+  | "cups"
+  | "peanuts"
+  | "limes";
+export type PackOptions = {
+  beer?: "super-bock" | "sagres";
+  vodka?: "eristoff" | "smirnoff";
+  gin?: "gordons" | "beefeater";
+  alcoholFreeBeer?: "super-bock-zero" | "sagres-zero";
+  mixer?: "coca-cola" | "coca-cola-zero" | "seven-up" | "none";
+  snack?: "doritos" | "pringles" | "none";
+  ice?: "included" | "none";
+  water?: "included" | "none";
+  cups?: "included" | "none";
+  peanuts?: "included" | "none";
+  limes?: "included" | "none";
+};
 export type PackChoice = {
   value: string;
   label: string;

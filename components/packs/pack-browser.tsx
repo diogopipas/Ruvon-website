@@ -5,9 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { packs, productById } from "@/lib/products";
 import {
   fitsGroup,
-  optionChoices,
-  optionLabels,
-  packContents,
+  configurePack,
   packEvent,
   packOptions,
   type GroupSize,
@@ -18,41 +16,15 @@ import { useCart } from "@/components/providers";
 import { Modal } from "@/components/ui/modal";
 import { Quantity } from "@/components/cart/quantity";
 import { ProductArt } from "@/components/ui/product-art";
-import type { Pack, PackOptions } from "@/types";
+import type { Pack } from "@/types";
+import { PackOptionsPicker } from "./pack-options-picker";
 
-export function PackOptionsPicker({
-  pack,
-  value,
-  onChange,
-  disabled = false,
-}: {
-  pack: Pack;
-  value: PackOptions;
-  onChange: (value: PackOptions) => void;
-  disabled?: boolean;
-}) {
-  return pack.options?.map((key) => (
-    <fieldset className="pack-option" key={key} disabled={disabled}>
-      <legend>{optionLabels[key]}</legend>
-      <div>
-        {optionChoices[key].map((choice) => (
-          <button
-            key={choice.value}
-            type="button"
-            aria-pressed={value[key] === choice.value}
-            onClick={() => onChange({ ...value, [key]: choice.value })}
-          >
-            {choice.label}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-  ));
-}
 function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
   const ref = useRef<HTMLElement>(null);
   const { items, ageConfirmed } = useCart();
-  const quantity = items.find((item) => item.id === pack.id)?.quantity ?? 0;
+  const item = items.find((item) => item.id === pack.id);
+  const quantity = item?.quantity ?? 0;
+  const configured = configurePack(pack, item?.options);
   useEffect(() => {
     if (!ageConfirmed) return;
     const observer = new IntersectionObserver(
@@ -97,10 +69,20 @@ function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
           {pack.id === "pack-sem-ressacas" ? " · Sem álcool" : ""}
         </span>
         <h3>{pack.name}</h3>
+        <p className="pack-core-value">{pack.summary}</p>
         <p className="pack-line">{pack.description}</p>
-        <p className="pack-summary">{pack.summary}</p>
+        <p className="pack-summary">
+          {quantity
+            ? "Marcas e extras à tua maneira."
+            : "Extras incluídos. Troca ou retira o que não precisas."}
+        </p>
         <div className="pack-buy">
-          <strong>{money(pack.price)}</strong>
+          <div>
+            <small className="pack-price-label">
+              {quantity ? "Na tua versão" : "Com extras"}
+            </small>
+            <strong>{money(configured.price)}</strong>
+          </div>
           <button
             className="button button-primary"
             onClick={onChoose}
@@ -153,6 +135,7 @@ function PackDetail({ pack, onClose }: { pack: Pack; onClose: () => void }) {
   const [options, setOptions] = useState(() =>
     packOptions(pack, existing?.options),
   );
+  const configured = configurePack(pack, options);
   const [added, setAdded] = useState(false);
   const guard = useRef(false);
   return (
@@ -196,24 +179,15 @@ function PackDetail({ pack, onClose }: { pack: Pack; onClose: () => void }) {
           </div>
           <div className="pack-detail-heading">
             <span>{pack.people}</span>
-            <strong>{money(pack.price)}</strong>
+            <strong>{money(configured.price)}</strong>
           </div>
           <p>{pack.description}</p>
-          <h3>Está tudo aqui.</h3>
-          <ul className="pack-full-contents">
-            {packContents(pack, options).map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
           <PackOptionsPicker
             pack={pack}
             value={options}
             onChange={setOptions}
           />
-          <p className="pack-preview">
-            Imagem ilustrativa. Preço de antevisão. Ainda sem entregas ou
-            pagamento.
-          </p>
+          <br/>
           <button
             className="button button-primary pack-detail-cta"
             disabled={!ageConfirmed}
@@ -229,7 +203,7 @@ function PackDetail({ pack, onClose }: { pack: Pack; onClose: () => void }) {
               }
             }}
           >
-            {existing ? "Atualizar pack" : `Adicionar · ${money(pack.price)}`}
+            {`${existing ? "Atualizar pack" : "Adicionar"} · ${money(configured.price)}`}
           </button>
         </>
       )}
@@ -242,15 +216,14 @@ export function PackBrowser({ featured = false }: { featured?: boolean }) {
   const sorted = [...packs].sort(
     (a, b) =>
       Number(b.id === "pack-classica") - Number(a.id === "pack-classica") ||
-      Number(!!b.featured) - Number(!!a.featured),
+      Number(b.tier === "primary") - Number(a.tier === "primary"),
   );
   const visible = sorted
     .filter(
       (pack) =>
-        fitsGroup(pack, group) &&
-        (!featured || group !== "all" || pack.featured),
+        fitsGroup(pack, group) && (!featured || pack.tier === "primary"),
     )
-    .slice(0, featured ? 3 : packs.length);
+    .slice(0, packs.length);
   return (
     <div
       className={`pack-browser ${featured ? "featured-packs" : "all-packs"}`}
@@ -263,7 +236,6 @@ export function PackBrowser({ featured = false }: { featured?: boolean }) {
       <div className="group-discovery">
         <div>
           <h3>Quantos são?</h3>
-          <p>Tu dizes quantos são. A Jola trata do resto.</p>
         </div>
         <div className="group-choices" aria-label="Tamanho do grupo">
           {(
@@ -299,14 +271,33 @@ export function PackBrowser({ featured = false }: { featured?: boolean }) {
         </p>
       )}
       <div className="pack-menu">
-        {visible.map((pack) => (
-          <PackProduct
-            key={pack.id}
-            pack={pack}
-            onChoose={() => setSelected(pack)}
-          />
-        ))}
+        {visible
+          .filter((pack) => pack.tier === "primary")
+          .map((pack) => (
+            <PackProduct
+              key={pack.id}
+              pack={pack}
+              onChoose={() => setSelected(pack)}
+            />
+          ))}
       </div>
+      {!featured && visible.some((pack) => pack.tier === "secondary") && (
+        <section className="secondary-packs" aria-label="Mais dois packs">
+          <h2>Outra bebida? Também há.</h2>
+          <p>Gin ou sem álcool. A mesma ideia, à tua maneira.</p>
+          <div className="pack-menu">
+            {visible
+              .filter((pack) => pack.tier === "secondary")
+              .map((pack) => (
+                <PackProduct
+                  key={pack.id}
+                  pack={pack}
+                  onChoose={() => setSelected(pack)}
+                />
+              ))}
+          </div>
+        </section>
+      )}
       {featured && (
         <Link href="/pedir" className="button button-secondary all-packs-link">
           Ver todos os packs

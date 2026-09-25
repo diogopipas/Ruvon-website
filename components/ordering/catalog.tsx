@@ -14,6 +14,7 @@ import { Quantity } from "@/components/cart/quantity";
 import { DesktopCart } from "@/components/cart/cart";
 import { useCart } from "@/components/providers";
 import { Modal } from "@/components/ui/modal";
+import { CitySelect } from "@/components/ui/city-select";
 import { locationSchema } from "@/lib/validation";
 import type { Product } from "@/types";
 function ProductCard({ product }: { product: Product }) {
@@ -212,19 +213,15 @@ export function Catalog() {
         >
           <div className="catalog-intro">
             <div>
-              <span className="small-label">
-                O botão de emergência da tua noite.
-              </span>
               <h1>
                 {active === "packs"
                   ? "A noite, resolvida."
                   : "O que é que falta?"}
               </h1>
-              <p>Monta a tua noite. Ajuda-nos a escolher onde lançar.</p>
             </div>
             <span className="catalog-time">
               <MapPin size={16} />
-              Acesso antecipado<span>Ainda sem entregas</span>
+              Acesso antecipado
             </span>
           </div>
           <div className="catalog-controls" ref={controlsRef}>
@@ -315,12 +312,6 @@ export function Catalog() {
               {active === "packs" ? "6 packs" : `${filtered.length} produtos`}
             </span>
           </div>
-          <p className="catalog-preview">
-            {active === "packs"
-              ? "Escolhe pelo grupo e pelo que te apetece. "
-              : ""}
-            Imagens e preços de antevisão. Ainda sem pagamentos ou entregas.
-          </p>
           {active === "packs" ? (
             <div className="catalog-packs" ref={resultsRef}>
               <PackBrowser />
@@ -348,9 +339,6 @@ export function Catalog() {
               </button>
             </div>
           )}
-          <p className="catalog-end">
-            O essencial está aqui. A melhor parte da noite está aí.
-          </p>
         </div>
         <DesktopCart />
       </main>
@@ -358,20 +346,12 @@ export function Catalog() {
         open={addressOpen}
         onOpenChange={setAddressOpen}
         title="Onde é a festa?"
-        description="Só precisamos da cidade e do código postal para saber onde faz sentido chegar primeiro."
+        description="Começamos em Faro. Seleciona a tua cidade e indica o código postal para registarmos o teu interesse."
       >
         <form className="form-stack" onSubmit={saveAddress}>
           <label>
             Cidade
-            <input
-              required
-              name="city"
-              defaultValue={location?.city}
-              minLength={2}
-              maxLength={80}
-              placeholder="Lisboa"
-              autoComplete="address-level2"
-            />
+            <CitySelect defaultValue={location?.city || "Faro"} />
           </label>
           <label>
             Código postal
@@ -382,12 +362,12 @@ export function Catalog() {
               pattern="[0-9]{4}-?[0-9]{3}"
               inputMode="numeric"
               maxLength={8}
-              placeholder="1000-001"
+              placeholder="8000-001"
               autoComplete="postal-code"
               aria-describedby="postcode-hint"
             />
             <small id="postcode-hint">
-              7 algarismos, por exemplo 1000-001.
+              7 algarismos, por exemplo 8000-001.
             </small>
           </label>
           {addressError && (

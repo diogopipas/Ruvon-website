@@ -106,7 +106,8 @@
   font-size: 14px;
   font-weight: 700;
 }
-.form-stack input:not([type="checkbox"]) {
+.form-stack input:not([type="checkbox"]),
+.form-stack select {
   width: 100%;
   background: #171b13;
   border: 1px solid #525946;
@@ -120,7 +121,8 @@
 .form-stack input::placeholder {
   color: #8f9882;
 }
-.form-stack input:focus {
+.form-stack input:focus,
+.form-stack select:focus {
   border-color: var(--amber);
   outline: 1px solid var(--amber);
   outline-offset: 1px;

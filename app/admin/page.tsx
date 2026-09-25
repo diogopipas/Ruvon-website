@@ -237,6 +237,44 @@ async function Dashboard() {
           </div>
         </section>
         <section className="dashboard-panel">
+          <h2>O que mudam no pack?</h2>
+          <p>
+            Trocas, remoções e reposições. “A explorar” inclui escolhas antes de
+            guardar; o carrinho conserva a configuração final.
+          </p>
+          {demand.customizations.length ? (
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pack / opção</th>
+                    <th>Antes</th>
+                    <th>Depois</th>
+                    <th>Onde</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {demand.customizations.map((change, index) => (
+                    <tr key={index}>
+                      <td>
+                        {change.pack}
+                        <small>{change.option}</small>
+                      </td>
+                      <td>{change.from}</td>
+                      <td>{change.to}</td>
+                      <td>{change.source}</td>
+                      <td>{change.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>As primeiras escolhas aparecem aqui.</p>
+          )}
+        </section>
+        <section className="dashboard-panel">
           <h2>Quantos são?</h2>
           <p>Última escolha de tamanho por perfil de navegador.</p>
           <Bars data={demand.groups} />

@@ -25,7 +25,7 @@ Local records persist in `.data/jola.json`, which is excluded from Git. A succes
 
 ## What is implemented
 
-- Mobile-first branded homepage with a photographic hero, three featured packs, product categories, how it works, launch cities, merchant form and FAQ.
+- Mobile-first branded homepage with a photographic hero, four primary packs, product categories, how it works, launch cities, merchant form and FAQ.
 - `/pedir`: six validation packs and 32 individual products, sticky search/categories, filters in the URL, accent-insensitive search, selected-item states, 44 px quantity controls, sticky desktop cart and floating mobile cart.
 - `/checkout`: basket review → city/postcode → transparent early-access invitation → email or Portuguese phone → persisted confirmation and optional native sharing. Progress belongs to the basket/zone; contact drafts stay in tab-scoped session storage.
 - Initial age confirmation, saved locally; negative response blocks the catalogue.
@@ -87,7 +87,7 @@ npm run build
 npm run test:e2e          # Production server/API integration suite; build first
 ```
 
-The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation and public routes/OG rendering. It does not automate a browser. The 66 unit/database tests and five HTTP integration tests pass. Safari checks cover the mobile customer journey, a failed-save/retry recovery, merchant submission and responsive previews; see [QA notes and bundle measurements](docs/QA.md).
+The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation and public routes/OG rendering. It does not automate a browser. The 69 unit/database tests and five HTTP integration tests pass. Safari checks cover the mobile customer journey, a failed-save/retry recovery, merchant submission and responsive previews; see [QA notes and bundle measurements](docs/QA.md).
 
 PostgreSQL tests use PGlite, a local PostgreSQL engine. They run the migration with only the optional `pgcrypto` extension declaration omitted, since `gen_random_uuid` is already available in the engine. No external database or credentials are needed for these tests.
 
@@ -137,10 +137,12 @@ More detail: [analytics events](docs/ANALYTICS.md), [QA](docs/QA.md), [design an
 
 ## Six-pack validation catalogue
 
-`/pedir` opens on Packs. The public set is Só Mais Uma (€24.90), A Clássica (€49.90), O Pré (€44.90), Só Somersby (€32.90), Gin & Chill (€42.90) and Sem Ressacas (€29.90). The homepage features A Clássica, O Pré and Só Somersby. Optional group-size filtering never blocks browsing; individual products remain available.
+`/pedir` opens on Packs. Four primary packs lead: Só Mais Uma (€21.90, 12 beers), A Clássica (€59.90, 24 beers + vodka), O Pré (€39.90, vodka + 4 Red Bull), and Só Somersby (€34.90, 16 ciders). Gin & Chill (€39.90, gin + tonic) and Sem Ressacas (€34.90, 12 alcohol-free beers + 4 Red Bull) sit in a supporting section. The homepage features the four primary packs. Group-size filtering stays optional; individual products remain available.
 
-Pack configuration lives in `lib/products.ts`. Beer substitutions are available on Só Mais Uma and A Clássica; A Clássica also offers Original/Zero mixer selection. A pack stays one basket line, with one option combination per pack ID; quantity changes apply to that combination. Canonical contents/options are preserved in the existing order/lead JSON fields. No additional SQL migration is needed for packs.
+Pack configuration lives in `lib/products.ts` and reusable components in `lib/pack-components.ts`. Listed prices include default extras. Fixed drink quantities cannot be removed. Brand choices, mixer/snack swaps and extra removals update the price immediately; the server independently validates and calculates it. A pack stays one basket line, with one configuration per pack ID; quantity changes apply to that configuration. Chosen brands, core/extra contents and removals persist in the existing order/lead JSON fields. No new SQL migration is needed. See [pack pricing and configuration](docs/PACKS.md) for all provisional upgrade/removal amounts.
 
 The dashboard separates pack views, additions, checkout share, current pack demand, basket values, group sizes and add-on actions. Definitions are in [the analytics contract](docs/ANALYTICS.md).
 
-Six local pack compositions and 17 transparent product packshots were generated as illustrative prelaunch assets, not sourced from manufacturers. Remaining SKUs use a replaceable SVG fallback. See [art direction](docs/ART-DIRECTION.md) and [asset provenance/prompts](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).
+Six local pack compositions and 17 transparent product packshots were generated as illustrative prelaunch assets, not sourced from manufacturers. The remaining 15 catalog products now use locally hosted product photography; see [photograph sources](docs/PRODUCT-PHOTOS.md). The SVG fallback is retained for future unmapped products. See [art direction](docs/ART-DIRECTION.md) and [asset provenance/prompts](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).
+
+The launch city is Faro. Catalog and checkout use a city selector, with Faro first and other cities available for registering interest; the postcode stays editable.

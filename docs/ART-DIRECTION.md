@@ -1,5 +1,19 @@
 # Final pack direction
 
+## Core and extras revision
+
+Keep the existing palette, type and receipt motif. Lead with four primary packs; give Gin & Chill and Sem Ressacas a compact supporting section. A Clássica retains the biggest composition. Put fixed drink quantities in prominent type, with default extras in a quieter line. Prices include the default extras; show every upgrade/deduction next to its control.
+
+```text
+Four primary products → two supporting alternatives
+Detail: fixed drinks + brand buttons
+        useful extras + swap/remove controls
+        live price + one add/update action
+Cart: selected contents + compact edit disclosure
+```
+
+Rejected: putting every option on the product cards, or splitting customization into a wizard. Keep cards scannable and customization in one panel. This revision supersedes the earlier three-feature layout and two-option limit below.
+
 Preserve the photographic hero, charcoal `#171815`, amber `#efb735`, cream `#f4eedf`, local Barlow Condensed display type and DM Sans utility text. Supporting pack stages use apple `#cbd19a`, mint `#bdd1c4` and cold blue `#b8d7dd`.
 
 Initial idea: six equal product cards. Rejected: too close to a pricing grid, too much choice on the homepage.

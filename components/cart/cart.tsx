@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { PackOptionsPicker } from "@/components/packs/pack-browser";
-import { basketPackEvents, packOptions } from "@/lib/packs";
+import { PackOptionsPicker } from "@/components/packs/pack-options-picker";
+import { basketPackEvents, configurePack, packOptions } from "@/lib/packs";
 import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Clock3, ShoppingBag } from "lucide-react";
@@ -84,11 +84,6 @@ export function CartContents({
           <ShoppingBag size={34} strokeWidth={1.5} />
         </div>
         <h3>A noite ainda está em branco.</h3>
-        <p>
-          Junta o que falta.
-          <br />
-          Nós guardamos-te o lugar.
-        </p>
         <Link
           className="button button-primary"
           href="/pedir"
@@ -104,6 +99,8 @@ export function CartContents({
         {items.map((item) => {
           const product = getCatalogItem(item.id)!;
           const art = productById.get(item.id);
+          const configuration =
+            "core" in product ? configurePack(product, item.options) : null;
           return (
             <div className="cart-item" key={item.id}>
               <div className="cart-item-art">
@@ -128,13 +125,27 @@ export function CartContents({
                 </small>
                 {"people" in product && (
                   <>
-                    <p className="cart-pack-summary">{product.summary}</p>
-                    <PackOptionsPicker
-                      pack={product}
-                      value={packOptions(product, item.options)}
-                      onChange={(options) => updateOptions(item.id, options)}
-                      disabled={editingDisabled || busy}
-                    />
+                    <p className="cart-pack-summary">
+                      {configuration?.core.join(" + ")}
+                    </p>
+                    <details className="cart-pack-edit">
+                      <summary>Marcas e extras</summary>
+                      <p className="cart-pack-summary">
+                        {configuration?.extras.join(" · ") || "Sem extras."}
+                      </p>
+                      {item.quantity > 1 && (
+                        <p className="pack-option-note">
+                          Estas escolhas aplicam-se aos {item.quantity} packs.
+                        </p>
+                      )}
+                      <PackOptionsPicker
+                        pack={product}
+                        value={packOptions(product, item.options)}
+                        onChange={(options) => updateOptions(item.id, options)}
+                        disabled={editingDisabled || busy}
+                        source="cart"
+                      />
+                    </details>
                   </>
                 )}
                 <Quantity
@@ -145,7 +156,7 @@ export function CartContents({
                 />
               </div>
               <strong className="cart-item-price">
-                {money(product.price * item.quantity)}
+                {money((configuration?.price ?? product.price) * item.quantity)}
               </strong>
             </div>
           );
@@ -186,8 +197,6 @@ export function CartContents({
         )}
         <p className="cart-disclaimer">
           O teu carrinho ajuda-nos a preparar o lançamento.
-          <br />
-          Simulação sem pagamento. * Objetivo de entrega no lançamento.
         </p>
         {storageError && (
           <p role="status" className="form-error">

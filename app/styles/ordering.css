@@ -26,7 +26,7 @@
   display: flex;
   gap: 11px;
   align-items: center;
-  text-align: left;
+  text-align: center;
   padding: 6px 12px;
 }
 .address-button > svg:first-child {
@@ -485,7 +485,7 @@
 }
 .checkout-button {
   width: 100%;
-  justify-content: space-between;
+  justify-content: center;
   min-height: 52px;
   padding: 12px 16px;
   font-size: 13px;

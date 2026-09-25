@@ -6,7 +6,7 @@ export function Wordmark({ large = false }: { large?: boolean }) {
       className={`wordmark ${large ? "wordmark-large" : ""}`}
       aria-label="Jola — página inicial"
     >
-      JOLA<span className="wordmark-dot">®</span>
+      JOLA
     </Link>
   );
 }

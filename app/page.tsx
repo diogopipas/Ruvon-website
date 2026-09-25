@@ -20,12 +20,12 @@ export default function Home() {
         <section className="hero container">
           <div className="hero-copy">
             <span className="launch-badge">
-              <span />A preparar o lançamento em Lisboa
+              <span />A preparar o lançamento em Faro
             </span>
             <h1>
               Acabou <br />a bebida?
               <br />
-              <span>Nós levamos.</span>
+              <span>Pede uma Jola</span>
             </h1>
             <p className="hero-description">
               Cerveja gelada, gelo, mixers, snacks e tudo o que falta para
@@ -35,10 +35,6 @@ export default function Home() {
               source="hero"
               className="button button-primary hero-cta"
             />
-            <p className="hero-microcopy">
-              Monta a tua noite e ajuda-nos a escolher onde começar.
-              <span>Ainda sem entregas. Sem pagamento.</span>
-            </p>
           </div>
           <div className="hero-visual">
             <Image
@@ -75,7 +71,7 @@ export default function Home() {
             </span>
             <span>
               <Zap size={16} />
-              Entrega rápida.*
+              Entrega rápida.
             </span>
             <span>
               <MapPin size={16} />À tua porta.
@@ -86,11 +82,11 @@ export default function Home() {
           </div>
         </section>
         <div className="brand-strip" aria-hidden="true">
-          <span>A NOITE NÃO ACABA AQUI.</span>
+          <span>PEDE.</span>
           <span>✳</span>
-          <span>NÃO VÁS BUSCAR. PEDE.</span>
+          <span>UMA.</span>
           <span>✳</span>
-          <span>A NOITE NÃO ACABA AQUI.</span>
+          <span>JOLA.</span>
           <span>✳</span>
         </div>
         <section className="section packs-section container" id="packs">
@@ -102,23 +98,13 @@ export default function Home() {
                 Há um pack para isso.
               </h2>
             </div>
-            <p className="section-aside">
-              Escolhe quantos são.
-              <br />
-              Nós tratamos do resto.
-            </p>
           </div>
           <PackBrowser featured />
-          <p className="preview-note">
-            Uma antevisão das boas noites que aí vêm. Packs e preços
-            ilustrativos.
-          </p>
         </section>
         <section className="section container" id="o-que-falta">
           <div className="section-heading">
             <div>
               <h2>O que te falta?</h2>
-              <p>O essencial para o «só mais uma».</p>
             </div>
             <OrderLink source="categories" className="text-link">
               Ver tudo
@@ -133,11 +119,6 @@ export default function Home() {
                 Da tua lista
                 <br />à tua porta.
               </h2>
-              <p className="section-aside">
-                É assim que queremos
-                <br />
-                salvar a tua noite.
-              </p>
             </div>
             <div className="steps-grid">
               <article>
@@ -163,15 +144,10 @@ export default function Home() {
                 </p>
               </article>
             </div>
-            <p className="preview-note">
-              * Objetivo de entrega no lançamento. Ainda não estamos a fazer
-              entregas.
-            </p>
           </div>
         </section>
         <section className="group-section container">
           <div className="group-copy">
-            <span className="small-label">Todos temos este grupo.</span>
             <h2>
               Alguém tem
               <br />
@@ -179,10 +155,7 @@ export default function Home() {
               <br />
               <span>Ou então, não.</span>
             </h2>
-            <p>
-              Feito para aquela mensagem no grupo.
-              <br />E para ninguém ter de responder «eu vou».
-            </p>
+            <br />
             <OrderLink source="group" />
           </div>
           <div className="chat-composition">
@@ -216,11 +189,11 @@ export default function Home() {
         <section className="location-section">
           <div className="container">
             <span className="location-dot">
-              <MapPin size={19} />A começar perto de ti.
+              <MapPin size={19} />A começar em Faro.
             </span>
             <h2>Onde queres a Jola?</h2>
             <p>
-              Estamos a preparar as primeiras entregas.
+              As primeiras entregas vão ser em Faro.
               <br />
               Diz-nos onde fazes a festa e fica com 5 € para a primeira Jola.
             </p>
@@ -244,7 +217,7 @@ export default function Home() {
                 ],
                 [
                   "Onde vai chegar a Jola?",
-                  "Queremos começar em Lisboa e crescer zona a zona. Deixa o teu código postal: a procura ajuda-nos a escolher as primeiras zonas.",
+                  "Vamos começar em Faro e crescer zona a zona. Deixa o teu código postal: avisamos-te quando chegarmos à tua zona.",
                 ],
                 [
                   "Como funciona a oferta de 5 €?",

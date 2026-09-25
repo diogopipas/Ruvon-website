@@ -40,7 +40,7 @@ The generated image was inspected and optimized into WebP without editing the de
 
 ## Pack art direction
 
-The final pass retains the hero and introduces large product stages with perforated receipt panels. A Clássica owns the main yellow composition, O Pré uses charcoal, Só Somersby apple green, Gin & Chill mint, Só Mais Uma sand, and Sem Ressacas cold blue. The homepage shows three packs by default; the full six-product menu belongs in `/pedir`.
+The final pass retains the hero and introduces large product stages with perforated receipt panels. A Clássica owns the main yellow composition, O Pré uses charcoal, Só Somersby apple green, Gin & Chill mint, Só Mais Uma sand, and Sem Ressacas cold blue. The homepage shows four primary packs; `/pedir` adds Gin & Chill and Sem Ressacas in a smaller supporting section. Fixed drink quantities lead the receipt; extras are secondary and editable.
 
 Ordinary CTA arrows, popularity badges, pack feature checklists and the old equal-card pack grid were removed. The how-it-works section uses a quiet numbered sequence, with the group-chat story retained. Buttons use a 5 px radius, strong labels and pressed feedback. Dialogs open immediately; no essential content depends on an entry fade.
 
