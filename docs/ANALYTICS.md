@@ -29,7 +29,7 @@ Example campaign URL:
 http://localhost:3000/?utm_source=instagram&utm_medium=paid_social&utm_campaign=lisboa_noite&utm_content=video_2347
 ```
 
-`analytics_events` records observed interactions. The dashboard's main demand funnel uses saved simulated orders: started baskets → reached checkout → converted to contact. `simulated_orders.reached_checkout` and `converted_to_lead` support durable conversion metrics even if an analytics request fails. Drop-off separates baskets that never reached checkout from checkouts without a contact.
+`analytics_events` records observed interactions. The dashboard's main demand funnel uses saved simulated orders: started baskets → reached checkout → converted to contact. `simulated_orders.reached_checkout` and `converted_to_lead` support durable conversion metrics even if an analytics request fails. Pedido → Checkout is reached checkouts divided by started orders; Checkout → Contacto is converted orders divided by reached checkouts. City-only signups count as contacts but are excluded from these order-funnel rates.
 
 Product and category demand is based on quantities in saved baskets, not add-button clicks. Basket values are simulated demand, not revenue. An empty city-only signup does not create an order or erase a previously saved lead basket.
 
@@ -45,17 +45,19 @@ Explicitly tagged visits replace the previous campaign. Visits without campaign 
 
 ## Pack validation
 
-Pack `product_viewed`, `product_added` and `product_removed` events carry `product_type: "pack"`, `pack_id`, `pack_name`, `pack_price` (configured euros), `default_pack_price`, `pack_tier`, `people_min`, `people_max` and `selected_options`. Individual products carry `product_type: "individual"`. Pack impressions require age confirmation and 25% of the larger pack row to be visible; they are deduplicated per pack/tab.
+Pack `product_viewed`, `product_added` and `product_removed` events carry `product_type: "pack"`, `pack_id`, `pack_name`, `pack_price` (configured euros), `default_pack_price`, `pack_tier`, `people_min`, `people_max` and `selected_options`. Individual products carry `product_type: "individual"`. Pack impressions require age confirmation and 10% of the pack image to be visible, or opening its detail. Adding through any path also records an implied view when one has not been sent. Impressions are deduplicated per pack/tab; add/remove actions are emitted centrally by the cart provider.
 
 `cart_opened`, `checkout_started` and `waitlist_submitted` include `contains_pack` and a `packs` array containing the same metadata plus quantity. Checkout-start deduplication includes the basket and substitutions. `pack_options_changed` records each deliberate swap/removal/restore in detail or cart, including drafts that are later closed without saving. It carries `previous_options`, `selected_options`, `changed_options`, structured `changes` (`option`, `from`, `to`, `action`), `removed_extras`, `previous_pack_price`, `pack_price` and `price_delta`. `source` distinguishes `detail` exploration from `cart` edits. Clicking an already selected choice emits nothing; saving a detail draft does not emit a duplicate change. Initial/default choices and final configurations are carried by product and basket lifecycle events. `pack_group_selected` records the optional `group_size` choice (`2-3`, `4-6`, `7+`, or reset `all`).
 
 The protected dashboard reports:
 
-- Pack view/add percentages over observed anonymous browser profiles across events and stored orders, including direct catalogue visits. These are not unique people.
-- Pack units in current saved baskets and the number of saved checkouts containing each pack.
-- Percentage of saved checkouts currently containing at least one pack.
-- Average basket subtotal with a pack versus without one. Pack AOV includes extras and excludes fees. These values are not revenue.
+- The five demand KPIs, order-to-checkout and checkout-to-contact rates, filtered across the entire panel by Todas, Faro or Lisboa. Pre-location events inherit their browser's saved city. Unknown-city sessions are shown only under Todas.
+- Campaign / city rows grouped by `utm_campaign`, `utm_content`, `utm_source` and city. Each saved order or contact counts under its own stored attribution. AOV is nonempty basket subtotal divided by nonempty baskets; simulated GMV sums current basket totals including fees. City-only contacts have no order.
+- Percentage of nonempty saved carts with at least one pack, most selected pack by units, pack and non-pack AOV excluding fees, and checkout rate per pack (saved checkouts containing it divided by nonempty saved carts containing it).
+- Most removed extras, selected extras and non-default brand/product swaps from final pack options in saved carts, weighted by pack quantity. Exploratory option clicks are tracked separately and do not inflate final-choice demand.
 - Latest non-reset group-size choice per browser profile.
 - Individual additions while a pack was already in the basket (`after_pack: true`). This action count does not subtract later removals.
+
+Best-effort event view/add counts include saved carts as a floor: a persisted pack proves the browser viewed/added it even if `/api/events` failed. This prevents a zero event rate beside checkouts that contain packs. The dashboard uses saved cart state for its pack KPIs rather than presenting those event rates.
 
 Options and a canonical contents snapshot live inside the existing JSON basket fields in orders and leads. No new SQL columns are required. Existing installations still need migration 002 from the previous audit.

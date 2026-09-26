@@ -19,39 +19,46 @@ import { ProductArt } from "@/components/ui/product-art";
 import type { Pack } from "@/types";
 import { PackOptionsPicker } from "./pack-options-picker";
 
+function recordPackView(pack: Pack) {
+  trackOnce(
+    "product_viewed",
+    { product: pack.id, category: "packs", ...packEvent(pack.id) },
+    `product_viewed:${pack.id}`,
+  );
+}
 function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLButtonElement>(null);
   const { items, ageConfirmed } = useCart();
   const item = items.find((item) => item.id === pack.id);
   const quantity = item?.quantity ?? 0;
   const configured = configurePack(pack, item?.options);
   useEffect(() => {
     if (!ageConfirmed) return;
+    if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          trackOnce(
-            "product_viewed",
-            { product: pack.id, category: "packs", ...packEvent(pack.id) },
-            `product_viewed:${pack.id}`,
-          );
+          recordPackView(pack);
           observer.disconnect();
         }
       },
-      { threshold: 0.25 },
+      { threshold: 0.1 },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [pack, ageConfirmed]);
   return (
     <article
-      ref={ref}
       className={`pack-product ${pack.id} ${quantity ? "has-pack" : ""}`}
       style={{ "--pack-stage": pack.color } as React.CSSProperties}
     >
       <button
+        ref={ref}
         className="pack-photo"
-        onClick={onChoose}
+        onClick={() => {
+          recordPackView(pack);
+          onChoose();
+        }}
         aria-label={`Ver ${pack.name}`}
         disabled={!ageConfirmed}
       >
@@ -85,7 +92,10 @@ function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
           </div>
           <button
             className="button button-primary"
-            onClick={onChoose}
+            onClick={() => {
+              recordPackView(pack);
+              onChoose();
+            }}
             disabled={!ageConfirmed}
           >
             {quantity ? `Editar pack · ${quantity}` : "Escolher pack"}
@@ -187,7 +197,7 @@ function PackDetail({ pack, onClose }: { pack: Pack; onClose: () => void }) {
             value={options}
             onChange={setOptions}
           />
-          <br/>
+          <br />
           <button
             className="button button-primary pack-detail-cta"
             disabled={!ageConfirmed}

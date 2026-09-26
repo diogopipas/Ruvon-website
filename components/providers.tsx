@@ -15,6 +15,7 @@ import {
   getSession,
   readLocal,
   track,
+  trackOnce,
   writeLocal,
 } from "@/lib/analytics";
 import { getCatalogItem, packById } from "@/lib/products";
@@ -169,6 +170,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setItems(next);
     writeLocal("jola_cart", next);
     const priced = priceBasket(next);
+    if (pack)
+      trackOnce(
+        "product_viewed",
+        { ...packEvent(id, selected), product: id, category: "packs" },
+        `product_viewed:${id}`,
+      );
     track("product_added", {
       ...packEvent(id, selected),
       after_pack: !pack && currentItems.some((item) => packById.has(item.id)),

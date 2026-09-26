@@ -1,6 +1,6 @@
 import type { Database } from "@/types";
 import { packById, productById } from "./products";
-import { componentChoices } from "./packs";
+import { componentChoices, configurePack } from "./packs";
 
 /** Browser-profile demand signals, not unique people or paid orders. */
 export function summarizePacks(db: Database) {
@@ -101,6 +101,50 @@ export function summarizePacks(db: Database) {
   const withoutPacks = orders.filter(
     (order) => !order.items.some((item) => isPack(item.id)),
   );
+  // A saved pack is stronger evidence of a view and addition than a best-effort
+  // browser event. Include it when events were blocked or sent before consent.
+  for (const order of withPacks) {
+    views.add(order.session_id);
+    additions.add(order.session_id);
+  }
+  for (const session of additions) views.add(session);
+  const removed = new Map<string, number>();
+  const selected = new Map<string, number>();
+  const swaps = new Map<string, number>();
+  const count = (map: Map<string, number>, name: string, quantity: number) =>
+    map.set(name, (map.get(name) ?? 0) + quantity);
+  for (const order of withPacks)
+    for (const item of order.items) {
+      const pack = packById.get(item.id);
+      if (!pack) continue;
+      const options = configurePack(pack, item.options).options;
+      for (const part of pack.extras) {
+        const choice = componentChoices(part, true).find(
+          (candidate) => candidate.value === options[part.key],
+        )!;
+        if (choice.value === "none") count(removed, part.label, item.quantity);
+        else count(selected, choice.content || choice.label, item.quantity);
+      }
+      for (const part of [...pack.core, ...pack.extras]) {
+        if (!part.key) continue;
+        const key = part.key;
+        const choice = componentChoices(
+          part,
+          pack.extras.some((extra) => extra.key === key),
+        ).find((candidate) => candidate.value === options[key])!;
+        if (choice.value !== "none" && choice.value !== part.choices[0].value)
+          count(
+            swaps,
+            `${part.choices[0].label} → ${choice.label}`,
+            item.quantity,
+          );
+      }
+    }
+  const ranked = (map: Map<string, number>) =>
+    [...map]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt"))
+      .slice(0, 8)
+      .map(([name, value]) => ({ name, value }));
   const average = (rows: typeof orders) =>
     rows.length
       ? Math.round(
@@ -119,22 +163,34 @@ export function summarizePacks(db: Database) {
     checkoutShare: checkouts.length
       ? (packCheckouts.length / checkouts.length) * 100
       : 0,
+    cartShare: orders.length ? (withPacks.length / orders.length) * 100 : 0,
     packAov: average(withPacks),
     nonPackAov: average(withoutPacks),
+    removedExtras: ranked(removed),
+    selectedExtras: ranked(selected),
+    swaps: ranked(swaps),
     packs: [...packById.values()]
-      .map((pack) => ({
-        id: pack.id,
-        name: pack.name,
-        units: orders.reduce(
-          (sum, order) =>
-            sum +
-            (order.items.find((item) => item.id === pack.id)?.quantity ?? 0),
-          0,
-        ),
-        checkouts: checkouts.filter((order) =>
+      .map((pack) => {
+        const carts = orders.filter((order) =>
           order.items.some((item) => item.id === pack.id),
-        ).length,
-      }))
+        ).length;
+        const packCheckoutCount = checkouts.filter((order) =>
+          order.items.some((item) => item.id === pack.id),
+        ).length;
+        return {
+          id: pack.id,
+          name: pack.name,
+          carts,
+          checkoutRate: carts ? (packCheckoutCount / carts) * 100 : 0,
+          units: orders.reduce(
+            (sum, order) =>
+              sum +
+              (order.items.find((item) => item.id === pack.id)?.quantity ?? 0),
+            0,
+          ),
+          checkouts: packCheckoutCount,
+        };
+      })
       .sort((a, b) => b.units - a.units),
     groups: [...groupCounts]
       .sort((a, b) => b[1] - a[1])

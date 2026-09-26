@@ -596,6 +596,64 @@ describe("validation packs", () => {
       id: "pack-classica",
       units: 1,
       checkouts: 1,
+      carts: 1,
+      checkoutRate: 100,
     });
+  });
+  it("uses saved pack choices when impression events are missing", () => {
+    const basket = priceBasket([
+      {
+        id: "pack-classica",
+        quantity: 2,
+        options: {
+          beer: "sagres",
+          mixer: "seven-up",
+          mixer2: "none",
+          ice: "none",
+          water: "none",
+          cups: "none",
+        },
+      },
+    ]);
+    const db: Database = {
+      leads: [],
+      merchant_interests: [],
+      analytics_events: [],
+      simulated_orders: [
+        {
+          id: session,
+          session_id: session,
+          created_at: "2026-09-24",
+          updated_at: "2026-09-24",
+          city: "Faro",
+          postcode: "",
+          ...basket,
+          reached_checkout: true,
+          converted_to_lead: false,
+        },
+      ],
+    };
+    const demand = summarizePacks(db);
+    expect(demand).toMatchObject({
+      viewed: 1,
+      added: 1,
+      viewRate: 100,
+      addRate: 100,
+      cartShare: 100,
+      checkoutShare: 100,
+      packAov: basket.subtotal,
+    });
+    expect(demand.removedExtras).toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 2 })]),
+    );
+    expect(demand.swaps).toEqual(
+      expect.arrayContaining([
+        { name: "Super Bock → Sagres", value: 2 },
+        { name: "Coca-Cola → 7Up", value: 2 },
+      ]),
+    );
+    expect(demand.selectedExtras.some((row) => row.name.includes("7Up"))).toBe(
+      true,
+    );
   });
 });

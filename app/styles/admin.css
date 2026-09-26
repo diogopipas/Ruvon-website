@@ -97,6 +97,30 @@
   margin-bottom: 25px;
   color: #cfc29e;
 }
+.dashboard-city-filter {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 24px;
+}
+.dashboard-city-filter a {
+  min-width: 83px;
+  padding: 9px 16px;
+  border: 1px solid #4b5b3a;
+  border-radius: 5px;
+  color: #c0c9ae;
+  text-align: center;
+  font-size: 13px;
+}
+.dashboard-city-filter a[aria-current="page"] {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #20281a;
+  font-weight: 700;
+}
+.dashboard-city-filter a:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

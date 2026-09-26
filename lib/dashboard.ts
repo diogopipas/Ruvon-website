@@ -1,5 +1,45 @@
 import type { Attribution, Database } from "@/types";
 import { categories, getCatalogItem } from "./products";
+
+export type DashboardCity = "all" | "Faro" | "Lisboa";
+
+const cityKey = (city: string) => city.trim().toLocaleLowerCase("pt");
+
+/** Assign pre-location events to the city eventually saved for that browser. */
+export function filterDashboardCity(
+  db: Database,
+  city: DashboardCity,
+): Database {
+  if (city === "all") return db;
+  const cities = new Map<string, string>();
+  for (const event of [...db.analytics_events].sort((a, b) =>
+    a.created_at.localeCompare(b.created_at),
+  )) {
+    if (
+      event.name === "location_entered" &&
+      typeof event.properties.city === "string"
+    )
+      cities.set(event.session_id, event.properties.city);
+  }
+  for (const order of db.simulated_orders)
+    if (order.city) cities.set(order.session_id, order.city);
+  for (const lead of db.leads)
+    if (lead.city) cities.set(lead.session_id, lead.city);
+  const matches = (session: string) =>
+    cityKey(cities.get(session) || "") === cityKey(city);
+  return {
+    leads: db.leads.filter((lead) => matches(lead.session_id)),
+    simulated_orders: db.simulated_orders.filter((order) =>
+      matches(order.session_id),
+    ),
+    merchant_interests: db.merchant_interests.filter(
+      (store) => cityKey(store.city) === cityKey(city),
+    ),
+    analytics_events: db.analytics_events.filter((event) =>
+      matches(event.session_id),
+    ),
+  };
+}
 function campaignKey(entry: Attribution) {
   return JSON.stringify([
     entry.utm_campaign || "Sem campanha",
@@ -70,6 +110,25 @@ export function summarize(db: Database) {
       gmv: number;
     }
   >();
+  const campaignCities = new Map<
+    string,
+    {
+      campaign: string;
+      content: string;
+      source: string;
+      city: string;
+      started: number;
+      checkouts: number;
+      contacts: number;
+      baskets: number;
+      subtotal: number;
+      gmv: number;
+    }
+  >();
+  const citiesBySession = new Map(
+    orders.map((order) => [order.session_id, order.city]),
+  );
+  for (const lead of db.leads) citiesBySession.set(lead.session_id, lead.city);
   for (const entry of [...orders, ...db.leads]) {
     const name = entry.utm_campaign || "Sem campanha";
     const source = entry.utm_source || "Direto";
@@ -97,6 +156,38 @@ export function summarize(db: Database) {
       row.gmv += entry.total;
     }
     campaigns.set(key, row);
+    const content = entry.utm_content || "—";
+    const city = citiesBySession.get(entry.session_id) || "Sem cidade";
+    const cityCampaignKey = JSON.stringify([
+      name,
+      content,
+      source,
+      cityKey(city),
+    ]);
+    const cityRow = campaignCities.get(cityCampaignKey) || {
+      campaign: name,
+      content,
+      source,
+      city,
+      started: 0,
+      checkouts: 0,
+      contacts: 0,
+      baskets: 0,
+      subtotal: 0,
+      gmv: 0,
+    };
+    if ("email" in entry) cityRow.contacts++;
+    else {
+      cityRow.started++;
+      if (entry.reached_checkout || entry.converted_to_lead)
+        cityRow.checkouts++;
+      if (entry.items.length) {
+        cityRow.baskets++;
+        cityRow.subtotal += entry.subtotal;
+        cityRow.gmv += entry.total;
+      }
+    }
+    campaignCities.set(cityCampaignKey, cityRow);
   }
   return {
     visitors,
@@ -106,6 +197,7 @@ export function summarize(db: Database) {
     beforeCheckout: orders.length - checkout,
     withoutContact: checkout - converted,
     checkoutConversion: checkout ? (converted / checkout) * 100 : 0,
+    orderToCheckout: orders.length ? (checkout / orders.length) * 100 : 0,
     leads: db.leads.length,
     gmv,
     average: currentBaskets.length
@@ -139,5 +231,17 @@ export function summarize(db: Database) {
         conversion: row.orders ? (row.converted / row.orders) * 100 : 0,
       }))
       .sort((a, b) => b.converted - a.converted || b.orders - a.orders),
+    campaignCities: [...campaignCities.values()]
+      .map(({ baskets, subtotal, ...row }) => ({
+        ...row,
+        aov: baskets ? Math.round(subtotal / baskets) : 0,
+      }))
+      .sort(
+        (a, b) =>
+          a.campaign.localeCompare(b.campaign, "pt") ||
+          a.content.localeCompare(b.content, "pt") ||
+          a.source.localeCompare(b.source, "pt") ||
+          a.city.localeCompare(b.city, "pt"),
+      ),
   };
 }

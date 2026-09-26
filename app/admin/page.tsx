@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
-import {
-  ArrowUpRight,
-  BarChart3,
-  MapPin,
-  ShoppingBag,
-  Users,
-} from "lucide-react";
+import { ArrowUpRight, BarChart3, ShoppingBag, Users } from "lucide-react";
 import { Wordmark } from "@/components/ui/wordmark";
 import { AdminActions, AdminLogin } from "@/components/admin/admin-actions";
 import { adminConfigured, isAdmin } from "@/lib/server/auth";
 import { isLocalStorage } from "@/lib/server/supabase";
 import { readDatabase } from "@/lib/server/storage";
-import { summarize } from "@/lib/dashboard";
+import {
+  filterDashboardCity,
+  summarize,
+  type DashboardCity,
+} from "@/lib/dashboard";
 import { summarizePacks } from "@/lib/pack-demand";
 import { money } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
@@ -46,7 +45,18 @@ function Bars({
     <p className="dashboard-empty">{empty}</p>
   );
 }
-export default async function Admin() {
+export default async function Admin({
+  searchParams,
+}: {
+  searchParams: Promise<{ cidade?: string | string[] }>;
+}) {
+  const requestedCity = (await searchParams).cidade;
+  const city: DashboardCity =
+    requestedCity === "faro"
+      ? "Faro"
+      : requestedCity === "lisboa"
+        ? "Lisboa"
+        : "all";
   const authorized = await isAdmin();
   return (
     <>
@@ -66,7 +76,7 @@ export default async function Admin() {
               </p>
             }
           >
-            <Dashboard />
+            <Dashboard city={city} />
           </Suspense>
         ) : (
           <AdminLogin configured={adminConfigured()} />
@@ -75,7 +85,7 @@ export default async function Admin() {
     </>
   );
 }
-async function Dashboard() {
+async function Dashboard({ city }: { city: DashboardCity }) {
   let db;
   try {
     db = await readDatabase();
@@ -90,8 +100,11 @@ async function Dashboard() {
       </div>
     );
   }
+  db = filterDashboardCity(db, city);
   const stats = summarize(db);
   const demand = summarizePacks(db);
+  const percentage = (value: number) =>
+    `${value.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`;
   const local = isLocalStorage();
   return (
     <>
@@ -112,6 +125,26 @@ async function Dashboard() {
           Supabase antes de partilhares o site ou investires em anúncios.
         </p>
       )}
+      <nav
+        className="dashboard-city-filter"
+        aria-label="Filtrar painel por cidade"
+      >
+        {(
+          [
+            ["all", "Todas", "/admin"],
+            ["Faro", "Faro", "/admin?cidade=faro"],
+            ["Lisboa", "Lisboa", "/admin?cidade=lisboa"],
+          ] as const
+        ).map(([value, label, href]) => (
+          <Link
+            key={value}
+            href={href}
+            aria-current={city === value ? "page" : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
       <div className="metric-grid">
         {[
           {
@@ -127,28 +160,10 @@ async function Dashboard() {
             icon: ArrowUpRight,
           },
           {
-            label: "Ainda sem checkout",
-            value: stats.beforeCheckout,
-            detail: "Carrinhos que ainda não avançaram",
-            icon: ShoppingBag,
-          },
-          {
-            label: "Checkout sem contacto",
-            value: stats.withoutContact,
-            detail: "Chegaram ao checkout, sem inscrição",
-            icon: Users,
-          },
-          {
             label: "Contactos recebidos",
             value: stats.leads,
             detail: "Inclui inscrições por cidade",
             icon: Users,
-          },
-          {
-            label: "Volume simulado",
-            value: money(stats.gmv),
-            detail: "Carrinhos atuais, incluindo taxas",
-            icon: BarChart3,
           },
           {
             label: "Valor médio do carrinho",
@@ -157,9 +172,21 @@ async function Dashboard() {
             icon: ShoppingBag,
           },
           {
-            label: "Pedido → contacto",
-            value: `${stats.conversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
-            detail: "Pedidos convertidos / iniciados",
+            label: "Volume simulado",
+            value: money(stats.gmv),
+            detail: "Carrinhos atuais, incluindo taxas",
+            icon: BarChart3,
+          },
+          {
+            label: "Pedido → Checkout %",
+            value: percentage(stats.orderToCheckout),
+            detail: "Checkouts / pedidos iniciados",
+            icon: ArrowUpRight,
+          },
+          {
+            label: "Checkout → Contacto %",
+            value: percentage(stats.checkoutConversion),
+            detail: "Contactos de pedidos / checkouts",
             icon: ArrowUpRight,
           },
         ].map((metric) => (
@@ -176,26 +203,18 @@ async function Dashboard() {
       <div className="dashboard-grid">
         <section className="dashboard-panel full-width">
           <h2>Os packs estão a resolver a noite?</h2>
-          <p>
-            Perfis de navegador observados, incluindo entradas diretas no
-            catálogo. Valores de carrinhos simulados, sem taxas.
-          </p>
+          <p>Packs nos carrinhos guardados. Valores simulados, sem taxas.</p>
           <div className="pack-kpis">
             {[
               [
-                "Viram packs",
-                `${demand.viewRate.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
-                `${demand.viewed} de ${demand.profiles} perfis`,
-              ],
-              [
-                "Adicionaram um pack",
-                `${demand.addRate.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
-                `${demand.added} ${demand.added === 1 ? "perfil" : "perfis"}`,
-              ],
-              [
-                "Checkouts com pack",
-                `${demand.checkoutShare.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`,
+                "Carrinhos com pack",
+                percentage(demand.cartShare),
                 "Pelo menos um pack no carrinho",
+              ],
+              [
+                "Pack mais escolhido",
+                demand.packs[0]?.units ? demand.packs[0].name : "—",
+                `${demand.packs[0]?.units ?? 0} unidades nos carrinhos`,
               ],
               [
                 "Carrinho médio com pack",
@@ -222,6 +241,7 @@ async function Dashboard() {
                   <th>Pack</th>
                   <th>Unidades nos carrinhos</th>
                   <th>Chegaram ao checkout</th>
+                  <th>Taxa de checkout</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,6 +250,7 @@ async function Dashboard() {
                     <td>{pack.name}</td>
                     <td>{pack.units}</td>
                     <td>{pack.checkouts}</td>
+                    <td>{pack.carts ? percentage(pack.checkoutRate) : "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -237,42 +258,19 @@ async function Dashboard() {
           </div>
         </section>
         <section className="dashboard-panel">
-          <h2>O que mudam no pack?</h2>
-          <p>
-            Trocas, remoções e reposições. “A explorar” inclui escolhas antes de
-            guardar; o carrinho conserva a configuração final.
-          </p>
-          {demand.customizations.length ? (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Pack / opção</th>
-                    <th>Antes</th>
-                    <th>Depois</th>
-                    <th>Onde</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {demand.customizations.map((change, index) => (
-                    <tr key={index}>
-                      <td>
-                        {change.pack}
-                        <small>{change.option}</small>
-                      </td>
-                      <td>{change.from}</td>
-                      <td>{change.to}</td>
-                      <td>{change.source}</td>
-                      <td>{change.count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p>As primeiras escolhas aparecem aqui.</p>
-          )}
+          <h2>Extras mais removidos</h2>
+          <p>Unidades retiradas das configurações guardadas.</p>
+          <Bars data={demand.removedExtras} />
+        </section>
+        <section className="dashboard-panel">
+          <h2>Extras mais escolhidos</h2>
+          <p>Unidades mantidas ou escolhidas nos packs guardados.</p>
+          <Bars data={demand.selectedExtras} />
+        </section>
+        <section className="dashboard-panel full-width">
+          <h2>Trocas de marcas e produtos</h2>
+          <p>Escolhas finais diferentes das opções default do pack.</p>
+          <Bars data={demand.swaps} />
         </section>
         <section className="dashboard-panel">
           <h2>Quantos são?</h2>
@@ -300,103 +298,51 @@ async function Dashboard() {
           <p>Unidades nos carrinhos atuais, por categoria. Packs à parte.</p>
           <Bars data={stats.categories} />
         </section>
-        <section className="dashboard-panel">
-          <h2>
-            <MapPin size={20} />
-            Onde faz sentido chegar
-          </h2>
-          <p>Sessões únicas por cidade.</p>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Zona</th>
-                  <th>Procura</th>
-                  <th>Contactos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.locations.map((row) => (
-                  <tr key={row.city}>
-                    <td>{row.city}</td>
-                    <td>{row.demand}</td>
-                    <td>{row.leads}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!stats.locations.length && (
-              <p className="dashboard-empty">
-                As primeiras zonas aparecem aqui.
-              </p>
-            )}
-          </div>
-        </section>
-        <section className="dashboard-panel">
-          <h2>Da curiosidade à primeira Jola</h2>
-          <p>
-            Uma contagem por dispositivo que iniciou um pedido. Inclui entradas
-            diretas no catálogo.
-          </p>
-          <Bars
-            data={[
-              { name: "Pedidos iniciados", value: stats.started },
-              { name: "Chegaram ao checkout", value: stats.checkout },
-              {
-                name: "Pedidos convertidos",
-                value: stats.converted,
-              },
-            ]}
-          />
-          <p>
-            {stats.checkout
-              ? `${stats.checkoutConversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}% dos que chegaram ao checkout deixaram contacto.`
-              : "A conversão aparece quando alguém chega ao checkout."}{" "}
-            Inscrições só por cidade ficam fora deste funil.
-          </p>
-        </section>
         <section className="dashboard-panel full-width">
-          <h2>De onde vêm as boas noites</h2>
+          <h2>Campanhas / Cidades</h2>
           <p>
-            Última campanha guardada em cada pedido. Só conta como conversão
-            quando o contacto tem a mesma campanha, origem e meio. Inscrições só
-            por cidade contam apenas em contactos.
+            Intenção por campanha, conteúdo e cidade. Cada pedido e contacto
+            conta na atribuição que ficou guardada; AOV sem taxas.
           </p>
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>Campanha</th>
-                  <th>Origem / meio</th>
-                  <th>Pedidos</th>
-                  <th>Checkout</th>
+                  <th>utm_campaign</th>
+                  <th>utm_content</th>
+                  <th>Origem</th>
+                  <th>Cidade</th>
+                  <th>Pedidos iniciados</th>
+                  <th>Checkouts</th>
                   <th>Contactos</th>
-                  <th>Pedido → contacto</th>
-                  <th>Volume simulado</th>
+                  <th>AOV</th>
+                  <th>GMV simulado</th>
                 </tr>
               </thead>
               <tbody>
-                {stats.campaigns.map((row) => (
-                  <tr key={JSON.stringify([row.name, row.source, row.medium])}>
-                    <td>{row.name}</td>
-                    <td>
-                      {row.source}
-                      <small>{row.medium}</small>
-                    </td>
-                    <td>{row.orders}</td>
-                    <td>{row.checkout}</td>
-                    <td>{row.leads}</td>
-                    <td>
-                      {row.orders
-                        ? `${row.conversion.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`
-                        : "—"}
-                    </td>
+                {stats.campaignCities.map((row) => (
+                  <tr
+                    key={JSON.stringify([
+                      row.campaign,
+                      row.content,
+                      row.source,
+                      row.city,
+                    ])}
+                  >
+                    <td>{row.campaign}</td>
+                    <td>{row.content}</td>
+                    <td>{row.source}</td>
+                    <td>{row.city}</td>
+                    <td>{row.started}</td>
+                    <td>{row.checkouts}</td>
+                    <td>{row.contacts}</td>
+                    <td>{row.aov ? money(row.aov) : "—"}</td>
                     <td>{money(row.gmv)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {!stats.campaigns.length && (
+            {!stats.campaignCities.length && (
               <p className="dashboard-empty">
                 As campanhas aparecem quando chegam os primeiros pedidos.
               </p>
@@ -482,11 +428,10 @@ async function Dashboard() {
         </section>
       </div>
       <p className="dashboard-footnote">
-        Dados desde o início da validação. Sem testemunhos, vendas ou números
-        inventados. Um identificador por dispositivo, até limpar os dados do
-        navegador; não equivale a pessoas únicas. {stats.visitors} dispositivos
-        passaram pela página inicial. Os valores representam intenção, não
-        receita.
+        Dados desde o início da validação. Cada pedido representa o estado atual
+        de um carrinho por navegador. Valores simulados representam intenção,
+        não receita. Inscrições apenas por cidade contam em contactos, fora do
+        funil de pedidos.
       </p>
     </>
   );

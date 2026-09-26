@@ -6,7 +6,7 @@ import {
   locationSchema,
   orderSchema,
 } from "@/lib/validation";
-import { summarize } from "@/lib/dashboard";
+import { filterDashboardCity, summarize } from "@/lib/dashboard";
 import { products, packs } from "@/lib/products";
 import { getSiteUrl } from "@/lib/site-url";
 import type { Database, SimulatedOrder } from "@/types";
@@ -117,6 +117,111 @@ describe("server input boundaries", () => {
   });
 });
 describe("demand metrics", () => {
+  it("groups campaign content by city and filters the full dashboard cohort", () => {
+    const basket = priceBasket([{ id: "gelo", quantity: 1 }]);
+    const order = (
+      id: string,
+      city: string,
+      checkout: boolean,
+    ): SimulatedOrder => ({
+      id,
+      session_id: id,
+      created_at: "2026-09-21",
+      updated_at: "2026-09-21",
+      city,
+      postcode: "",
+      ...basket,
+      reached_checkout: checkout,
+      converted_to_lead: checkout,
+      utm_campaign: "launch",
+      utm_content: "video_a",
+      utm_source: "instagram",
+    });
+    const faro = order("faro-order", "Faro", true);
+    const faroAlternate = {
+      ...order("faro-other", "Faro", false),
+      utm_content: "video_b",
+    };
+    const lisboa = order("lisboa-order", "Lisboa", false);
+    const db: Database = {
+      simulated_orders: [faro, faroAlternate, lisboa],
+      leads: [
+        {
+          id: "contact",
+          session_id: faro.session_id,
+          created_at: "2026-09-21",
+          email: "faro@example.com",
+          phone: null,
+          city: "Faro",
+          postcode: "",
+          basket_total: faro.total,
+          basket_items: faro.items,
+          consent_at: "2026-09-21",
+          utm_campaign: "launch",
+          utm_content: "video_a",
+          utm_source: "instagram",
+        },
+      ],
+      merchant_interests: [],
+      analytics_events: [
+        {
+          id: "early",
+          session_id: faro.session_id,
+          created_at: "2026-09-20",
+          name: "product_viewed",
+          properties: { product: "gelo" },
+        },
+      ],
+    };
+    expect(summarize(db).campaignCities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          city: "Faro",
+          campaign: "launch",
+          content: "video_a",
+          started: 1,
+          checkouts: 1,
+          contacts: 1,
+          aov: 99,
+          gmv: faro.total,
+        }),
+        expect.objectContaining({
+          city: "Faro",
+          campaign: "launch",
+          content: "video_b",
+          started: 1,
+          checkouts: 0,
+          contacts: 0,
+        }),
+        expect.objectContaining({
+          city: "Lisboa",
+          campaign: "launch",
+          content: "video_a",
+          started: 1,
+          checkouts: 0,
+          contacts: 0,
+          aov: 99,
+          gmv: lisboa.total,
+        }),
+      ]),
+    );
+    expect(summarize(db).campaignCities).toHaveLength(3);
+    const filtered = filterDashboardCity(db, "Faro");
+    expect(filtered.simulated_orders).toHaveLength(2);
+    expect(filtered.analytics_events).toHaveLength(1);
+    expect(summarize(filtered)).toMatchObject({
+      started: 2,
+      checkout: 1,
+      leads: 1,
+      orderToCheckout: 50,
+      checkoutConversion: 100,
+    });
+    expect(summarize(filterDashboardCity(db, "Lisboa"))).toMatchObject({
+      started: 1,
+      checkout: 0,
+      leads: 0,
+    });
+  });
   it("deduplicates visitor sessions and geographic demand; city waitlists do not inflate order conversion", () => {
     const priced = priceBasket(items);
     const order: SimulatedOrder = {
