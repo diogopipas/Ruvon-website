@@ -2,6 +2,8 @@
 
 The single entry point is `track(name, properties)` in `lib/analytics.ts`. It posts to `/api/events` and dispatches a `jola:analytics` DOM event for a future provider adapter. Development builds also log structured events. No email, phone, name or street is included in event properties.
 
+Vercel Web Analytics separately measures page views through the `Analytics` component in the root layout. Jola's custom events below remain in its own storage; they are not forwarded to Vercel.
+
 | Event                | Trigger                                                          | Main properties                                                 |
 | -------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
 | `landing_view`       | First landing-page mount in a tab journey                        | UTM attribution                                                 |

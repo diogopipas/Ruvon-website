@@ -31,7 +31,7 @@ Local records persist in `.data/jola.json`, which is excluded from Git. A succes
 - Initial age confirmation, saved locally; negative response blocks the catalogue.
 - `/admin`: signed, HTTP-only password session; visitors, CTA clicks, started orders, checkout attempts, leads, simulated GMV, average basket, conversion, product/category selections, geography, campaigns and merchant interests.
 - Server validation, canonical prices, atomic/retry-safe lead capture, idempotent merchant submissions, bounded network requests, origin checks, request-size limits, honeypot and basic rate limiting.
-- Local fonts, optimized WebP, branded OpenGraph image, sitemap, metadata, accessible dialogs, focus treatment and reduced-motion support.
+- Local fonts, optimized WebP, branded OpenGraph image, sitemap, metadata, Vercel Web Analytics page views, accessible dialogs, focus treatment and reduced-motion support.
 
 All product-facing copy is European Portuguese. Prices, ETA and products are clearly marked as previews. The chat example is explicitly fictional. There are no invented testimonials, operational claims or analytics numbers.
 
@@ -129,7 +129,7 @@ The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and
 - Funnel dropoff uses started orders → checkout → converted orders. City-only waitlist leads are shown separately from this denominator. Each browser has one durable record, not a record per visit or unique person.
 - Landing/product impression events are deduplicated per tab session, including reloads. Product impressions wait for age confirmation. Real add/remove clicks remain individual events.
 - Server storage requests have an 8-second deadline; browser submissions have a 12-second deadline. Cart writes coalesce to the latest state, avoiding a backlog during outages. Failed submissions preserve the form and offer retry.
-- Analytics delivery is best effort. Contact and order saves report errors and can be retried; analytics loss does not prevent using the product. There is no advertising pixel configured.
+- Analytics delivery is best effort. Contact and order saves report errors and can be retried; analytics loss does not prevent using the product. Vercel Web Analytics measures page views separately from Jola's custom events. There is no advertising pixel configured.
 - Request limits are in-process and suitable for an MVP; use a shared rate limiter or Vercel firewall rules when traffic scales. The dashboard pages through all stored rows and aggregates on the server; use SQL aggregation when volume justifies it.
 - Local disk storage is intended for one local server process. Use Supabase for multi-instance deployments.
 

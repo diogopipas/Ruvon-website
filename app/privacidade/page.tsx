@@ -58,8 +58,10 @@ export default function Privacy() {
         <p>
           Registamos visitas, cliques, produtos escolhidos e os passos do pedido
           para perceber a procura. Os eventos usam um identificador aleatório e
-          não incluem o teu email ou telefone. Não está instalado nenhum pixel
-          de publicidade ou fornecedor externo de analytics.
+          não incluem o teu email ou telefone. A Vercel Web Analytics também
+          mede visitas e páginas vistas de forma agregada, sem cookies de
+          rastreamento. Não lhe enviamos dados de contacto nem usamos pixels de
+          publicidade.
         </p>
         <h2>Armazenamento e acesso</h2>
         <p>
