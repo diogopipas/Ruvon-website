@@ -223,6 +223,9 @@
   gap: 13px;
 }
 .category-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   background: var(--surface);
   border-radius: 9px;
   overflow: hidden;
