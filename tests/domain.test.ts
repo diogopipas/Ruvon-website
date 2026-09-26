@@ -37,8 +37,8 @@ describe("prices and catalog", () => {
   });
   it("prices a bundle as one catalog item", () => {
     expect(priceBasket([{ id: "pack-classica", quantity: 2 }])).toMatchObject({
-      subtotal: 9330,
-      total: 9718,
+      subtotal: 10490,
+      total: 10878,
       item_count: 2,
     });
   });
@@ -57,15 +57,14 @@ describe("prices and catalog", () => {
   });
 });
 describe("server input boundaries", () => {
-  it.each(["1000001", "1000 001", "1000-001", " 1000 - 001 "])(
-    "normalizes Portuguese postcode %s",
-    (postcode) => {
-      expect(locationSchema.parse({ city: " Lisboa ", postcode })).toEqual({
-        city: "Lisboa",
-        postcode: "1000-001",
-      });
-    },
-  );
+  it("accepts a city alone and removes legacy postcodes", () => {
+    expect(locationSchema.parse({ city: " Lisboa " })).toEqual({
+      city: "Lisboa",
+    });
+    expect(
+      locationSchema.parse({ city: "Lisboa", postcode: "1000-001" }),
+    ).toEqual({ city: "Lisboa" });
+  });
   it.each([
     "teste@example.com",
     "912 345 678",
@@ -79,12 +78,12 @@ describe("server input boundaries", () => {
     "rejects invalid contact %s",
     (contact) => expect(contactSchema.safeParse(contact).success).toBe(false),
   );
-  it("requires consent and a Portuguese postcode", () => {
+  it("requires consent and a valid city", () => {
     const input = {
       session_id: session,
       items,
       contact: "teste@example.com",
-      location: { city: "Lisboa", postcode: "1000-001" },
+      location: { city: "Lisboa" },
       consent: true,
     };
     expect(leadSchema.safeParse(input).success).toBe(true);
@@ -94,7 +93,7 @@ describe("server input boundaries", () => {
     expect(
       leadSchema.safeParse({
         ...input,
-        location: { city: "Lisboa", postcode: "1000" },
+        location: { city: "" },
       }).success,
     ).toBe(false);
     expect(leadSchema.safeParse({ ...input, website: "spam" }).success).toBe(

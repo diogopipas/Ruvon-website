@@ -195,7 +195,7 @@ export default function Home() {
             <p>
               As primeiras entregas vão ser em Faro.
               <br />
-              Diz-nos onde fazes a festa e fica com 5 € para a primeira Jola.
+              Diz-nos onde fazes a festa e avisamos-te quando chegarmos.
             </p>
             <CityPicker />
           </div>
@@ -217,11 +217,11 @@ export default function Home() {
                 ],
                 [
                   "Onde vai chegar a Jola?",
-                  "Vamos começar em Faro e crescer zona a zona. Deixa o teu código postal: avisamos-te quando chegarmos à tua zona.",
+                  "Vamos começar em Faro e crescer zona a zona. Escolhe a tua cidade: avisamos-te quando chegarmos à tua zona.",
                 ],
                 [
-                  "Como funciona a oferta de 5 €?",
-                  "Ao deixares o teu contacto, ficas na lista para receber 5 € de desconto na primeira Jola, quando lançarmos na tua zona. As condições finais serão comunicadas antes de utilizares a oferta. Não é necessário pagar nada agora.",
+                  "O que acontece depois de me inscrever?",
+                  "Guardamos o teu contacto para avisar quando a Jola chegar à tua zona. Não estás a fazer uma encomenda e não há pagamento nesta fase.",
                 ],
                 [
                   "É preciso ter mais de 18 anos?",

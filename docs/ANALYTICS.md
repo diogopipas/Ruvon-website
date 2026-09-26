@@ -12,11 +12,10 @@ The single entry point is `track(name, properties)` in `lib/analytics.ts`. It po
 | `product_removed`    | Decrement/remove                                                 | `product`, `category`, `quantity`, `basket_value`, `item_count` |
 | `cart_opened`        | Open drawer/cart control                                         | `basket_value`, `item_count`                                    |
 | `checkout_started`   | Continue from basket                                             | `basket_value`, `item_count`                                    |
-| `location_entered`   | Valid city/postcode saved                                        | `city`, `postcode`, basket properties in checkout               |
-| `waitlist_submitted` | Lead successfully persisted                                      | `city`, `postcode`, `basket_value`, `item_count`                |
-| `share_clicked`      | Optional share CTA clicked                                       | `source`                                                        |
+| `location_entered`   | Valid city saved                                                 | `city`, basket properties in checkout                           |
+| `waitlist_submitted` | Lead successfully persisted                                      | `city`, `basket_value`, `item_count`                            |
 
-Every event has a UUID, server timestamp and anonymous `session_id`. `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content` are attached when available. A share click measures intent; it does not claim a message was sent.
+Every event has a UUID, server timestamp and anonymous `session_id`. `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content` are attached when available.
 
 The anonymous `session_id` is a browser-profile identifier persisted in local storage, not a new visit or a known person. `trackOnce` deduplicates lifecycle events and product impressions within a tab, including reloads, using session storage with an in-memory fallback. Each product has its own impression key. Repeated intentional add/remove/category/cart actions remain separate events. Delivery is best effort; this is not an exactly-once analytics pipeline.
 

@@ -181,8 +181,6 @@ export function CartContents({
         </div>
       </div>
       <div className="delivery-estimate">
-        <Clock3 size={15} />
-        <span>Entrega estimada: 22–32 min*</span>
       </div>
       <div className="cart-actions">
         {!review && (
@@ -195,9 +193,6 @@ export function CartContents({
             {busy ? "A guardar o carrinho…" : "Continuar para a minha zona"}
           </button>
         )}
-        <p className="cart-disclaimer">
-          O teu carrinho ajuda-nos a preparar o lançamento.
-        </p>
         {storageError && (
           <p role="status" className="form-error">
             Ligação instável. O carrinho está guardado neste dispositivo.{" "}

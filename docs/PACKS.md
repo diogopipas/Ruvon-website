@@ -5,8 +5,8 @@ The displayed price is the sum of the default products, including extras. Prices
 | Pack         | Fixed core                                  | Default extras                                         |  Price |
 | ------------ | ------------------------------------------- | ------------------------------------------------------ | -----: |
 | Só Mais Uma  | 12 Super Bock minis, 20 cl                  | Ice, Doritos, 6 waters, 10 cups                        | €14.70 |
-| A Clássica   | 24 Super Bock minis, 20 cl; Eristoff, 70 cl | 2 Coca-Cola, ice, Doritos, Pringles, 6 waters, 20 cups | €46.65 |
-| O Pré        | Eristoff, 70 cl; 4 Red Bull, 25 cl          | 2 Coca-Cola, ice, Doritos, 6 waters, 20 cups           | €35.03 |
+| A Clássica   | 24 Super Bock minis, 20 cl; Absolut, 70 cl  | 2 Coca-Cola, ice, Doritos, Pringles, 6 waters, 20 cups | €52.45 |
+| O Pré        | Absolut, 70 cl; 4 Red Bull, 25 cl           | 2 Coca-Cola, ice, Doritos, 6 waters, 20 cups           | €40.83 |
 | Só Somersby  | 16 Somersby, 33 cl                          | Ice, Doritos, Pringles, 6 waters, 20 cups              | €31.15 |
 | Gin & Chill  | Gordon’s, 70 cl; 3 Schweppes Tónica, 1 L    | 4 limes, ice, Doritos, 6 waters, 20 cups               | €33.22 |
 | Sem Ressacas | 12 Super Bock 0.0, 33 cl; 4 Red Bull, 25 cl | 2 Coca-Cola, ice, Doritos, Pringles, 6 waters, 20 cups | €34.31 |
@@ -14,6 +14,8 @@ The displayed price is the sum of the default products, including extras. Prices
 | Product or extra                        |                  Price |
 | --------------------------------------- | ---------------------: |
 | 6 / 12 / 24 Super Bock minis, 20 cl     | €3.75 / €7.50 / €14.99 |
+| Absolut Vodka, 70 cl                    |                 €21.49 |
+| Smirnoff Vodka, 70 cl (pack option)     |                 €15.79 |
 | Eristoff Vodka, 70 cl                   |                 €15.69 |
 | Gordon’s Gin, 70 cl                     |                 €17.49 |
 | 4 / 8 / 16 Somersby, 33 cl              | €4.99 / €9.98 / €19.96 |
@@ -26,10 +28,10 @@ The displayed price is the sum of the default products, including extras. Prices
 | 10 / 20 paper cups                      |          €1.00 / €2.00 |
 | 4 limes                                 |    €1.08 (approximate) |
 
-Core quantities remain fixed. Super Bock/Sagres (including alcohol-free) swaps cost the same. Eristoff → Smirnoff and Gordon’s → Beefeater add €2 per pack; alternative brand prices were not supplied. Tonic and Red Bull belong to the fixed core where listed. Default extras can be swapped or removed independently. Where a pack contains Doritos and Pringles, they are separate controls. Coca-Cola → Zero changes the pack by −€0.40 per bottle; Coca-Cola → 7Up by −€0.30. Doritos → Pringles changes it by −€0.30.
+Core quantities remain fixed. Super Bock/Sagres (including alcohol-free) swaps cost the same. Absolut is the default vodka: Eristoff reduces the pack by €5.80, while Smirnoff reduces it by €5.70. Gordon’s → Beefeater adds €2 per pack; its alternative brand price was not supplied. Tonic and Red Bull belong to the fixed core where listed. Default extras can be swapped or removed independently. Where a pack contains Doritos and Pringles, they are separate controls. In A Clássica and O Pré, Refrigerante 1 and Refrigerante 2 can each be changed or removed; previously saved single-mixer selections apply to both on load. Coca-Cola → Zero changes the pack by −€0.40 per bottle; Coca-Cola → 7Up by −€0.30. Doritos → Pringles changes it by −€0.30.
 
 `configurePack` adds the differences between selected and default component values. API validation rejects unsupported options, invented values and core removal. Client-supplied prices are ignored. A pack remains one basket line with one configuration per pack ID; increasing quantity duplicates that configuration.
 
 Order and lead snapshots include selected options, configured unit price, full contents, separate core and extra contents and removed-extra keys. Checkout identity includes every option. Every option change records a swap, removal or restoration event with before and after prices. Product and checkout events include the final configuration.
 
-Generated pack scenes are illustrative and do not update with customization. The textual configuration is authoritative. New standalone sizes without matching product photography use the existing illustrated fallback until accurate photos are available.
+Generated pack scenes are illustrative and do not update with customization. The textual configuration is authoritative. Standalone products use locally hosted photographs; combined formats show repeated photos of the smaller retail pack where no exact-format packshot is available. See [product photo sources](PRODUCT-PHOTOS.md).

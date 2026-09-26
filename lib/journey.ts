@@ -40,14 +40,5 @@ export function checkoutKey(
 }
 
 export function locationKey(location: Location | null) {
-  return location
-    ? `${location.city.trim().toLocaleLowerCase("pt")}:${location.postcode}`
-    : "";
-}
-
-export function formatPostcode(value: string) {
-  const digits = value.replace(/[^0-9]/g, "").slice(0, 7);
-  return digits.length > 4
-    ? `${digits.slice(0, 4)}-${digits.slice(4)}`
-    : digits;
+  return location ? location.city.trim().toLocaleLowerCase("pt") : "";
 }

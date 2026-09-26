@@ -27,7 +27,7 @@ Local records persist in `.data/jola.json`, which is excluded from Git. A succes
 
 - Mobile-first branded homepage with a photographic hero, four primary packs, product categories, how it works, launch cities, merchant form and FAQ.
 - `/pedir`: six validation packs and 32 individual products, sticky search/categories, filters in the URL, accent-insensitive search, selected-item states, 44 px quantity controls, sticky desktop cart and floating mobile cart.
-- `/checkout`: basket review → city/postcode → transparent early-access invitation → email or Portuguese phone → persisted confirmation and optional native sharing. Progress belongs to the basket/zone; contact drafts stay in tab-scoped session storage.
+- `/checkout`: basket review → city selection → transparent early-access invitation → email or Portuguese phone → persisted confirmation and optional native sharing. Progress belongs to the basket/city; contact drafts stay in tab-scoped session storage.
 - Initial age confirmation, saved locally; negative response blocks the catalogue.
 - `/admin`: signed, HTTP-only password session; visitors, CTA clicks, started orders, checkout attempts, leads, simulated GMV, average basket, conversion, product/category selections, geography, campaigns and merchant interests.
 - Server validation, canonical prices, atomic/retry-safe lead capture, idempotent merchant submissions, bounded network requests, origin checks, request-size limits, honeypot and basic rate limiting.
@@ -38,7 +38,7 @@ All product-facing copy is European Portuguese. Prices, ETA and products are cle
 ## Supabase setup
 
 1. Create a Supabase project.
-2. Apply the SQL migrations in filename order: [001_jola.sql](supabase/migrations/001_jola.sql), then [002_preserve_lead_basket.sql](supabase/migrations/002_preserve_lead_basket.sql). Existing installations only need 002. It preserves the previous basket when a browser later submits city-only interest.
+2. Apply the SQL migrations in filename order: [001_jola.sql](supabase/migrations/001_jola.sql), [002_preserve_lead_basket.sql](supabase/migrations/002_preserve_lead_basket.sql), then [003_city_only.sql](supabase/migrations/003_city_only.sql). Existing installations need any migrations they have not yet applied. Migration 003 allows signups with only a city; apply it before deploying this version.
 3. Set the server-side variables:
 
 ```dotenv
@@ -71,7 +71,7 @@ The full local flow and PostgreSQL migrations are tested without touching produc
 
 Before inviting public traffic, set `JOLA_OPERATOR_NAME` to the real person or company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` to an inbox you control, then rebuild. A brand name alone is not the operator identity. If the project is operated personally, use your actual legal name; do not invent a company or mailbox. See [launch requirements](docs/LAUNCH.md).
 
-The privacy page contains a proposed 12-month prelaunch retention policy, configurable through `JOLA_RETENTION_MONTHS` (1–24). Set up a recurring deletion/anonymisation process before collecting public contacts; this MVP does not automatically purge records. Confirm your hosting/database region, processing terms and final promotional terms. The €5 launch incentive is explicitly planned, with conditions still to be confirmed.
+The privacy page contains a proposed 12-month prelaunch retention policy, configurable through `JOLA_RETENTION_MONTHS` (1–24). Set up a recurring deletion/anonymisation process before collecting public contacts; this MVP does not automatically purge records. Confirm your hosting/database region and processing terms.
 
 The application is prepared for Vercel; no public deployment was made as part of this implementation.
 
@@ -123,7 +123,7 @@ The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and
 - GMV sums current nonempty order totals, including fees. Average basket excludes fees and empty baskets.
 - Order-to-lead conversion uses converted order sessions / started order sessions. City-only waitlist leads count in the lead total but do not inflate order conversion.
 - Product/category charts sum units in current saved baskets, including removals. Packs count as packs; they do not inflate individual-product selections.
-- Geography combines orders and leads and deduplicates by session within each city/postcode.
+- Geography combines orders and leads and deduplicates by session within each city.
 - Campaigns use the latest explicitly tagged visit, persisted until replaced by another tagged visit. Untagged navigation preserves attribution. Source, medium, campaign and content are stored.
 - Campaign conversion requires a converted order and its saved lead to share campaign/source/medium. A later tagged visit cannot inherit an earlier campaign's conversion. This is current-state demand reporting, not historical multi-touch attribution.
 - Funnel dropoff uses started orders → checkout → converted orders. City-only waitlist leads are shown separately from this denominator. Each browser has one durable record, not a record per visit or unique person.
@@ -137,12 +137,12 @@ More detail: [analytics events](docs/ANALYTICS.md), [QA](docs/QA.md), [design an
 
 ## Six-pack validation catalogue
 
-`/pedir` opens on Packs. Four primary packs lead: Só Mais Uma (€14.70, 12 minis), A Clássica (€46.65, 24 minis + vodka), O Pré (€35.03, vodka + 4 Red Bull), and Só Somersby (€31.15, 16 ciders). Gin & Chill (€33.22, gin + tonic) and Sem Ressacas (€34.31, 12 alcohol-free beers + 4 Red Bull) sit in a supporting section. The homepage features the four primary packs. Group-size filtering stays optional; individual products remain available.
+`/pedir` opens on Packs. Four primary packs lead: Só Mais Uma (€14.70, 12 minis), A Clássica (€52.45, 24 minis + Absolut vodka), O Pré (€40.83, Absolut vodka + 4 Red Bull), and Só Somersby (€31.15, 16 ciders). Gin & Chill (€33.22, gin + tonic) and Sem Ressacas (€34.31, 12 alcohol-free beers + 4 Red Bull) sit in a supporting section. The homepage features the four primary packs. Group-size filtering stays optional; individual products remain available.
 
 Pack configuration lives in `lib/products.ts` and reusable components in `lib/pack-components.ts`. Listed prices include default extras. Fixed drink quantities cannot be removed. Brand choices, mixer/snack swaps and extra removals update the price immediately; the server independently validates and calculates it. A pack stays one basket line, with one configuration per pack ID; quantity changes apply to that configuration. Chosen brands, core/extra contents and removals persist in the existing order/lead JSON fields. No new SQL migration is needed. See [pack pricing and configuration](docs/PACKS.md) for all provisional upgrade/removal amounts.
 
 The dashboard separates pack views, additions, checkout share, current pack demand, basket values, group sizes and add-on actions. Definitions are in [the analytics contract](docs/ANALYTICS.md).
 
-Six local pack compositions and 17 transparent product packshots were generated as illustrative prelaunch assets, not sourced from manufacturers. The remaining 15 catalog products now use locally hosted product photography; see [photograph sources](docs/PRODUCT-PHOTOS.md). The SVG fallback is retained for future unmapped products. See [art direction](docs/ART-DIRECTION.md) and [asset provenance/prompts](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).
+The six pack scenes remain illustrative prelaunch assets. Catalog products use local packshots or sourced product photography; the new Mini, Somersby, 0.0, Red Bull, Eristoff, Luso and cup formats now show photographed products. Combined quantities repeat photographed smaller packs. See [photograph sources](docs/PRODUCT-PHOTOS.md), [art direction](docs/ART-DIRECTION.md) and [asset provenance](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).
 
-The launch city is Faro. Catalog and checkout use a city selector, with Faro first and other cities available for registering interest; the postcode stays editable.
+The launch city is Faro. Catalog and checkout use a city selector, with Faro first and other cities available for registering interest. No postcode is requested.

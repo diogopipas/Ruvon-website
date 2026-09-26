@@ -59,7 +59,7 @@ function makeOrder(input: OrderInput): SimulatedOrder {
     created_at: now,
     updated_at: now,
     city: input.location?.city ?? "",
-    postcode: input.location?.postcode ?? "",
+    postcode: "",
     items: priced.items,
     subtotal: priced.subtotal,
     delivery_fee: priced.delivery_fee,
@@ -109,7 +109,7 @@ export async function saveLead(input: LeadInput) {
       ? null
       : input.contact.replace(/[\s()-]/g, ""),
     city: input.location.city,
-    postcode: input.location.postcode,
+    postcode: "",
     basket_total: order.total,
     basket_items: order.items,
     consent_at: now,

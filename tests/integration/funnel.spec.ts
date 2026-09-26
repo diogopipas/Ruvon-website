@@ -18,6 +18,7 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
         beer: "sagres",
         vodka: "smirnoff",
         mixer: "seven-up",
+        mixer2: "coca-cola-zero",
         snack: "pringles",
         ice: "none",
         water: "none",
@@ -31,7 +32,7 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     session_id,
     items,
     reached_checkout: true,
-    location: { city: "Lisboa", postcode: "1000001" },
+    location: { city: "Lisboa" },
     attribution: { utm_campaign: "packs-validation" },
   };
   expect((await request.post("/api/orders", { headers, data })).status()).toBe(
@@ -56,19 +57,20 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     (row) => row.session_id === session_id,
   )!;
   expect(order).toMatchObject({
-    subtotal: 4383,
-    total: 4771,
+    subtotal: 4183,
+    total: 4571,
     converted_to_lead: true,
   });
-  expect(lead.basket_total).toBe(4771);
+  expect(lead.basket_total).toBe(4571);
   expect(lead.basket_items).toEqual(order.items);
   expect(lead.basket_items[0]).toMatchObject({
     product_type: "pack",
-    price: 4284,
+    price: 4084,
     options: {
       beer: "sagres",
       vodka: "smirnoff",
       mixer: "seven-up",
+      mixer2: "coca-cola-zero",
       snack: "pringles",
       ice: "none",
       water: "none",
@@ -77,7 +79,8 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
   });
   expect(lead.basket_items[0].contents).toContain("24 × Sagres Mini 20 cl");
   expect(lead.basket_items[0].contents).toContain("1 × Smirnoff Vodka 70 cl");
-  expect(lead.basket_items[0].contents).toContain("2 × 7Up 1,75 L");
+  expect(lead.basket_items[0].contents).toContain("1 × 7Up 1,75 L");
+  expect(lead.basket_items[0].contents).toContain("1 × Coca-Cola Zero 1,75 L");
   expect(lead.basket_items[0].removed_extras).toEqual(["ice", "water", "cups"]);
   expect(
     lead.basket_items[0].extra_contents?.some((line) =>
@@ -92,7 +95,7 @@ test("pack substitutions survive order, lead, analytics and retry with canonical
     product_type: "pack",
     pack_id: "pack-classica",
     pack_name: "A Clássica",
-    pack_price: 42.84,
+    pack_price: 40.84,
     people_min: 5,
     people_max: 7,
     selected_options: items[0].options,
@@ -166,7 +169,7 @@ test("complete demand funnel persists canonical basket, location, attribution an
   expect(saved.subtotal).toBe(1316);
   expect(saved.total).toBe(1704);
   expect(saved.converted_to_lead).toBe(false);
-  const location = { city: "Lisboa", postcode: "1000-001" };
+  const location = { city: "Lisboa" };
   expect(
     (
       await request.post("/api/orders", {
@@ -209,7 +212,7 @@ test("complete demand funnel persists canonical basket, location, attribution an
     converted_to_lead: true,
     reached_checkout: true,
     city: "Lisboa",
-    postcode: "1000-001",
+    postcode: "",
     utm_content: "video-2347",
   });
   expect(db.leads.filter((l) => l.session_id === session_id)).toHaveLength(1);
@@ -218,7 +221,7 @@ test("complete demand funnel persists canonical basket, location, attribution an
     utm_source: "instagram",
     utm_campaign: attribution.utm_campaign,
     city: "Lisboa",
-    postcode: "1000-001",
+    postcode: "",
   });
   const anonymous = await request.get("/admin");
   expect(await anonymous.text()).not.toContain(data.contact);
@@ -253,7 +256,7 @@ test("rejects invalid, forged, oversized and cross-origin submissions", async ({
   const input = {
     session_id: randomUUID(),
     items: [{ id: "gelo", quantity: 1 }],
-    location: { city: "Porto", postcode: "4000-001" },
+    location: { city: "Porto" },
     contact: "invalid",
     consent: true,
   };
@@ -313,7 +316,7 @@ test("city-only waitlist and merchant interests remain separate from orders", as
     data: {
       session_id,
       items: [],
-      location: { city: "Braga", postcode: "4700-001" },
+      location: { city: "Braga" },
       contact: "+351 912 345 678",
       consent: true,
     },

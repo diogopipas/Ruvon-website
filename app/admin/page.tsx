@@ -305,7 +305,7 @@ async function Dashboard() {
             <MapPin size={20} />
             Onde faz sentido chegar
           </h2>
-          <p>Sessões únicas por cidade e código postal.</p>
+          <p>Sessões únicas por cidade.</p>
           <div className="table-scroll">
             <table>
               <thead>
@@ -317,11 +317,8 @@ async function Dashboard() {
               </thead>
               <tbody>
                 {stats.locations.map((row) => (
-                  <tr key={`${row.city}${row.postcode}`}>
-                    <td>
-                      {row.city}
-                      <small>{row.postcode}</small>
-                    </td>
+                  <tr key={row.city}>
+                    <td>{row.city}</td>
                     <td>{row.demand}</td>
                     <td>{row.leads}</td>
                   </tr>
@@ -427,10 +424,7 @@ async function Dashboard() {
                   .map((lead) => (
                     <tr key={lead.id}>
                       <td>{lead.email || lead.phone}</td>
-                      <td>
-                        {lead.city}
-                        <small>{lead.postcode}</small>
-                      </td>
+                      <td>{lead.city}</td>
                       <td>{money(lead.basket_total)}</td>
                       <td>
                         {lead.utm_campaign || "Direto"}

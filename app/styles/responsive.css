@@ -996,7 +996,7 @@
     min-height: 51px;
   }
   .checkout-form .button {
-    font-size: 13px;
+    font-size: 15px;
     min-height: 52px;
   }
   .checkout-form .form-footnote {
@@ -1041,44 +1041,21 @@
   }
   .checkout-success-layout {
     display: block;
-    padding-top: 22px;
+    padding-top: 18px;
   }
   .success-content {
-    padding: 20px 0 12px;
+    padding: 50px 0 58px;
   }
-  .success-cheers {
-    font-size: 80px;
+  .success-mark {
+    width: 66px;
+    height: 66px;
+    margin-bottom: 22px;
   }
   .success-content h1 {
-    font-size: 74px;
+    font-size: clamp(49px, 12vw, 66px);
   }
   .success-content > p {
-    font-size: 13px;
-  }
-  .offer-ticket {
-    padding: 21px 24px;
-    gap: 8px;
-    margin: 29px auto;
-  }
-  .offer-ticket small {
-    font-size: 13px;
-  }
-  .offer-ticket strong {
-    font-size: 47px;
-  }
-  .offer-ticket strong > span {
-    font-size: 13px;
-  }
-  .offer-ticket p {
-    font-size: 13px;
-  }
-  .ticket-wordmark {
-    font-size: 29px;
-    padding-top: 10px;
-  }
-  .success-content > .button {
-    font-size: 13px;
-    min-width: 230px;
+    font-size: 14px;
   }
   .waitlist-aside {
     padding: 10px;

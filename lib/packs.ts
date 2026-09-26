@@ -30,7 +30,11 @@ export function packOptions(
   return Object.fromEntries(
     components.map((part) => {
       const key = part.key!;
-      const value = supplied[key] ?? part.choices[0].value;
+      // A saved choice from before the split still applies to both bottles.
+      const value =
+        supplied[key] ??
+        (key === "mixer2" ? supplied.mixer : undefined) ??
+        part.choices[0].value;
       const removable = pack.extras.some((extra) => extra.key === key);
       if (
         !componentChoices(part, removable).some(

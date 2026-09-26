@@ -81,6 +81,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (savedLocation.success) {
       locationRef.current = savedLocation.data;
       setDelivery(savedLocation.data);
+      writeLocal("jola_location", savedLocation.data);
     }
     checkoutReached.current =
       readLocal<boolean>("jola_checkout_started", false) === true;

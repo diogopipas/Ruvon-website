@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createLatestWriter, postJson } from "@/lib/client-request";
-import { checkoutKey, formatPostcode, locationKey } from "@/lib/journey";
+import { checkoutKey, locationKey } from "@/lib/journey";
 
 function browserStorage() {
   const data = new Map<string, string>();
@@ -136,18 +136,12 @@ describe("checkout journey boundaries", () => {
     expect(checkoutKey([], true, "Lisboa")).not.toBe(
       checkoutKey([], true, "Porto"),
     );
-    expect(locationKey({ city: " Lisboa ", postcode: "1000-001" })).toBe(
-      locationKey({ city: "lisboa", postcode: "1000-001" }),
+    expect(locationKey({ city: " Lisboa " })).toBe(
+      locationKey({ city: "lisboa" }),
     );
-    expect(locationKey({ city: "Lisboa", postcode: "1000-001" })).not.toBe(
-      locationKey({ city: "Lisboa", postcode: "1000-002" }),
+    expect(locationKey({ city: "Lisboa" })).not.toBe(
+      locationKey({ city: "Porto" }),
     );
-  });
-
-  it("formats seven-digit postcodes from mobile keyboards and pasted input", () => {
-    expect(formatPostcode("1000001")).toBe("1000-001");
-    expect(formatPostcode("1000-001")).toBe("1000-001");
-    expect(formatPostcode("1000")).toBe("1000");
   });
 });
 

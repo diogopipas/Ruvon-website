@@ -36,14 +36,11 @@ export default function Terms() {
           presença não implica uma parceria com as marcas ou disponibilidade
           futura.
         </p>
-        <h2>A oferta da primeira Jola</h2>
+        <h2>Avisos de lançamento</h2>
         <p>
-          A inscrição permite receber novidades e uma oferta prevista de 5 € na
-          primeira Jola, quando o serviço lançar na tua zona. O lançamento, a
-          cobertura e a data ainda não estão definidos. As condições finais,
-          incluindo validade e eventual valor mínimo do pedido, serão
-          comunicadas antes da utilização da oferta. Não há qualquer pagamento
-          nesta fase.
+          Ao inscreveres-te, pedes para receber um aviso quando a Jola chegar à
+          tua zona. A cobertura e a data de lançamento ainda não estão
+          definidas. A inscrição não é uma encomenda e não implica pagamento.
         </p>
         <h2>Interesse de lojas</h2>
         <p>

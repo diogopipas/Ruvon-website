@@ -10,11 +10,11 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 4. Click “Pedir uma Jola”. Add one each: Super Bock Original 6 × 33 cl, Saco de gelo 2 kg, Coca-Cola Original 1,75 L, Doritos Tex-Mex 225 g.
 5. Verify the floating cart shows four articles. Open it.
 6. Confirm subtotal **14,46 €**, delivery **2,99 €**, Jola fee **0,89 €**, total **18,34 €**. Increment/decrement and check the total changes.
-7. Choose “Continuar para a minha zona”, enter **Lisboa / 1000-001**, and continue to early access.
-8. Confirm the zone-by-zone launch message and planned 5 € incentive. Refresh; the location, basket and contact step must survive.
+7. Choose “Continuar para a minha zona”, select **Lisboa**, and continue to the launch-notification form. No postcode field should appear.
+8. Confirm the zone-by-zone launch message and the “Quero saber quando chegar” CTA. Refresh; the location, basket and contact step must survive.
 9. Enter a synthetic email or valid-format Portuguese phone, check consent, submit.
-10. Confirm “Estás dentro.” and the 5 € ticket. Refresh: success persists. Sharing opens native share where available or copies the URL; do not send a test message to anyone.
-11. Open `/admin`, authenticate with the configured password, verify the lead, basket, postcode, conversion, products and `qa_mobile` campaign.
+10. Confirm “Vais saber quando chegar.” and the selected zone. Refresh: success persists. “Voltar ao início” returns to the homepage.
+11. Open `/admin`, authenticate with the configured password, verify the lead, basket, city, conversion, products and `qa_mobile` campaign.
 12. Confirm records in Supabase, or `.data/jola.json` when explicitly running locally. Retrying the same lead must not create duplicates.
 
 ## Other flows
@@ -26,7 +26,7 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 - [ ] Direct empty `/checkout` offers a route back to the catalogue.
 - [ ] Each city button preselects its city; “Outra” permits an arbitrary city. A city-only signup does not create a fake order.
 - [ ] Merchant navbar and section CTA open the same form. Validated submissions appear separately in the admin dashboard.
-- [ ] Invalid contacts, postcodes, missing consent and honeypot values are rejected.
+- [ ] Invalid contacts, missing cities, missing consent and honeypot values are rejected.
 - [ ] A failed submission stays on the form, preserves the basket and permits retry; never show success on a non-200 response.
 - [ ] Keyboard focus is visible. Dialog Escape/close/backdrop behavior works; the age gate cannot be dismissed accidentally.
 - [ ] Reduced-motion preference disables nonessential animations.

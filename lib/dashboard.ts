@@ -41,17 +41,15 @@ export function summarize(db: Database) {
     string,
     {
       city: string;
-      postcode: string;
       sessions: Set<string>;
       leads: Set<string>;
     }
   >();
   for (const entry of [...orders, ...db.leads]) {
     if (!entry.city) continue;
-    const key = `${entry.city.toLocaleLowerCase("pt")}|${entry.postcode}`;
+    const key = entry.city.trim().toLocaleLowerCase("pt");
     const value = locations.get(key) || {
       city: entry.city,
-      postcode: entry.postcode,
       sessions: new Set<string>(),
       leads: new Set<string>(),
     };
@@ -132,7 +130,6 @@ export function summarize(db: Database) {
       .slice(0, 10)
       .map((row) => ({
         city: row.city,
-        postcode: row.postcode,
         demand: row.sessions.size,
         leads: row.leads.size,
       })),

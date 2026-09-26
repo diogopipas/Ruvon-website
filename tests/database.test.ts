@@ -88,6 +88,18 @@ describe("PostgreSQL migration and transactions", () => {
       ).rows,
     ).toHaveLength(1);
   });
+  it("accepts city-only leads after the migration", async () => {
+    const { order, lead } = fixture();
+    await db.query("select public.capture_lead($1::jsonb,$2::jsonb)", [
+      JSON.stringify({ ...lead, postcode: "" }),
+      JSON.stringify({ ...order, postcode: "" }),
+    ]);
+    const result = await db.query(
+      "select city, postcode from public.leads where session_id=$1",
+      [lead.session_id],
+    );
+    expect(result.rows).toEqual([{ city: "Lisboa", postcode: "" }]);
+  });
   it("rolls the order back when the lead fails a constraint", async () => {
     const { order, lead } = fixture();
     await expect(

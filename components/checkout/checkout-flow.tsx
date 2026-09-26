@@ -2,15 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Check,
-  Mail,
-  MapPin,
-  MessageCircle,
-  ShieldCheck,
-  Smartphone,
-} from "lucide-react";
+import { ArrowLeft, Check, Mail, MapPin, Smartphone } from "lucide-react";
 import { useCart } from "@/components/providers";
 import { Wordmark } from "@/components/ui/wordmark";
 import { CartContents } from "@/components/cart/cart";
@@ -20,7 +12,6 @@ import { attribution, getSession, track, trackOnce } from "@/lib/analytics";
 import { postJson } from "@/lib/client-request";
 import {
   checkoutKey,
-  formatPostcode,
   locationKey,
   readJourney,
   writeJourney,
@@ -34,22 +25,14 @@ export function CheckoutFlow() {
   const params = useSearchParams();
   const interest = params.get("interesse") === "1";
   const chosenCity = params.get("cidade") || "";
-  const {
-    items,
-    ready,
-    ageConfirmed,
-    location,
-    setLocation,
-    syncOrder,
-    notify,
-  } = useCart();
+  const { items, ready, ageConfirmed, location, setLocation, syncOrder } =
+    useCart();
   const [step, setStep] = useState<Step>("location");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"email" | "phone">("email");
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [city, setCity] = useState("");
-  const [postcode, setPostcode] = useState("");
   const inFlight = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -78,20 +61,16 @@ export function CheckoutFlow() {
         ? saved.step
         : "location",
     );
-    const address = readJourney<{ city?: string; postcode?: string } | null>(
+    const address = readJourney<{ city?: string } | null>(
       `jola_address:${scope}`,
       null,
     );
-    setCity(
+    const savedCity =
       typeof address?.city === "string"
         ? address.city
-        : chosenCity || location?.city || "Faro",
-    );
-    setPostcode(
-      typeof address?.postcode === "string"
-        ? address.postcode
-        : location?.postcode || "",
-    );
+        : chosenCity || location?.city || "Faro";
+    setCity(savedCity);
+    writeJourney(`jola_address:${scope}`, { city: savedCity });
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [ready, scope, zone, chosenCity, location]);
   useEffect(() => {
@@ -209,7 +188,6 @@ export function CheckoutFlow() {
         {
           ...basketPackEvents(interest ? [] : items),
           city: location.city,
-          postcode: location.postcode,
           basket_value: interest ? 0 : priced.subtotal / 100,
           item_count: interest ? 0 : priced.item_count,
         },
@@ -244,34 +222,11 @@ export function CheckoutFlow() {
       setBusy(false);
     }
   }
-  async function share() {
-    track("share_clicked", { source: "checkout" });
-    const url = new URL("/", window.location.origin).href;
-    try {
-      if (navigator.share)
-        await navigator.share({
-          title: "A noite não acaba aqui. | Jola",
-          text: "Acabou a bebida? Ajuda a escolher onde a Jola vai começar. Entra na lista de acesso antecipado. 🍺",
-          url,
-        });
-      else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-        notify("Link copiado. Manda ao grupo!");
-      } else notify(`Partilha este link: ${url}`);
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError"))
-        notify("Não foi possível partilhar. Copia o endereço da página.");
-    }
-  }
   const empty = ready && !items.length && !interest && step !== "success";
   return (
     <>
       <header className="checkout-header container">
         <Wordmark />
-        <span>
-          <ShieldCheck size={16} />
-          Sem pagamento. Sem compromisso.
-        </span>
       </header>
       <main
         id="main"
@@ -314,7 +269,7 @@ export function CheckoutFlow() {
                     className={step === "contact" ? "current" : ""}
                     aria-current={step === "contact" ? "step" : undefined}
                   >
-                    <span>{interest ? 2 : 3}</span>Acesso antecipado
+                    <span>{interest ? 2 : 3}</span>Aviso de lançamento
                   </li>
                 </ol>
               )}
@@ -333,8 +288,8 @@ export function CheckoutFlow() {
                       próximas zonas.
                     </p>
                     <p className="checkout-explainer">
-                      Aqui guardas o teu interesse e podes entrar na lista de
-                      acesso antecipado. Não há pagamento nem entrega nesta
+                      Aqui guardas o teu interesse e podes pedir um aviso para
+                      quando a Jola chegar. Não há pagamento nem entrega nesta
                       fase.
                     </p>
                     <form
@@ -352,39 +307,12 @@ export function CheckoutFlow() {
                             setCity(event.target.value);
                             writeJourney(`jola_address:${scope}`, {
                               city: event.target.value,
-                              postcode,
                             });
                           }}
                           aria-describedby={
                             error ? "checkout-error" : undefined
                           }
                         />
-                      </label>
-                      <label>
-                        Código postal
-                        <input
-                          name="postcode"
-                          value={postcode}
-                          disabled={busy}
-                          onChange={(event) => {
-                            const next = formatPostcode(event.target.value);
-                            setPostcode(next);
-                            writeJourney(`jola_address:${scope}`, {
-                              city,
-                              postcode: next,
-                            });
-                          }}
-                          placeholder="8000-001"
-                          autoComplete="postal-code"
-                          inputMode="numeric"
-                          required
-                          pattern="[0-9]{4}-[0-9]{3}"
-                          maxLength={8}
-                          aria-describedby={`postcode-hint${error ? " checkout-error" : ""}`}
-                        />
-                        <small id="postcode-hint">
-                          Escreve os 7 algarismos. Não precisamos da tua morada.
-                        </small>
                       </label>
                       {error && (
                         <p
@@ -415,28 +343,23 @@ export function CheckoutFlow() {
                   <>
                     <span className="launch-badge">
                       <span />
-                      Acesso antecipado · lançamento por zonas
+                      Lançamento por zonas
                     </span>
                     <h1 ref={headingRef} tabIndex={-1}>
-                      A primeira Jola
+                      Queres saber
                       <br />
-                      <span>começa contigo.</span>
+                      <span>quando chegar?</span>
                     </h1>
                     <p className="checkout-description">
                       {interest
                         ? "A tua zona conta."
-                        : "O teu carrinho ficou guardado e ajuda-nos a preparar a oferta."}{" "}
-                      Vamos lançar zona a zona. Deixa o teu contacto para seres
-                      dos primeiros a saber quando chegarmos à tua.
-                    </p>
-                    <p className="checkout-zone-note">
-                      <strong>5 € previstos na tua primeira Jola.</strong> A
-                      oferta será confirmada com as condições do lançamento.
-                      Ainda não há data definida nem encomenda em curso.
+                        : "O teu carrinho ficou guardado e ajuda-nos a preparar o lançamento."}{" "}
+                      Deixa o teu contacto e avisamos-te quando a Jola chegar à
+                      tua zona.
                     </p>
                     <div className="selected-location">
                       <MapPin size={16} />
-                      {location?.city} · {location?.postcode}
+                      {location?.city}
                       <button
                         onClick={() => {
                           saveStep("location");
@@ -546,52 +469,35 @@ export function CheckoutFlow() {
                         disabled={busy || !ageConfirmed}
                       >
                         {busy
-                          ? "A guardar o teu lugar…"
-                          : "Quero acesso antecipado"}
+                          ? "A guardar o teu contacto…"
+                          : "Quero saber quando chegar"}
                       </button>
-                      <p className="form-footnote">
-                        Só boas notícias. Podes retirar o consentimento a
-                        qualquer momento.
-                      </p>
                     </form>
                   </>
                 )}
                 {step === "success" && (
                   <div className="success-content">
-                    <div className="success-cheers" aria-hidden="true">
-                      🍻
+                    <div className="success-mark" aria-hidden="true">
+                      <Check size={34} strokeWidth={2.2} />
                     </div>
-                    <span className="launch-badge">
-                      <Check size={14} />
-                      Lugar guardado.
+                    <span className="success-eyebrow">
+                      Inscrição confirmada
                     </span>
                     <h1 ref={headingRef} tabIndex={-1}>
-                      Estás dentro.
+                      Vais saber quando chegar.
                     </h1>
                     <p>
-                      Quando a Jola chegar à tua zona,
-                      <br />
-                      vais ser dos primeiros a saber.
+                      Guardámos o teu contacto. Quando a Jola chegar à tua zona,
+                      avisamos-te.
                     </p>
-                    <div className="offer-ticket">
-                      <div>
-                        <small>A tua primeira noite com a Jola</small>
-                        <strong>
-                          5 € <span>de oferta</span>
-                        </strong>
-                        <p>
-                          Oferta prevista para o lançamento na tua zona.
-                          Confirmamos as condições nessa altura.
-                        </p>
+                    {location && (
+                      <div className="success-zone">
+                        <MapPin size={17} />
+                        <span>{location.city}</span>
                       </div>
-                      <span className="ticket-wordmark">JOLA</span>
-                    </div>
-                    <button className="button button-primary" onClick={share}>
-                      Mandar ao grupo
-                      <MessageCircle size={19} />
-                    </button>
+                    )}
                     <Link href="/" className="text-link">
-                      Até à próxima Jola
+                      Voltar ao início
                     </Link>
                   </div>
                 )}
@@ -619,10 +525,6 @@ export function CheckoutFlow() {
                   <span>{priced.item_count} artigos</span>
                 </div>
                 <CartContents review editingDisabled={busy} />
-                <div className="checkout-offer-note">
-                  A tua seleção ajuda-nos a escolher o catálogo de lançamento.
-                  <strong>Acesso antecipado + oferta prevista de 5 €.</strong>
-                </div>
                 <span className="sr-only">
                   Total do pedido: {money(priced.total)}
                 </span>

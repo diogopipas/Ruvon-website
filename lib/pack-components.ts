@@ -1,6 +1,6 @@
 import type { PackComponent, PackExtra } from "@/types";
 
-// Contributions match the listed product values, per complete component.
+// Brand prices are relative to each pack's default; extras use their full values.
 export const beerCore = (quantity: number): PackComponent => ({
   key: "beer",
   label: `${quantity} minis · 20 cl`,
@@ -24,16 +24,22 @@ export const vodkaCore: PackComponent = {
   label: "1 vodka · 70 cl",
   choices: [
     {
+      value: "absolut",
+      label: "Absolut",
+      content: "1 × Absolut Vodka 70 cl",
+      price: 0,
+    },
+    {
       value: "eristoff",
       label: "Eristoff",
       content: "1 × Eristoff Vodka 70 cl",
-      price: 0,
+      price: -580,
     },
     {
       value: "smirnoff",
       label: "Smirnoff",
       content: "1 × Smirnoff Vodka 70 cl",
-      price: 200,
+      price: -570,
     },
   ],
 };
@@ -41,9 +47,13 @@ export const fixedCore = (content: string): PackComponent => ({
   label: content,
   choices: [{ value: "included", label: content, content, price: 0 }],
 });
-export const mixerExtra = (quantity: number): PackExtra => ({
-  key: "mixer",
-  label: `${quantity} refrigerante${quantity === 1 ? "" : "s"} · 1,75 L`,
+export const mixerExtra = (
+  quantity: number,
+  key: "mixer" | "mixer2" = "mixer",
+  label = `${quantity} refrigerante${quantity === 1 ? "" : "s"} · 1,75 L`,
+): PackExtra => ({
+  key,
+  label,
   choices: [
     {
       value: "coca-cola",

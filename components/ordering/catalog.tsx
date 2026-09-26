@@ -50,7 +50,7 @@ function ProductCard({ product }: { product: Product }) {
     >
       {product.tag && <span className="product-tag">{product.tag}</span>}
       <div className="product-picture">
-        <ProductArt product={product} />
+        <ProductArt product={product} showBundle />
       </div>
       <div className="product-info">
         <h3>{product.name}</h3>
@@ -190,11 +190,7 @@ export function Catalog() {
             <MapPin size={20} />
             <span>
               <small>A tua zona</small>
-              <strong>
-                {location
-                  ? `${location.city}, ${location.postcode}`
-                  : "Escolher cidade"}
-              </strong>
+              <strong>{location?.city || "Escolher cidade"}</strong>
             </span>
           </button>
           <button
@@ -346,29 +342,12 @@ export function Catalog() {
         open={addressOpen}
         onOpenChange={setAddressOpen}
         title="Onde é a festa?"
-        description="Começamos em Faro. Seleciona a tua cidade e indica o código postal para registarmos o teu interesse."
+        description="Começamos em Faro. Seleciona a tua cidade para registarmos o teu interesse."
       >
         <form className="form-stack" onSubmit={saveAddress}>
           <label>
             Cidade
             <CitySelect defaultValue={location?.city || "Faro"} />
-          </label>
-          <label>
-            Código postal
-            <input
-              required
-              name="postcode"
-              defaultValue={location?.postcode}
-              pattern="[0-9]{4}-?[0-9]{3}"
-              inputMode="numeric"
-              maxLength={8}
-              placeholder="8000-001"
-              autoComplete="postal-code"
-              aria-describedby="postcode-hint"
-            />
-            <small id="postcode-hint">
-              7 algarismos, por exemplo 8000-001.
-            </small>
           </label>
           {addressError && (
             <p role="alert" className="form-error">

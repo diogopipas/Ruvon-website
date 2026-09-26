@@ -214,7 +214,7 @@ export const products: Product[] = [
     id: "vodka",
     name: "Absolut Vodka",
     size: "70 cl",
-    price: 1699,
+    price: 2149,
     category: "spirits",
     art: "spirit",
     color: "#76a8c5",
@@ -482,7 +482,7 @@ export const packs: Pack[] = [
   {
     id: "pack-classica",
     name: "A Clássica",
-    price: 4665,
+    price: 5245,
     tier: "primary",
     people: "5–7 pessoas",
     peopleMin: 5,
@@ -491,7 +491,8 @@ export const packs: Pack[] = [
     summary: "24 minis + 1 vodka",
     core: [beerCore(24), vodkaCore],
     extras: [
-      mixerExtra(2),
+      mixerExtra(1, "mixer", "Refrigerante 1 · 1,75 L"),
+      mixerExtra(1, "mixer2", "Refrigerante 2 · 1,75 L"),
       iceExtra(1),
       snackExtra(),
       snackExtra("pringles", "snack2"),
@@ -501,7 +502,7 @@ export const packs: Pack[] = [
     color: "#efb735",
     items: [
       "super-bock-mini-24",
-      "eristoff",
+      "vodka",
       "coca-cola",
       "gelo",
       "doritos",
@@ -514,7 +515,7 @@ export const packs: Pack[] = [
   {
     id: "pack-pre",
     name: "O Pré",
-    price: 3503,
+    price: 4083,
     tier: "primary",
     people: "4–6 pessoas",
     peopleMin: 4,
@@ -523,7 +524,8 @@ export const packs: Pack[] = [
     summary: "1 vodka + 4 Red Bull",
     core: [vodkaCore, fixedCore("4 × Red Bull 25 cl")],
     extras: [
-      mixerExtra(2),
+      mixerExtra(1, "mixer", "Refrigerante 1 · 1,75 L"),
+      mixerExtra(1, "mixer2", "Refrigerante 2 · 1,75 L"),
       iceExtra(1),
       snackExtra(),
       cupsExtra(20),
@@ -531,7 +533,7 @@ export const packs: Pack[] = [
     ],
     color: "#252923",
     items: [
-      "eristoff",
+      "vodka",
       "red-bull",
       "coca-cola",
       "gelo",

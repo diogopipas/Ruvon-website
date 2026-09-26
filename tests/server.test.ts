@@ -123,7 +123,7 @@ describe("storage failures and retries", () => {
     const input = leadSchema.parse({
       session_id: randomUUID(),
       items: [{ id: "gelo", quantity: 2 }],
-      location: { city: "Lisboa", postcode: "1000001" },
+      location: { city: "Lisboa" },
       contact: "lead@example.com",
       consent: true,
       attribution: { utm_campaign: "original" },
@@ -136,7 +136,8 @@ describe("storage failures and retries", () => {
     );
     expect(leads).toHaveLength(1);
     expect(leads[0]).toMatchObject({
-      postcode: "1000-001",
+      city: "Lisboa",
+      postcode: "",
       basket_items: [{ id: "gelo", quantity: 2 }],
       utm_campaign: "original",
     });

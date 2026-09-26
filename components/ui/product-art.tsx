@@ -1,16 +1,42 @@
 import { useId } from "react";
 import Image from "next/image";
-import { productImages, sourcedProductImages } from "@/lib/product-images";
+import {
+  productImages,
+  productPhotoTiles,
+  sourcedProductImages,
+} from "@/lib/product-images";
 import type { Product } from "@/types";
 export function ProductArt({
   product,
   className = "",
+  showBundle = false,
 }: {
   product: Product;
   className?: string;
+  showBundle?: boolean;
 }) {
   const id = useId().replace(/:/g, "");
   const photo = productImages[product.id];
+  const tiles = showBundle ? productPhotoTiles[product.id] : undefined;
+  if (photo && tiles)
+    return (
+      <span
+        className={`product-art product-bundle-art ${tiles === 4 ? "product-bundle-art--four" : ""} ${className}`}
+        aria-hidden="true"
+      >
+        {Array.from({ length: tiles }, (_, index) => (
+          <Image
+            key={index}
+            src={photo}
+            alt=""
+            width={400}
+            height={400}
+            className="product-packshot sourced-packshot"
+            sizes="(max-width: 700px) 20vw, 100px"
+          />
+        ))}
+      </span>
+    );
   if (photo)
     return (
       <Image

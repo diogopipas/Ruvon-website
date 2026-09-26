@@ -7,7 +7,7 @@ export function Footer() {
         <div className="footer-top">
           <div>
             <Wordmark />
-            <p>Não vás buscar. Pede.</p>
+            <p>Pede uma Jola</p>
           </div>
           <nav aria-label="Rodapé">
             <Link href="/#como-funciona">Como funciona</Link>

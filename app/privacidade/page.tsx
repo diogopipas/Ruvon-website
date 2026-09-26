@@ -34,17 +34,17 @@ export default function Privacy() {
         <h2>O que guardamos</h2>
         <p>
           Se te inscreveres, guardamos o email ou telefone que escolheres, a
-          cidade, o código postal, o carrinho simulado e a data do teu
-          consentimento. Se representares uma loja, guardamos o nome da loja, a
-          cidade, o teu nome e o contacto indicado.
+          cidade, o carrinho simulado e a data do teu consentimento. Se
+          representares uma loja, guardamos o nome da loja, a cidade, o teu nome
+          e o contacto indicado.
         </p>
         <h2>Para que usamos os dados</h2>
         <p>
           Com o teu consentimento, usamos o teu contacto para comunicar o
-          lançamento e a oferta da primeira Jola. A zona e os produtos
-          escolhidos ajudam-nos a decidir onde lançar e o que disponibilizar. Os
-          contactos das lojas são usados para preparar possíveis parcerias. Não
-          pedimos dados de pagamento.
+          lançamento da Jola na tua zona. A zona e os produtos escolhidos
+          ajudam-nos a decidir onde lançar e o que disponibilizar. Os contactos
+          das lojas são usados para preparar possíveis parcerias. Não pedimos
+          dados de pagamento.
         </p>
         <h2>O que fica no teu dispositivo</h2>
         <p>

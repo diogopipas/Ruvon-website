@@ -24,6 +24,7 @@ export type PackOptionKey =
   | "gin"
   | "alcoholFreeBeer"
   | "mixer"
+  | "mixer2"
   | "snack"
   | "snack2"
   | "ice"
@@ -33,10 +34,11 @@ export type PackOptionKey =
   | "limes";
 export type PackOptions = {
   beer?: "super-bock" | "sagres";
-  vodka?: "eristoff" | "smirnoff";
+  vodka?: "absolut" | "eristoff" | "smirnoff";
   gin?: "gordons" | "beefeater";
   alcoholFreeBeer?: "super-bock-zero" | "sagres-zero";
   mixer?: "coca-cola" | "coca-cola-zero" | "seven-up" | "none";
+  mixer2?: "coca-cola" | "coca-cola-zero" | "seven-up" | "none";
   snack?: "doritos" | "pringles" | "none";
   snack2?: "doritos" | "pringles" | "none";
   ice?: "included" | "none";
@@ -95,7 +97,7 @@ export type Attribution = {
   utm_campaign?: string;
   utm_content?: string;
 };
-export type Location = { city: string; postcode: string; street?: string };
+export type Location = { city: string };
 export type SimulatedOrder = Attribution & {
   id: string;
   created_at: string;

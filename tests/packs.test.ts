@@ -24,7 +24,7 @@ describe("validation packs", () => {
       "Sem Ressacas",
     ]);
     expect(packs.map((pack) => pack.price)).toEqual([
-      1470, 4665, 3503, 3115, 3322, 3431,
+      1470, 5245, 4083, 3115, 3322, 3431,
     ]);
     for (const group of ["2-3", "4-6", "7+"] as const)
       expect(packs.some((pack) => fitsGroup(pack, group))).toBe(true);
@@ -39,6 +39,7 @@ describe("validation packs", () => {
           "super-bock-mini-6",
           "super-bock-mini-12",
           "super-bock-mini-24",
+          "vodka",
           "eristoff",
           "gin",
           "somersby",
@@ -65,6 +66,7 @@ describe("validation packs", () => {
       "super-bock-mini-6": 375,
       "super-bock-mini-12": 750,
       "super-bock-mini-24": 1499,
+      vodka: 2149,
       eristoff: 1569,
       gin: 1749,
       somersby: 499,
@@ -96,7 +98,7 @@ describe("validation packs", () => {
       ],
       "pack-classica": [
         ["super-bock-mini-24", 1],
-        ["eristoff", 1],
+        ["vodka", 1],
         ["coca-cola", 2],
         ["gelo", 1],
         ["doritos", 1],
@@ -105,7 +107,7 @@ describe("validation packs", () => {
         ["copos", 1],
       ],
       "pack-pre": [
-        ["eristoff", 1],
+        ["vodka", 1],
         ["red-bull", 1],
         ["coca-cola", 2],
         ["gelo", 1],
@@ -152,7 +154,7 @@ describe("validation packs", () => {
     }
     expect(configurePack(packs[1]).extras).toContain("1 × Pringles 175 g");
     expect(configurePack(packs[1]).extras).toContain("1 × Doritos 225 g");
-    expect(configurePack(packs[1], { snack2: "none" }).price).toBe(4366);
+    expect(configurePack(packs[1], { snack2: "none" }).price).toBe(4946);
   });
   it("keeps substitutions in one canonical pack line and through a JSON round trip", () => {
     const cart = cartSchema.parse([
@@ -167,19 +169,159 @@ describe("validation packs", () => {
     const basket = priceBasket(JSON.parse(JSON.stringify(cart)));
     expect(basket.items).toHaveLength(2);
     expect(basket).toMatchObject({
-      subtotal: 9269,
-      total: 9657,
+      subtotal: 10429,
+      total: 10817,
       item_count: 3,
     });
     expect(basket.items[0]).toMatchObject({
-      price: 4585,
+      price: 5165,
       product_type: "pack",
       options: { beer: "sagres", mixer: "coca-cola-zero" },
       people_min: 5,
       people_max: 7,
     });
     expect(basket.items[0].contents).toContain("24 × Sagres Mini 20 cl");
-    expect(basket.items[0].contents).toContain("2 × Coca-Cola Zero 1,75 L");
+    expect(
+      basket.items[0].contents?.filter(
+        (line) => line === "1 × Coca-Cola Zero 1,75 L",
+      ),
+    ).toHaveLength(2);
+  });
+  it("lets A Clássica choose and remove its two soft drinks independently", () => {
+    const classica = packs.find((pack) => pack.id === "pack-classica")!;
+    expect(classica.extras.slice(0, 2).map((extra) => extra.label)).toEqual([
+      "Refrigerante 1 · 1,75 L",
+      "Refrigerante 2 · 1,75 L",
+    ]);
+    expect(configurePack(classica).options).toMatchObject({
+      mixer: "coca-cola",
+      mixer2: "coca-cola",
+    });
+    const mixedCart = cartSchema.parse([
+      {
+        id: classica.id,
+        quantity: 1,
+        options: { mixer: "seven-up", mixer2: "coca-cola-zero" },
+      },
+    ]);
+    expect(priceBasket(mixedCart).items[0]).toMatchObject({
+      price: 5175,
+      options: { mixer: "seven-up", mixer2: "coca-cola-zero" },
+      extra_contents: expect.arrayContaining([
+        "1 × 7Up 1,75 L",
+        "1 × Coca-Cola Zero 1,75 L",
+      ]),
+    });
+    const oneRemoved = configurePack(classica, {
+      mixer: "none",
+      mixer2: "coca-cola",
+    });
+    expect(oneRemoved.price).toBe(5006);
+    expect(oneRemoved.removed).toEqual(["mixer"]);
+    expect(oneRemoved.extras).toContain("1 × Coca-Cola Original 1,75 L");
+    const change = packChangeEvent(
+      classica,
+      {},
+      { mixer2: "coca-cola-zero" },
+      "detail",
+    );
+    expect(change).toMatchObject({
+      changed_options: ["mixer2"],
+      price_delta: -0.4,
+      changes: [{ option: "mixer2", from: "coca-cola", to: "coca-cola-zero" }],
+    });
+    expect(
+      eventSchema.parse({
+        id: session,
+        session_id: session,
+        name: "pack_options_changed",
+        properties: change,
+      }).properties,
+    ).toEqual(change);
+    expect(
+      cartSchema.parse([
+        { id: classica.id, quantity: 1, options: { mixer: "seven-up" } },
+      ])[0].options,
+    ).toMatchObject({ mixer: "seven-up", mixer2: "seven-up" });
+  });
+  it("lets O Pré choose and remove its two soft drinks independently", () => {
+    const pre = packs.find((pack) => pack.id === "pack-pre")!;
+    expect(pre.extras.slice(0, 2).map((extra) => extra.label)).toEqual([
+      "Refrigerante 1 · 1,75 L",
+      "Refrigerante 2 · 1,75 L",
+    ]);
+    expect(configurePack(pre).options).toMatchObject({
+      mixer: "coca-cola",
+      mixer2: "coca-cola",
+    });
+    const mixed = configurePack(pre, {
+      mixer: "seven-up",
+      mixer2: "coca-cola-zero",
+    });
+    expect(mixed.price).toBe(4013);
+    expect(mixed.extras).toEqual(
+      expect.arrayContaining(["1 × 7Up 1,75 L", "1 × Coca-Cola Zero 1,75 L"]),
+    );
+    const mixedCart = cartSchema.parse([
+      {
+        id: pre.id,
+        quantity: 1,
+        options: { mixer: "seven-up", mixer2: "coca-cola-zero" },
+      },
+    ]);
+    expect(priceBasket(mixedCart).items[0]).toMatchObject({
+      price: 4013,
+      options: { mixer: "seven-up", mixer2: "coca-cola-zero" },
+      extra_contents: expect.arrayContaining(mixed.extras.slice(0, 2)),
+    });
+    const reversed = cartSchema.parse([
+      {
+        id: pre.id,
+        quantity: 1,
+        options: { mixer: "coca-cola-zero", mixer2: "seven-up" },
+      },
+    ]);
+    expect(checkoutKey(mixedCart, false)).not.toBe(
+      checkoutKey(reversed, false),
+    );
+    const oneRemoved = configurePack(pre, {
+      mixer: "coca-cola",
+      mixer2: "none",
+    });
+    expect(oneRemoved.price).toBe(3844);
+    expect(oneRemoved.removed).toEqual(["mixer2"]);
+    expect(oneRemoved.extras).toContain("1 × Coca-Cola Original 1,75 L");
+    expect(configurePack(pre, { mixer: "none", mixer2: "none" }).price).toBe(
+      3605,
+    );
+    const change = packChangeEvent(pre, {}, { mixer2: "seven-up" }, "detail");
+    expect(change).toMatchObject({
+      changed_options: ["mixer2"],
+      price_delta: -0.3,
+      changes: [{ option: "mixer2", from: "coca-cola", to: "seven-up" }],
+    });
+    expect(
+      eventSchema.parse({
+        id: session,
+        session_id: session,
+        name: "pack_options_changed",
+        properties: change,
+      }).properties,
+    ).toEqual(change);
+    expect(
+      cartSchema.parse([
+        { id: pre.id, quantity: 1, options: { mixer: "seven-up" } },
+      ])[0].options,
+    ).toMatchObject({ mixer: "seven-up", mixer2: "seven-up" });
+    expect(
+      cartSchema.safeParse([
+        {
+          id: "pack-sem-ressacas",
+          quantity: 1,
+          options: { mixer2: "seven-up" },
+        },
+      ]).success,
+    ).toBe(false);
   });
   it("rejects invented substitutions and options on individual products", () => {
     for (const item of [
@@ -196,7 +338,7 @@ describe("validation packs", () => {
     ).toMatchObject({
       beer: "super-bock",
       mixer: "coca-cola",
-      vodka: "eristoff",
+      vodka: "absolut",
       ice: "included",
     });
   });
@@ -207,6 +349,7 @@ describe("validation packs", () => {
     ]);
     expect(checkoutKey(original, false)).not.toBe(checkoutKey(changed, false));
     for (const options of [
+      { vodka: "eristoff" },
       { vodka: "smirnoff" },
       { ice: "none" },
       { snack: "pringles" },
@@ -225,8 +368,8 @@ describe("validation packs", () => {
     expect(packs.filter((pack) => pack.tier === "secondary")).toHaveLength(2);
     const expected = [
       ["12 × Super Bock Mini 20 cl"],
-      ["24 × Super Bock Mini 20 cl", "1 × Eristoff Vodka 70 cl"],
-      ["1 × Eristoff Vodka 70 cl", "4 × Red Bull 25 cl"],
+      ["24 × Super Bock Mini 20 cl", "1 × Absolut Vodka 70 cl"],
+      ["1 × Absolut Vodka 70 cl", "4 × Red Bull 25 cl"],
       ["16 × Somersby Maçã 33 cl"],
       ["1 × Gordon’s London Dry Gin 70 cl", "3 × Schweppes Tónica 1 L"],
       ["12 × Super Bock 0.0 33 cl", "4 × Red Bull 25 cl"],
@@ -271,14 +414,16 @@ describe("validation packs", () => {
       },
     ]);
     const basket = priceBasket(items);
-    expect(basket.subtotal).toBe(8568);
-    expect(basket.total).toBe(8956);
+    expect(basket.subtotal).toBe(8188);
+    expect(basket.total).toBe(8576);
     expect(basket.items[0]).toMatchObject({
-      price: 4284,
+      price: 4094,
       removed_extras: ["ice", "water", "cups"],
     });
     expect(basket.items[0].contents).toContain("1 × Smirnoff Vodka 70 cl");
-    expect(basket.items[0].contents).toContain("2 × 7Up 1,75 L");
+    expect(
+      basket.items[0].contents?.filter((line) => line === "1 × 7Up 1,75 L"),
+    ).toHaveLength(2);
     expect(basket.items[0].contents).toContain("1 × Pringles 175 g");
     expect(
       basket.items[0].contents?.some((line) => /gelo|água|copos/.test(line)),
@@ -289,8 +434,8 @@ describe("validation packs", () => {
     const removal = packChangeEvent(pack, {}, { ice: "none" }, "detail");
     expect(removal).toMatchObject({
       price_delta: -0.99,
-      pack_price: 45.66,
-      default_pack_price: 46.65,
+      pack_price: 51.46,
+      default_pack_price: 52.45,
       removed_extras: ["ice"],
       changes: [
         { option: "ice", from: "included", to: "none", action: "removed" },
@@ -300,8 +445,11 @@ describe("validation packs", () => {
       packChangeEvent(pack, { ice: "none" }, {}, "cart").changes[0].action,
     ).toBe("restored");
     expect(
+      packChangeEvent(pack, {}, { vodka: "eristoff" }, "detail").price_delta,
+    ).toBe(-5.8);
+    expect(
       packChangeEvent(pack, {}, { vodka: "smirnoff" }, "detail").price_delta,
-    ).toBe(2);
+    ).toBe(-5.7);
     const parsed = eventSchema.parse({
       id: session,
       session_id: session,
@@ -439,7 +587,7 @@ describe("validation packs", () => {
       viewRate: 50,
       addRate: 50,
       checkoutShare: 50,
-      packAov: 4764,
+      packAov: 5344,
       nonPackAov: 99,
       groups: [{ name: "4–6", value: 1 }],
       addons: [{ name: "Saco de gelo", value: 1 }],
