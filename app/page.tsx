@@ -60,9 +60,6 @@ export default function Home() {
                 <b>Sem sair de casa.</b>
               </span>
             </div>
-            <span className="visual-caption">
-              A tua noite, bem acompanhada.
-            </span>
           </div>
           <div className="hero-bottom">
             <span>

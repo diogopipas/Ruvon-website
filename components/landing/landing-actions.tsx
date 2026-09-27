@@ -85,10 +85,7 @@ export function MerchantSection() {
       </div>
       <div>
         <h2>Tens uma loja?</h2>
-        <p>
-          Estamos à procura das primeiras lojas parceiras. O próximo saco pode
-          sair da tua porta.
-        </p>
+        <p>Procuramos as primeiras lojas parceiras em Faro. Junta-te à Jola.</p>
       </div>
       <button className="button button-secondary" onClick={() => setOpen(true)}>
         Quero vender na Jola

@@ -315,6 +315,7 @@
   }
   .hero h1 > span {
     white-space: nowrap;
+    font-size: 0.78em;
   }
   .hero-description {
     font-size: 14px;
@@ -324,7 +325,9 @@
   }
   .hero-cta {
     height: 54px;
-    width: 100%;
+    width: min(100%, 320px);
+    margin-inline: auto;
+    display: flex;
     font-size: 16px;
   }
   .hero-microcopy {
@@ -332,18 +335,18 @@
     margin-top: 9px;
   }
   .hero-visual {
-    height: 305px;
-    margin: 6px -20px -10px 20px;
+    width: min(100%, 420px);
+    height: min(90vw, 390px);
+    margin: 18px auto 0;
     z-index: 0;
   }
   .hero-visual > img {
-    height: 345px;
+    height: 100%;
     max-height: none;
-    top: -12px;
-    object-position: center 55%;
-    mask-image:
-      linear-gradient(to right, transparent, #000 6%, #000 90%, transparent),
-      linear-gradient(to bottom, transparent, #000 9%, #000 86%, transparent);
+    top: 0;
+    object-fit: contain;
+    object-position: center;
+    mask-image: linear-gradient(to bottom, #000 0%, #000 90%, transparent);
   }
   .time-sticker {
     right: 8%;
@@ -369,21 +372,23 @@
   .hero-note svg {
     width: 20px;
   }
-  .visual-caption {
-    font-size: 13px;
-    bottom: 5%;
-    right: 8%;
-  }
   .hero-bottom {
-    padding: 18px 0;
-    gap: 10px 16px;
-    font-size: 13px;
+    border-top: 0;
+    padding: 14px 0 20px;
+    gap: 12px;
+    font-size: 12px;
     position: relative;
     z-index: 2;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .hero-bottom > span {
     gap: 5px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .hero-bottom > span:nth-of-type(3) {
+    display: none;
   }
   .hero-bottom svg {
     width: 12px;
@@ -393,14 +398,19 @@
     display: none;
   }
   .brand-strip {
-    font-size: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    font-size: clamp(16px, 5vw, 20px);
     height: 48px;
-    gap: 25px;
-    justify-content: flex-start;
-    padding-left: 20px;
+    gap: clamp(4px, 2vw, 12px);
+    padding-inline: 20px;
+    text-align: center;
   }
   .brand-strip > span:nth-child(2n) {
-    font-size: 26px;
+    font-size: 23px;
+  }
+  .brand-strip > span:last-child {
+    display: none;
   }
   .section {
     padding-block: 50px;
@@ -568,8 +578,10 @@
     line-height: 1.8;
   }
   .merchant-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     padding: 40px 0;
-    gap: 15px;
+    gap: 18px;
   }
   .merchant-icon {
     width: 56px;
@@ -584,15 +596,20 @@
   }
   .merchant-section p {
     font-size: 14px;
-    line-height: 1.7;
-    margin-top: 7px;
+    line-height: 1.6;
+    margin-top: 10px;
+    max-width: 34ch;
+  }
+  .merchant-section > div:nth-child(2) {
+    min-width: 0;
+    width: 100%;
   }
   .merchant-section > .button {
-    margin-left: 71px;
+    margin-left: 0;
+    justify-self: start;
     font-size: 13px;
     min-height: 44px;
     padding: 11px 13px;
-    gap: 20px;
   }
   .faq-section {
     grid-template-columns: 1fr;
@@ -1105,12 +1122,6 @@
   }
   .hero h1 {
     font-size: 17.6vw;
-  }
-  .hero-visual {
-    height: 300px;
-  }
-  .hero-visual > img {
-    height: 345px;
   }
   .hero-bottom {
     font-size: 13px;
