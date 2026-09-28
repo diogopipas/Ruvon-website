@@ -168,6 +168,58 @@
   background: transparent;
   text-decoration: underline;
 }
+.meta-consent {
+  position: fixed;
+  z-index: 80;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, calc(100% - 32px));
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #252c1e;
+  border: 1px solid #5b6947;
+  border-radius: 10px;
+  box-shadow: 0 14px 45px #0008;
+}
+.meta-consent p {
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 410px;
+}
+.meta-consent p a,
+.privacy-preferences {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.meta-consent > div {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.meta-consent .button {
+  min-height: 44px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.privacy-preferences {
+  color: var(--cream);
+  font-size: 14px;
+  margin-top: 16px;
+}
+@media (max-width: 620px) {
+  .meta-consent {
+    display: block;
+  }
+  .meta-consent > div {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
 .form-footnote {
   font-size: 13px;
   text-align: center;

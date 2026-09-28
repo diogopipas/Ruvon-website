@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 import { CartLayer } from "@/components/cart/cart";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 const display = localFont({
   src: "../node_modules/@fontsource/barlow-condensed/files/barlow-condensed-latin-800-normal.woff2",
   variable: "--font-display",
@@ -51,6 +52,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <CartLayer />
+          <MetaPixel />
         </Providers>
         <Analytics />
       </body>

@@ -4,6 +4,8 @@ The single entry point is `track(name, properties)` in `lib/analytics.ts`. It po
 
 Vercel Web Analytics separately measures page views through the `Analytics` component in the root layout. Jola's custom events below remain in its own storage; they are not forwarded to Vercel.
 
+The Meta Pixel (`1319849436755354`) loads only after optional advertising consent and adult age confirmation. It sends `PageView` on the current public route and subsequent client-side public-route changes. It does not receive Jola's product, cart or contact events. Rejection leaves the Meta script unloaded; the privacy page lets visitors change their preference. The no-script image fallback is deliberately omitted because it cannot obtain consent.
+
 | Event                | Trigger                                                          | Main properties                                                 |
 | -------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
 | `landing_view`       | First landing-page mount in a tab journey                        | UTM attribution                                                 |

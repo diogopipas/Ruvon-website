@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Header } from "@/components/ui/header";
 import { Footer } from "@/components/ui/footer";
 import { privacyConfig } from "@/lib/privacy";
+import { MetaPixelPreferencesButton } from "@/components/analytics/meta-pixel";
 export const metadata: Metadata = { title: "Privacidade" };
 export default function Privacy() {
   const { operator, contact, retentionMonths, ready } = privacyConfig();
@@ -51,8 +52,8 @@ export default function Privacy() {
           Guardamos localmente a confirmação de idade, o carrinho, a zona e um
           identificador aleatório. O progresso e os rascunhos do formulário
           ficam apenas na sessão do separador. Também guardamos os parâmetros da
-          campanha que te trouxe até aqui. Podes apagar estes dados nas
-          definições do navegador.
+          campanha que te trouxe até aqui e a tua escolha sobre publicidade.
+          Podes apagar estes dados nas definições do navegador.
         </p>
         <h2>Medição da experiência</h2>
         <p>
@@ -60,9 +61,17 @@ export default function Privacy() {
           para perceber a procura. Os eventos usam um identificador aleatório e
           não incluem o teu email ou telefone. A Vercel Web Analytics também
           mede visitas e páginas vistas de forma agregada, sem cookies de
-          rastreamento. Não lhe enviamos dados de contacto nem usamos pixels de
-          publicidade.
+          rastreamento. Não lhe enviamos dados de contacto.
         </p>
+        <p>
+          Se autorizares a medição de publicidade, o Meta Pixel (Meta Platforms)
+          recebe eventos de página vista, incluindo o endereço da página e dados
+          técnicos do navegador. Pode usar identificadores e cookies para medir
+          campanhas. Não lhe enviamos os dados dos formulários. Sem a tua
+          autorização, o Pixel não é carregado. Podes recusar e alterar a tua
+          escolha a qualquer momento.
+        </p>
+        <MetaPixelPreferencesButton />
         <h2>Armazenamento e acesso</h2>
         <p>
           Só a equipa responsável pelo projeto tem acesso aos contactos e aos
