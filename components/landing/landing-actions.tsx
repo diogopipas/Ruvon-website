@@ -42,11 +42,11 @@ export function CategoryCards() {
 }
 export function CityPicker() {
   const router = useRouter();
-  const [city, setCity] = useState("Faro");
+  const [city, setCity] = useState("");
   return (
     <div className="city-picker">
       <div className="city-options">
-        {["Faro", "Lisboa", "Porto", "Coimbra", "Braga", "Outra"].map(
+        {["Braga", "Coimbra", "Faro", "Lisboa", "Porto", "Outra"].map(
           (name) => (
             <button
               key={name}
@@ -85,7 +85,7 @@ export function MerchantSection() {
       </div>
       <div>
         <h2>Tens uma loja?</h2>
-        <p>Procuramos as primeiras lojas parceiras em Faro. Junta-te à Jola.</p>
+        <p>Procuramos as primeiras lojas parceiras. Junta-te à Jola.</p>
       </div>
       <button className="button button-secondary" onClick={() => setOpen(true)}>
         Quero vender na Jola

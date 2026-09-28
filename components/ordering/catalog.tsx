@@ -342,12 +342,12 @@ export function Catalog() {
         open={addressOpen}
         onOpenChange={setAddressOpen}
         title="Onde é a festa?"
-        description="Começamos em Faro. Seleciona a tua cidade para registarmos o teu interesse."
+        description="Seleciona a tua cidade para registarmos o teu interesse e escolhermos as primeiras zonas."
       >
         <form className="form-stack" onSubmit={saveAddress}>
           <label>
             Cidade
-            <CitySelect defaultValue={location?.city || "Faro"} />
+            <CitySelect defaultValue={location?.city || ""} />
           </label>
           {addressError && (
             <p role="alert" className="form-error">

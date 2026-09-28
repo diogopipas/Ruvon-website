@@ -20,7 +20,7 @@ export default function Home() {
         <section className="hero container">
           <div className="hero-copy">
             <span className="launch-badge">
-              <span />A preparar o lançamento em Faro
+              <span />A preparar o lançamento
             </span>
             <h1>
               Acabou <br />a bebida?
@@ -186,11 +186,11 @@ export default function Home() {
         <section className="location-section">
           <div className="container">
             <span className="location-dot">
-              <MapPin size={19} />A começar em Faro.
+              <MapPin size={19} />A tua cidade conta.
             </span>
             <h2>Onde queres a Jola?</h2>
             <p>
-              As primeiras entregas vão ser em Faro.
+              Estamos a escolher as primeiras zonas.
               <br />
               Diz-nos onde fazes a festa e avisamos-te quando chegarmos.
             </p>
@@ -214,7 +214,7 @@ export default function Home() {
                 ],
                 [
                   "Onde vai chegar a Jola?",
-                  "Vamos começar em Faro e crescer zona a zona. Escolhe a tua cidade: avisamos-te quando chegarmos à tua zona.",
+                  "Estamos a decidir as primeiras zonas com base no interesse. Escolhe a tua cidade e avisamos-te quando a Jola chegar.",
                 ],
                 [
                   "O que acontece depois de me inscrever?",

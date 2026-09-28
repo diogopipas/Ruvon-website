@@ -110,7 +110,7 @@ export default function MerchantForm({
               minLength={2}
               maxLength={80}
               autoComplete="address-level2"
-              placeholder="Faro"
+              placeholder="Cidade da loja"
             />
           </label>
           <label>

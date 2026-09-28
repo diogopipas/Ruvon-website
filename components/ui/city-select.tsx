@@ -1,6 +1,6 @@
 import type { SelectHTMLAttributes } from "react";
 
-const cities = ["Faro", "Lisboa", "Porto", "Coimbra", "Braga", "Outra zona"];
+const cities = ["Braga", "Coimbra", "Faro", "Lisboa", "Porto", "Outra zona"];
 
 /** Keep previously saved cities selectable when an existing journey resumes. */
 export function CitySelect(props: SelectHTMLAttributes<HTMLSelectElement>) {

@@ -68,7 +68,7 @@ export function CheckoutFlow() {
     const savedCity =
       typeof address?.city === "string"
         ? address.city
-        : chosenCity || location?.city || "Faro";
+        : chosenCity || location?.city || "";
     setCity(savedCity);
     writeJourney(`jola_address:${scope}`, { city: savedCity });
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -283,9 +283,8 @@ export function CheckoutFlow() {
                       Qual é a tua zona?
                     </h1>
                     <p className="checkout-description">
-                      Estamos a preparar o lançamento em Faro. Seleciona a tua
-                      cidade: o teu interesse também ajuda a escolher as
-                      próximas zonas.
+                      Estamos a preparar o lançamento. Seleciona a tua cidade: o
+                      teu interesse ajuda-nos a escolher as primeiras zonas.
                     </p>
                     <p className="checkout-explainer">
                       Aqui guardas o teu interesse e podes pedir um aviso para

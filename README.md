@@ -141,8 +141,8 @@ More detail: [analytics events](docs/ANALYTICS.md), [QA](docs/QA.md), [design an
 
 Pack configuration lives in `lib/products.ts` and reusable components in `lib/pack-components.ts`. Listed prices include default extras. Fixed drink quantities cannot be removed. Brand choices, mixer/snack swaps and extra removals update the price immediately; the server independently validates and calculates it. A pack stays one basket line, with one configuration per pack ID; quantity changes apply to that configuration. Chosen brands, core/extra contents and removals persist in the existing order/lead JSON fields. No new SQL migration is needed. See [pack pricing and configuration](docs/PACKS.md) for all provisional upgrade/removal amounts.
 
-The dashboard focuses on saved-order funnel, campaign and city demand, pack choice, final extra removals and product swaps. Use the Todas, Faro and Lisboa filter to compare launch locations. Definitions are in [the analytics contract](docs/ANALYTICS.md).
+The dashboard focuses on saved-order funnel, campaign and city demand, pack choice, final extra removals and product swaps. Use the Todas, Faro and Lisboa filter to compare city cohorts. Definitions are in [the analytics contract](docs/ANALYTICS.md).
 
 The six pack scenes remain illustrative prelaunch assets. Catalog products use local packshots or sourced product photography; the new Mini, Somersby, 0.0, Red Bull, Eristoff, Luso and cup formats now show photographed products. Combined quantities repeat photographed smaller packs. See [photograph sources](docs/PRODUCT-PHOTOS.md), [art direction](docs/ART-DIRECTION.md) and [asset provenance](docs/DESIGN.md). Replace preview imagery with approved supplier photography before real sales. Existing credential, privacy and deployment requirements remain in [LAUNCH.md](docs/LAUNCH.md).
 
-The launch city is Faro. Catalog and checkout use a city selector, with Faro first and other cities available for registering interest. No postcode is requested.
+The first launch cities are not fixed. Catalog and checkout require a city selection to register interest; no city is preselected and no postcode is requested.

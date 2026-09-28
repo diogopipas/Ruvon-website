@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Acabou a bebida? Nós levamos. | Jola",
     description:
-      "Cerveja gelada, gelo, mixers e snacks. Não vás buscar. Pede. Em breve em Faro.",
+      "Cerveja gelada, gelo, mixers e snacks. Não vás buscar. Pede. Em breve, zona a zona.",
     locale: "pt_PT",
     type: "website",
     siteName: "Jola",
