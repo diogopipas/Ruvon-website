@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -55,6 +56,7 @@ export default function RootLayout({
           <MetaPixel />
         </Providers>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
