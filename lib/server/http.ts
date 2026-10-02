@@ -82,6 +82,13 @@ export function apiError(
   console.error(
     "[Jola] Request failed:",
     error instanceof Error ? error.name : "StorageError",
+    typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      typeof error.code === "string" &&
+      /^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(error.code)
+      ? `code=${error.code}`
+      : "code=unknown",
   );
   return NextResponse.json(
     {

@@ -149,12 +149,18 @@ describe("storage failures and retries", () => {
   });
 
   it("returns an actionable error without leaking storage error details", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const response = apiError(new Error("private database credential"));
     expect(response.status).toBe(503);
     const body = await response.json();
     expect(body.error).toContain("Tenta novamente");
     expect(body.error).not.toContain("private");
+    apiError({ code: "23514", message: "sensitive event properties" });
+    expect(log).toHaveBeenLastCalledWith(
+      "[Jola] Request failed:",
+      "StorageError",
+      "code=23514",
+    );
     const limited = apiError(new RequestError("Espera um minuto.", 429));
     expect(limited.headers.get("Retry-After")).toBe("60");
   });

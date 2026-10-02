@@ -3,6 +3,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { priceBasket } from "@/lib/pricing";
+import { eventNames } from "@/lib/validation";
 const db = new PGlite();
 beforeAll(async () => {
   await db.exec(
@@ -63,6 +64,27 @@ function fixture() {
   return { order, lead };
 }
 describe("PostgreSQL migration and transactions", () => {
+  it("accepts every event emitted by the client after the pack analytics migration", async () => {
+    const sessionId = randomUUID();
+    for (const name of eventNames) {
+      await db.query(
+        "insert into public.analytics_events (id, session_id, name) values ($1, $2, $3)",
+        [randomUUID(), sessionId, name],
+      );
+    }
+    const result = await db.query(
+      "select name from public.analytics_events where session_id = $1",
+      [sessionId],
+    );
+    expect(result.rows).toHaveLength(eventNames.length);
+    await expect(
+      db.query(
+        "insert into public.analytics_events (id, session_id, name) values ($1, $2, $3)",
+        [randomUUID(), sessionId, "not_an_event"],
+      ),
+    ).rejects.toThrow();
+  });
+
   it("atomically stores lead and order and makes retries idempotent", async () => {
     const { order, lead } = fixture();
     for (let n = 0; n < 2; n++)

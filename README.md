@@ -38,7 +38,7 @@ All product-facing copy is European Portuguese. Prices, ETA and products are cle
 ## Supabase setup
 
 1. Create a Supabase project.
-2. Apply the SQL migrations in filename order: [001_jola.sql](supabase/migrations/001_jola.sql), [002_preserve_lead_basket.sql](supabase/migrations/002_preserve_lead_basket.sql), then [003_city_only.sql](supabase/migrations/003_city_only.sql). Existing installations need any migrations they have not yet applied. Migration 003 allows signups with only a city; apply it before deploying this version.
+2. Apply the SQL migrations in filename order: [001_jola.sql](supabase/migrations/001_jola.sql), [002_preserve_lead_basket.sql](supabase/migrations/002_preserve_lead_basket.sql), [003_city_only.sql](supabase/migrations/003_city_only.sql), then [004_pack_analytics_events.sql](supabase/migrations/004_pack_analytics_events.sql). Existing installations need any migrations they have not yet applied. Migration 004 permits pack browsing and customization events in production; apply it to the existing Supabase project to stop those event writes returning 503.
 3. Set the server-side variables:
 
 ```dotenv
