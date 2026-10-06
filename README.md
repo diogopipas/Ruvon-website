@@ -1,6 +1,8 @@
 # Jola
 
-**Acabou a bebida? Nós levamos.** A working demand-validation MVP for a Portuguese drinks-and-party delivery concept. It has a full simulated ordering experience, local persistence for development, Supabase persistence for deployment, and a protected demand dashboard. It does not sell alcohol, take payments, book deliveries or send messages.
+**Acabou a bebida? Nós levamos.** A working demand-validation MVP for a Portuguese drinks-and-party delivery concept. It has a full simulated ordering experience, local persistence for development, Supabase persistence for deployment, and a protected demand dashboard. It does not sell alcohol, accept live payments, book deliveries or send messages.
+
+An opt-in **Easypay MB WAY sandbox checkout** is also implemented. It uses the real test API, immutable server-priced orders, private cookies and verified webhooks; it moves no money and books no delivery. The public production checkout remains a waitlist. See [MB WAY setup and verification](docs/PAYMENTS.md).
 
 ## Run locally
 
@@ -87,7 +89,7 @@ npm run build
 npm run test:e2e          # Production server/API integration suite; build first
 ```
 
-The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation and public routes/OG rendering. It does not automate a browser. The 69 unit/database tests and five HTTP integration tests pass. Safari checks cover the mobile customer journey, a failed-save/retry recovery, merchant submission and responsive previews; see [QA notes and bundle measurements](docs/QA.md).
+The integration suite starts an isolated production server on port 3100, writes only to `.data/integration`, and uses synthetic contacts. It tests the full stored funnel, server price authority, origin and validation boundaries, retry safety, login/logout, dashboard privacy, merchant separation, production payment lockout and public routes/OG rendering. It does not automate a browser. The 92 unit/database tests and six HTTP integration tests pass. Safari checks cover the mobile customer journey, a failed-save/retry recovery, merchant submission and responsive previews; see [QA notes and bundle measurements](docs/QA.md). MB WAY verification and the remaining hosted setup are documented in [PAYMENTS.md](docs/PAYMENTS.md).
 
 PostgreSQL tests use PGlite, a local PostgreSQL engine. They run the migration with only the optional `pgcrypto` extension declaration omitted, since `gen_random_uuid` is already available in the engine. No external database or credentials are needed for these tests.
 
@@ -113,7 +115,7 @@ tests/                Domain, PostgreSQL and server integration tests
 docs/                 Analytics, manual QA, design and asset provenance
 ```
 
-The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and Supabase. Dialogs use Radix with Jola's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. Small CSS transitions replace Framer Motion, and the optional merchant form loads on demand. No CMS, accounts, payment, delivery, merchant dashboard or inventory systems are included.
+The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and Supabase. Dialogs use Radix with Jola's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. Small CSS transitions replace Framer Motion, and the optional merchant form loads on demand. No CMS, customer accounts, live payments, delivery, merchant dashboard or inventory systems are included. Sandbox payment orders and attempts use separate tables in an isolated test project.
 
 ## Metric definitions and operating limits
 

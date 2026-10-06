@@ -7,6 +7,8 @@ import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 import { CartLayer } from "@/components/cart/cart";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { sandboxRequested } from "@/lib/server/payment-config";
+import { connection } from "next/server";
 const display = localFont({
   src: "../node_modules/@fontsource/barlow-condensed/files/barlow-condensed-latin-800-normal.woff2",
   variable: "--font-display",
@@ -39,24 +41,26 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#171815",
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const sandbox = sandboxRequested();
+  if (sandbox) await connection();
   return (
     <html lang="pt-PT" className={`${display.variable} ${body.variable}`}>
       <body>
         <a href="#main" className="skip-link">
           Saltar para o conteúdo
         </a>
-        <Providers>
+        <Providers sandbox={sandbox}>
           {children}
           <CartLayer />
-          <MetaPixel />
+          {!sandbox && <MetaPixel />}
         </Providers>
-        <Analytics />
-        <SpeedInsights />
+        {!sandbox && <Analytics />}
+        {!sandbox && <SpeedInsights />}
       </body>
     </html>
   );

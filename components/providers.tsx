@@ -26,6 +26,7 @@ import { Modal } from "@/components/ui/modal";
 import { createLatestWriter, postJson } from "@/lib/client-request";
 import { readJourney, writeJourney } from "@/lib/journey";
 import type { CartItem, Location, PackOptions } from "@/types";
+import { subtractPurchasedBasket } from "@/lib/payments";
 type CartContextValue = {
   items: CartItem[];
   ready: boolean;
@@ -41,6 +42,8 @@ type CartContextValue = {
   notify: (message: string) => void;
   syncOrder: (checkout?: boolean, delivery?: Location) => Promise<void>;
   storageError: boolean;
+  sandbox: boolean;
+  clearPaidOrder: (orderId: string, purchased: CartItem[]) => void;
 };
 const CartContext = createContext<CartContextValue | null>(null);
 export function useCart() {
@@ -48,7 +51,13 @@ export function useCart() {
   if (!context) throw new Error("CartProvider missing");
   return context;
 }
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  sandbox = false,
+}: {
+  children: React.ReactNode;
+  sandbox?: boolean;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [location, setDelivery] = useState<Location | null>(null);
   const [ready, setReady] = useState(false);
@@ -69,10 +78,43 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const savedPayload = useRef("");
   const checkoutReached = useRef(false);
   const started = useRef(false);
+  const paidOrders = useRef<string[]>([]);
+  const persistCart = useCallback(
+    (next: CartItem[]) => {
+      if (sandbox)
+        writeLocal("jola_sandbox_cart", {
+          items: next,
+          paidOrders: paidOrders.current,
+        });
+      else writeLocal("jola_cart", next);
+    },
+    [sandbox],
+  );
+  const clearPaidOrder = useCallback(
+    (orderId: string, purchased: CartItem[]) => {
+      if (!sandbox || paidOrders.current.includes(orderId)) return;
+      paidOrders.current = [...paidOrders.current, orderId];
+      const next = subtractPurchasedBasket(itemsRef.current, purchased);
+      itemsRef.current = next;
+      // Cart and receipt are one localStorage write, so a reload cannot subtract twice.
+      persistCart(next);
+      setItems(next);
+    },
+    [sandbox, persistCart],
+  );
   useEffect(() => {
     captureAttribution();
     getSession();
-    const cart = cartSchema.safeParse(readLocal("jola_cart", []));
+    const saved = readLocal<{ items?: CartItem[]; paidOrders?: string[] }>(
+      "jola_sandbox_cart",
+      {},
+    );
+    paidOrders.current = Array.isArray(saved.paidOrders)
+      ? saved.paidOrders.filter((id) => typeof id === "string")
+      : [];
+    const cart = cartSchema.safeParse(
+      sandbox ? (saved.items ?? []) : readLocal("jola_cart", []),
+    );
     const savedLocation = locationSchema.safeParse(
       readLocal("jola_location", null),
     );
@@ -93,52 +135,56 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setDenied(refused);
     setAgeOpen(!allowedRef.current);
     setReady(true);
-  }, []);
+  }, [sandbox]);
   const notify = useCallback((message: string) => {
     setToast(message);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setToast(""), 2400);
   }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
-  const syncOrder = useCallback((checkout = false, delivery?: Location) => {
-    if (!allowedRef.current) return Promise.resolve();
-    if (checkout) {
-      checkoutReached.current = true;
-      writeLocal("jola_checkout_started", true);
-    }
-    if (delivery) locationRef.current = delivery;
-    if (!writeQueue.current)
-      writeQueue.current = createLatestWriter<OrderInput>(async (payload) => {
-        const signature = JSON.stringify(payload);
-        if (signature === savedPayload.current) return;
-        try {
-          await postJson("/api/orders", payload);
-          savedPayload.current = signature;
-          setStorageError(false);
-        } catch (error) {
-          savedPayload.current = "";
-          setStorageError(true);
-          throw error;
-        }
+  const syncOrder = useCallback(
+    (checkout = false, delivery?: Location) => {
+      if (sandbox) return Promise.resolve();
+      if (!allowedRef.current) return Promise.resolve();
+      if (checkout) {
+        checkoutReached.current = true;
+        writeLocal("jola_checkout_started", true);
+      }
+      if (delivery) locationRef.current = delivery;
+      if (!writeQueue.current)
+        writeQueue.current = createLatestWriter<OrderInput>(async (payload) => {
+          const signature = JSON.stringify(payload);
+          if (signature === savedPayload.current) return;
+          try {
+            await postJson("/api/orders", payload);
+            savedPayload.current = signature;
+            setStorageError(false);
+          } catch (error) {
+            savedPayload.current = "";
+            setStorageError(true);
+            throw error;
+          }
+        });
+      return writeQueue.current({
+        session_id: getSession(),
+        items: itemsRef.current,
+        location: locationRef.current ?? undefined,
+        attribution: attribution(),
+        reached_checkout: checkoutReached.current,
       });
-    return writeQueue.current({
-      session_id: getSession(),
-      items: itemsRef.current,
-      location: locationRef.current ?? undefined,
-      attribution: attribution(),
-      reached_checkout: checkoutReached.current,
-    });
-  }, []);
+    },
+    [sandbox],
+  );
   useEffect(() => {
     if (!ageConfirmed) return;
-    writeLocal("jola_cart", items);
+    persistCart(items);
     if (!started.current && !items.length) return;
     started.current = true;
     const timeout = setTimeout(() => {
       void syncOrder().catch(() => undefined);
     }, 350);
     return () => clearTimeout(timeout);
-  }, [items, location, ageConfirmed, syncOrder]);
+  }, [items, location, ageConfirmed, syncOrder, persistCart]);
   const add = (id: string, options?: PackOptions) => {
     const product = getCatalogItem(id);
     if (!allowedRef.current || !product) return;
@@ -168,7 +214,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         ];
     itemsRef.current = next;
     setItems(next);
-    writeLocal("jola_cart", next);
+    persistCart(next);
     const priced = priceBasket(next);
     if (pack)
       trackOnce(
@@ -200,7 +246,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
     itemsRef.current = next;
     setItems(next);
-    writeLocal("jola_cart", next);
+    persistCart(next);
     const product = getCatalogItem(id);
     const priced = priceBasket(next);
     track("product_removed", {
@@ -226,7 +272,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
     itemsRef.current = next;
     setItems(next);
-    writeLocal("jola_cart", next);
+    persistCart(next);
     // Individual changes are tracked by the shared picker, including detail drafts.
     notify("Pack atualizado.");
   };
@@ -267,6 +313,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         notify,
         syncOrder,
         storageError,
+        sandbox,
+        clearPaidOrder,
       }}
     >
       {children}

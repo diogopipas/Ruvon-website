@@ -18,6 +18,9 @@ export default defineConfig({
       SUPABASE_URL: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
       NEXT_PUBLIC_SITE_URL: "http://localhost:3100",
+      // Production must retain the waitlist even with an accidentally set flag.
+      JOLA_PAYMENTS_MODE: "sandbox",
+      VERCEL_ENV: "production",
     },
   },
 });

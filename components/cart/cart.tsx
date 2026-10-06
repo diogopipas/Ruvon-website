@@ -5,7 +5,7 @@ import { PackOptionsPicker } from "@/components/packs/pack-options-picker";
 import { basketPackEvents, configurePack, packOptions } from "@/lib/packs";
 import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock3, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers";
 import { Modal } from "@/components/ui/modal";
 import { Quantity } from "./quantity";
@@ -29,6 +29,7 @@ export function CartContents({
     notify,
     storageError,
     updateOptions,
+    sandbox,
   } = useCart();
   const [busy, setBusy] = useState(false);
   const [retrying, setRetrying] = useState(false);
@@ -180,8 +181,7 @@ export function CartContents({
           <strong data-testid="basket-total">{money(priced.total)}</strong>
         </div>
       </div>
-      <div className="delivery-estimate">
-      </div>
+      <div className="delivery-estimate"></div>
       <div className="cart-actions">
         {!review && (
           <button
@@ -190,7 +190,11 @@ export function CartContents({
             disabled={busy || !ageConfirmed}
             aria-busy={busy}
           >
-            {busy ? "A guardar o carrinho…" : "Continuar para a minha zona"}
+            {busy
+              ? "A guardar o carrinho…"
+              : sandbox
+                ? "Continuar para MB WAY"
+                : "Continuar para a minha zona"}
           </button>
         )}
         {storageError && (
