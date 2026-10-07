@@ -85,10 +85,10 @@ export function MerchantSection() {
       </div>
       <div>
         <h2>Tens uma loja?</h2>
-        <p>Procuramos as primeiras lojas parceiras. Junta-te à Jola.</p>
+        <p>Procuramos as primeiras lojas parceiras. Junta-te à Ruvon.</p>
       </div>
       <button className="button button-secondary" onClick={() => setOpen(true)}>
-        Quero vender na Jola
+        Quero vender na Ruvon
       </button>
       {open && <MerchantForm open={open} onOpenChange={setOpen} />}
     </section>

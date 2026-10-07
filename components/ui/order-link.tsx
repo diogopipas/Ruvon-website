@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { track } from "@/lib/analytics";
 export function OrderLink({
-  children = "Pedir uma Jola",
+  children = "Pedir uma Ruvon",
   source = "landing",
   className = "button button-primary",
   href = "/pedir",

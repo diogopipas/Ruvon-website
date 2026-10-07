@@ -157,7 +157,7 @@ describe("storage failures and retries", () => {
     expect(body.error).not.toContain("private");
     apiError({ code: "23514", message: "sensitive event properties" });
     expect(log).toHaveBeenLastCalledWith(
-      "[Jola] Request failed:",
+      "[Ruvon] Request failed:",
       "StorageError",
       "code=23514",
     );

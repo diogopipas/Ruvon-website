@@ -91,7 +91,7 @@ export function track(
     properties: { ...attribution(), ...properties },
   };
   if (process.env.NODE_ENV === "development")
-    console.info("[Jola analytics]", name, payload.properties);
+    console.info("[Ruvon analytics]", name, payload.properties);
   window.dispatchEvent(new CustomEvent("jola:analytics", { detail: payload }));
   void fetch("/api/events", {
     method: "POST",

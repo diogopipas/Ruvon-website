@@ -111,7 +111,7 @@ async function Dashboard({ city }: { city: DashboardCity }) {
       <div className="dashboard-intro">
         <div>
           <span className="small-label">Antes da primeira entrega.</span>
-          <h1>Há sede de Jola?</h1>
+          <h1>Há sede de Ruvon?</h1>
           <p>Procura real. Pedidos simulados. Próximas decisões.</p>
         </div>
         <span className={`data-badge ${local ? "local" : ""}`}>

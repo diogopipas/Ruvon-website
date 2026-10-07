@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 export const alt =
-  "Jola — Acabou a bebida? Nós levamos. Em breve, zona a zona.";
+  "Ruvon — Acabou a bebida? Nós levamos. Em breve, zona a zona.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default async function Image() {
@@ -32,7 +32,7 @@ export default async function Image() {
           alignItems: "center",
         }}
       >
-        <span style={{ fontSize: 61, fontStyle: "italic" }}>JOLA</span>
+        <span style={{ fontSize: 61, fontStyle: "italic" }}>RUVON</span>
         <span style={{ fontSize: 26, color: "#bbc2a6" }}>
           Em breve, zona a zona
         </span>

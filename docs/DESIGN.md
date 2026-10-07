@@ -1,6 +1,6 @@
 # Design direction and asset provenance
 
-The brief calls for the feeling of a Portuguese night in: warm, cold drinks at hand, confident and slightly cheeky. The defining visual is the amber Jola delivery bag. Supporting UI stays quiet: product illustrations, simple borders, squared-off buttons and restrained motion on actions.
+The brief calls for the feeling of a Portuguese night in: warm, cold drinks at hand, confident and slightly cheeky. The defining visual is the amber Ruvon delivery bag. Supporting UI stays quiet: product illustrations, simple borders, squared-off buttons and restrained motion on actions.
 
 ## Tokens
 
@@ -24,19 +24,17 @@ Headings and wordmark use Barlow Condensed 800; body/UI use DM Sans. Both fonts 
 - The compact mobile catalogue introduction gives products more space. Prelaunch status remains visible before ordering and throughout checkout.
 - Short CSS transitions support controls; dialogs open immediately. Reduced-motion preferences disable nonessential animation. The merchant form loads only when requested.
 
-## Generated hero
+## Generated hero and brand refresh
 
-- Mode: built-in `image_gen` tool, not the CLI.
-- Production asset: `public/images/jola-hero.webp` (1100 px, approximately 156 KB).
-- Original: `public/images/jola-hero.png`.
+- Mode: built-in `image_gen` tool.
+- Production asset: `public/images/ruvon-hero.webp` (1100 × 1100 px).
+- Edited source: `public/images/ruvon-hero.png`.
 - Used through `next/image` with explicit dimensions and responsive sizes.
-- Seventeen key products now use generated transparent preview packshots; the others retain isolated SVG fallback artwork. These are not manufacturer-supplied photographs.
+- On 7 October 2026, the bag wordmark was replaced with RUVON while preserving the existing photo composition, products, colors and lighting.
+- Peanut, paper-cup and legacy ice-bag previews were also edited to show Ruvon. The catalog uses `ruvon-amendoins.webp` and `ruvon-copos.webp`; ice continues to use the sourced 2 kg product photograph. Branded preview paths changed so image caches request the refreshed assets.
+- The old branded raster files were removed from `public`.
 
-Exact generation prompt:
-
-> Use case: product-mockup. Asset type: high end Portuguese nightlife delivery brand website hero photograph, square 1024x1024. Create an editorial studio still life of a mustard amber-yellow paper delivery bag with bold black italic wordmark 'JOLA' centered on it. An open bag overflowing with two realistic cold brown glass beer bottles with plain cream labels, green bottle, red cola can, plus blue bag of ice leaning on the right and an orange snack packet at left. Clear ice cubes scattered in foreground on a near black tabletop. Bag centered and entire composition contained within image with generous breathing room. Moody charcoal background #171815 seamless studio, amber side lighting, condensation on bottles, crisp tactile material, subtle film grain, appetizing premium beverage commercial photography. Slightly low camera angle, dynamic yet physically plausible arrangement. Color palette charcoal, warm mustard, cream, little red, glacial blue. No people, no UI, no slogans, no watermark, no text other than JOLA on bag. This is an actual photograph-inspired hero asset, not a web page mockup.
-
-The generated image was inspected and optimized into WebP without editing the depicted content. OpenGraph imagery is generated locally using Next.js `ImageResponse` and the same typography/palette.
+Exact edit prompts: [Ruvon image prompts](ruvon-image-prompts.json). The edited rasters were inspected and optimized with Sharp without changing their depicted content. OpenGraph imagery is generated locally using Next.js `ImageResponse` and the same typography/palette. The favicon uses an R monogram.
 
 ## Pack art direction
 

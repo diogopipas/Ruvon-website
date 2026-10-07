@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-07",
+  "mode": "built-in image_gen edits",
+  "assets": [
+    {
+      "asset": "public/images/ruvon-hero.png",
+      "prompt": "Use case: text-localization. Asset type: existing Portuguese drinks-delivery website hero photograph. Input image 1: edit target, the existing hero. Primary request: replace only the large black italic wordmark \"JOLA\" on the front of the amber paper bag with \"RUVON\", spelled exactly R-U-V-O-N. Match the original bold condensed italic lettering style, black ink, centered placement, perspective, paper folds and tactile texture. Fit all five letters neatly across the same bag face. Constraints: keep the photograph composition, square framing, bag shape, beer bottles, green bottle, red can, orange snack packet, blue ice bag, scattered ice cubes, lighting, condensation, colors and background unchanged. Preserve photographic realism. No JOLA text anywhere. No extra text, slogan, objects, UI or watermark."
+    },
+    {
+      "asset": "public/images/products/ruvon-amendoins.webp",
+      "prompt": "Use case: text-localization. Asset type: transparent catalog peanut pouch packshot. Input image 1: edit target. Replace only the brand word \"Jola\" inside the dark green oval with \"Ruvon\", spelled R-u-v-o-n, in matching cream bold italic lettering. Fit neatly within the same oval; retain leaf icon. Keep the entire kraft paper pouch, transparent peanut window, peanuts, label, \"AMENDOINS\", \"TORRADOS\", \"100% NATURAL\", \"200g\", composition, colors, lighting and proportions unchanged. Preserve transparent background and isolated product cutout. No Jola text anywhere, no extra objects, no watermark."
+    },
+    {
+      "asset": "public/images/products/ruvon-copos.webp",
+      "prompt": "Use case: text-localization. Asset type: transparent catalog paper cups packshot. Input image 1: edit target. Replace only the green brand word \"Jola\" on the wrapper label with \"Ruvon\", spelled R-u-v-o-n, in matching bold green lettering, fitting in the same label area and retaining the leaf icon. Keep the tall stack of cream paper cups, transparent plastic wrapping, green label design, \"20 UNIDADES\", \"COPOS DE PAPEL\", \"33cl\", recycling icons and other label text, framing, lighting, colors and proportions unchanged. Preserve transparent background and isolated product cutout. No Jola text anywhere, no extra objects, no watermark."
+    },
+    {
+      "asset": "public/images/products/ruvon-gelo.webp",
+      "prompt": "Use case: text-localization. Asset type: transparent catalog ice bag packshot. Input image 1: edit target. Replace only the white italic brand word \"Jola\" inside the blue oval with \"Ruvon\", spelled R-u-v-o-n, in matching bold white italic lettering, fitting neatly within the same oval. Keep the full blue transparent tied ice bag, ice cubes, \"GELO\", \"EM CUBOS\", \"2 kg\", snowflake badge, other label text, plastic folds, framing, colors, lighting and proportions unchanged. Preserve transparent background and isolated product cutout. No Jola text anywhere, no extra objects, no watermark."
+    }
+  ]
+}

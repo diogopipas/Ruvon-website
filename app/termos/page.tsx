@@ -16,9 +16,9 @@ export default function Terms() {
           <br />
           Tudo às claras.
         </h1>
-        <h2>Uma antevisão da Jola</h2>
+        <h2>Uma antevisão da Ruvon</h2>
         <p>
-          A Jola é atualmente um conceito em fase de validação. O catálogo, os
+          A Ruvon é atualmente um conceito em fase de validação. O catálogo, os
           carrinhos, os preços, as taxas e os tempos de entrega apresentados são
           ilustrativos. Não estão a ser aceites encomendas reais. Não há vendas,
           pagamentos, reservas de produtos ou entregas.
@@ -38,7 +38,7 @@ export default function Terms() {
         </p>
         <h2>Avisos de lançamento</h2>
         <p>
-          Ao inscreveres-te, pedes para receber um aviso quando a Jola chegar à
+          Ao inscreveres-te, pedes para receber um aviso quando a Ruvon chegar à
           tua zona. A cobertura e a data de lançamento ainda não estão
           definidas. A inscrição não é uma encomenda e não implica pagamento.
         </p>

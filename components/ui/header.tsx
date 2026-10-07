@@ -11,13 +11,13 @@ export function Header() {
             Como funciona
           </Link>
           <Link href="/?loja=1#lojas" className="nav-link">
-            Quero vender na Jola
+            Quero vender na Ruvon
           </Link>
           <OrderLink
             source="navbar"
             className="button button-primary button-small"
           >
-            Pedir uma Jola
+            Pedir uma Ruvon
           </OrderLink>
         </nav>
       </div>

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { CheckoutFlow } from "@/components/checkout/checkout-flow";
 export const metadata: Metadata = {
-  title: "A tua primeira Jola",
+  title: "A tua primeira Ruvon",
   robots: { index: false, follow: false },
 };
 export default function Page() {

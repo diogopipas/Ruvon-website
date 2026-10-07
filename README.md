@@ -1,4 +1,4 @@
-# Jola
+# Ruvon
 
 **Acabou a bebida? Nós levamos.** A working demand-validation MVP for a Portuguese drinks-and-party delivery concept. It has a full simulated ordering experience, local persistence for development, Supabase persistence for deployment, and a protected demand dashboard. It does not sell alcohol, take payments, book deliveries or send messages.
 
@@ -113,7 +113,7 @@ tests/                Domain, PostgreSQL and server integration tests
 docs/                 Analytics, manual QA, design and asset provenance
 ```
 
-The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and Supabase. Dialogs use Radix with Jola's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. Small CSS transitions replace Framer Motion, and the optional merchant form loads on demand. No CMS, accounts, payment, delivery, merchant dashboard or inventory systems are included.
+The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and Supabase. Dialogs use Radix with Ruvon's own styling. The server renders the landing content and dashboard; only interactive sections hydrate. Small CSS transitions replace Framer Motion, and the optional merchant form loads on demand. No CMS, accounts, payment, delivery, merchant dashboard or inventory systems are included.
 
 ## Metric definitions and operating limits
 
@@ -129,7 +129,7 @@ The stack is Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, Lucide and
 - Funnel dropoff uses started orders → checkout → converted orders. City-only waitlist leads are shown separately from this denominator. Each browser has one durable record, not a record per visit or unique person.
 - Landing/product impression events are deduplicated per tab session, including reloads. Product impressions wait for age confirmation. Real add/remove clicks remain individual events.
 - Server storage requests have an 8-second deadline; browser submissions have a 12-second deadline. Cart writes coalesce to the latest state, avoiding a backlog during outages. Failed submissions preserve the form and offer retry.
-- Analytics delivery is best effort. Contact and order saves report errors and can be retried; analytics loss does not prevent using the product. Vercel Web Analytics measures page views separately from Jola's custom events. The Meta Pixel sends `PageView` only after optional advertising consent; visitors can change that choice on the privacy page.
+- Analytics delivery is best effort. Contact and order saves report errors and can be retried; analytics loss does not prevent using the product. Vercel Web Analytics measures page views separately from Ruvon's custom events. The Meta Pixel sends `PageView` only after optional advertising consent; visitors can change that choice on the privacy page.
 - Request limits are in-process and suitable for an MVP; use a shared rate limiter or Vercel firewall rules when traffic scales. The dashboard pages through all stored rows and aggregates on the server; use SQL aggregation when volume justifies it.
 - Local disk storage is intended for one local server process. Use Supabase for multi-instance deployments.
 

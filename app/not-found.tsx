@@ -9,7 +9,7 @@ export default function NotFound() {
         <h1>Aqui já não há nada.</h1>
         <p>Mas o essencial para a noite está logo ali.</p>
         <Link href="/pedir" className="button button-primary">
-          Voltar à Jola
+          Voltar à Ruvon
         </Link>
       </main>
     </>

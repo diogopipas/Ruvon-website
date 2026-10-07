@@ -89,7 +89,7 @@ export function CartContents({
           href="/pedir"
           onClick={closeCart}
         >
-          Explorar a Jola
+          Explorar a Ruvon
         </Link>
       </div>
     );
@@ -172,7 +172,7 @@ export function CartContents({
           <span>{money(priced.delivery_fee)}</span>
         </div>
         <div>
-          <span>Taxa Jola</span>
+          <span>Taxa Ruvon</span>
           <span>{money(priced.service_fee)}</span>
         </div>
         <div className="cart-total">

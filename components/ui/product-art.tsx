@@ -363,7 +363,7 @@ export function ProductArt({
             fontSize="12"
             fill="#7e785f"
           >
-            JOLA
+            RUVON
           </text>
         </g>
       )}

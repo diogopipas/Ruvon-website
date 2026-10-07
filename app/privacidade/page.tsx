@@ -16,7 +16,7 @@ export default function Privacy() {
         </Link>
         <h1>A tua privacidade.</h1>
         <p>
-          A Jola é um projeto em fase de validação. Esta página explica o que a
+          A Ruvon é um projeto em fase de validação. Esta página explica o que a
           experiência guarda e para quê.
         </p>
         <h2>Quem é responsável</h2>
@@ -42,7 +42,7 @@ export default function Privacy() {
         <h2>Para que usamos os dados</h2>
         <p>
           Com o teu consentimento, usamos o teu contacto para comunicar o
-          lançamento da Jola na tua zona. A zona e os produtos escolhidos
+          lançamento da Ruvon na tua zona. A zona e os produtos escolhidos
           ajudam-nos a decidir onde lançar e o que disponibilizar. Os contactos
           das lojas são usados para preparar possíveis parcerias. Não pedimos
           dados de pagamento.
@@ -96,7 +96,7 @@ export default function Privacy() {
         </p>
         {contact ? (
           <p>
-            Para falar com a equipa Jola sobre os teus dados:{" "}
+            Para falar com a equipa Ruvon sobre os teus dados:{" "}
             <a href={`mailto:${contact}`}>{contact}</a>.
           </p>
         ) : (

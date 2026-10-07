@@ -7,7 +7,7 @@ export function Footer() {
         <div className="footer-top">
           <div>
             <Wordmark />
-            <p>Pede uma Jola</p>
+            <p>Pede uma Ruvon</p>
           </div>
           <nav aria-label="Rodapé">
             <Link href="/#como-funciona">Como funciona</Link>
@@ -19,7 +19,7 @@ export function Footer() {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Jola. Feito para boas noites.
+            © {new Date().getFullYear()} Ruvon. Feito para boas noites.
           </span>
         </div>
       </div>

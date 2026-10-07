@@ -288,7 +288,7 @@ export function CheckoutFlow() {
                     </p>
                     <p className="checkout-explainer">
                       Aqui guardas o teu interesse e podes pedir um aviso para
-                      quando a Jola chegar. Não há pagamento nem entrega nesta
+                      quando a Ruvon chegar. Não há pagamento nem entrega nesta
                       fase.
                     </p>
                     <form
@@ -353,7 +353,7 @@ export function CheckoutFlow() {
                       {interest
                         ? "A tua zona conta."
                         : "O teu carrinho ficou guardado e ajuda-nos a preparar o lançamento."}{" "}
-                      Deixa o teu contacto e avisamos-te quando a Jola chegar à
+                      Deixa o teu contacto e avisamos-te quando a Ruvon chegar à
                       tua zona.
                     </p>
                     <div className="selected-location">
@@ -444,7 +444,7 @@ export function CheckoutFlow() {
                           }
                         />
                         <span>
-                          Quero receber novidades sobre o lançamento da Jola e
+                          Quero receber novidades sobre o lançamento da Ruvon e
                           li a{" "}
                           <Link href="/privacidade" target="_blank">
                             Privacidade
@@ -486,8 +486,8 @@ export function CheckoutFlow() {
                       Vais saber quando chegar.
                     </h1>
                     <p>
-                      Guardámos o teu contacto. Quando a Jola chegar à tua zona,
-                      avisamos-te.
+                      Guardámos o teu contacto. Quando a Ruvon chegar à tua
+                      zona, avisamos-te.
                     </p>
                     {location && (
                       <div className="success-zone">
@@ -508,11 +508,11 @@ export function CheckoutFlow() {
           <aside className="checkout-summary">
             {interest ? (
               <div className="waitlist-aside">
-                <span>JOLA</span>
+                <span>RUVON</span>
                 <h2>
                   A tua cidade.
                   <br />A tua noite.
-                  <br />A tua Jola.
+                  <br />A tua Ruvon.
                 </h2>
                 <p>Ajudas-nos a escolher onde começar.</p>
                 <MapPin size={48} strokeWidth={1} />
@@ -533,7 +533,7 @@ export function CheckoutFlow() {
         )}
       </main>
       <footer className="checkout-footer">
-        Jola é um conceito em validação. Não há vendas, cobranças ou entregas
+        Ruvon é um conceito em validação. Não há vendas, cobranças ou entregas
         nesta fase.
       </footer>
     </>
