@@ -37,7 +37,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
         <br />
         da próxima noite.
       </h1>
-      <p>O pulso da Jola, numa só página.</p>
+      <p>O pulso da Ruvon, numa só página.</p>
       {!configured ? (
         <p className="form-error">
           Define ADMIN_PASSWORD com pelo menos 12 caracteres para ativar o

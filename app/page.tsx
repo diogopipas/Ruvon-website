@@ -25,7 +25,7 @@ export default function Home() {
             <h1>
               Acabou <br />a bebida?
               <br />
-              <span>Pede uma Jola</span>
+              <span>Pede uma Ruvon</span>
             </h1>
             <p className="hero-description">
               Cerveja gelada, gelo, mixers, snacks e tudo o que falta para
@@ -38,8 +38,8 @@ export default function Home() {
           </div>
           <div className="hero-visual">
             <Image
-              src="/images/jola-hero.webp"
-              alt="Saco Jola cheio de bebidas geladas, gelo e snacks para a tua noite"
+              src="/images/ruvon-hero.webp"
+              alt="Saco Ruvon cheio de bebidas geladas, gelo e snacks para a tua noite"
               width={1100}
               height={1100}
               preload
@@ -83,7 +83,7 @@ export default function Home() {
           <span>✳</span>
           <span>UMA.</span>
           <span>✳</span>
-          <span>JOLA.</span>
+          <span>RUVON.</span>
           <span>✳</span>
         </div>
         <section className="section packs-section container" id="packs">
@@ -175,7 +175,7 @@ export default function Home() {
               <time>23:47</time>
             </div>
             <div className="chat-message outgoing">
-              <p>calma. peço uma Jola 🍺</p>
+              <p>calma. peço uma Ruvon 🍺</p>
               <time>23:48 ✓✓</time>
             </div>
             <span className="chat-caption">
@@ -188,7 +188,7 @@ export default function Home() {
             <span className="location-dot">
               <MapPin size={19} />A tua cidade conta.
             </span>
-            <h2>Onde queres a Jola?</h2>
+            <h2>Onde queres a Ruvon?</h2>
             <p>
               Estamos a escolher as primeiras zonas.
               <br />
@@ -210,19 +210,19 @@ export default function Home() {
               {[
                 [
                   "Já posso fazer um pedido?",
-                  "Ainda não. Estamos a validar a Jola antes do lançamento. Podes explorar o catálogo, montar um carrinho e dizer-nos a tua zona. Não há pagamentos, vendas ou entregas nesta fase.",
+                  "Ainda não. Estamos a validar a Ruvon antes do lançamento. Podes explorar o catálogo, montar um carrinho e dizer-nos a tua zona. Não há pagamentos, vendas ou entregas nesta fase.",
                 ],
                 [
-                  "Onde vai chegar a Jola?",
-                  "Estamos a decidir as primeiras zonas com base no interesse. Escolhe a tua cidade e avisamos-te quando a Jola chegar.",
+                  "Onde vai chegar a Ruvon?",
+                  "Estamos a decidir as primeiras zonas com base no interesse. Escolhe a tua cidade e avisamos-te quando a Ruvon chegar.",
                 ],
                 [
                   "O que acontece depois de me inscrever?",
-                  "Guardamos o teu contacto para avisar quando a Jola chegar à tua zona. Não estás a fazer uma encomenda e não há pagamento nesta fase.",
+                  "Guardamos o teu contacto para avisar quando a Ruvon chegar à tua zona. Não estás a fazer uma encomenda e não há pagamento nesta fase.",
                 ],
                 [
                   "É preciso ter mais de 18 anos?",
-                  "Sim. A experiência Jola destina-se a maiores de 18 anos. O consumo responsável faz parte de uma boa noite.",
+                  "Sim. A experiência Ruvon destina-se a maiores de 18 anos. O consumo responsável faz parte de uma boa noite.",
                 ],
               ].map(([question, answer]) => (
                 <details key={question}>

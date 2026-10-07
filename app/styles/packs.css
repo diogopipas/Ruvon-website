@@ -1,4 +1,4 @@
-/* Jola's pack menu: product stages and order receipts. */
+/* Ruvon's pack menu: product stages and order receipts. */
 .pack-receipt h3,
 .group-discovery h3,
 .pack-detail h3,
@@ -602,7 +602,7 @@
   display: none;
 }
 .steps-grid {
-  counter-reset: jola-step;
+  counter-reset: ruvon-step;
   gap: 36px;
 }
 .steps-grid article {
@@ -610,10 +610,10 @@
   border: 0;
   border-radius: 0;
   padding: 0;
-  counter-increment: jola-step;
+  counter-increment: ruvon-step;
 }
 .steps-grid article h3::before {
-  content: "0" counter(jola-step);
+  content: "0" counter(ruvon-step);
   display: block;
   font-size: 66px;
   line-height: 1;

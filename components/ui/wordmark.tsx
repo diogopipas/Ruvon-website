@@ -4,9 +4,9 @@ export function Wordmark({ large = false }: { large?: boolean }) {
     <Link
       href="/"
       className={`wordmark ${large ? "wordmark-large" : ""}`}
-      aria-label="Jola — página inicial"
+      aria-label="Ruvon — página inicial"
     >
-      JOLA
+      RUVON
     </Link>
   );
 }

@@ -5,7 +5,7 @@ import { PaymentCheckout } from "@/components/checkout/payment-checkout";
 import { sandboxRequested } from "@/lib/server/payment-config";
 import { connection } from "next/server";
 export const metadata: Metadata = {
-  title: "A tua primeira Jola",
+  title: "A tua primeira Ruvon",
   robots: { index: false, follow: false },
 };
 export default async function Page({

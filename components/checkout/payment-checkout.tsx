@@ -289,7 +289,7 @@ export function PaymentCheckout() {
                           ? "Pagamento não concluído."
                           : order
                             ? "Tudo pronto?"
-                            : "A tua Jola, com MB WAY."}
+                            : "A tua Ruvon, com MB WAY."}
               </h1>
               <p className="checkout-description">
                 {completed
@@ -438,7 +438,7 @@ export function PaymentCheckout() {
                 <span>{money(order?.delivery_fee ?? priced.delivery_fee)}</span>
               </div>
               <div>
-                <span>Taxa Jola</span>
+                <span>Taxa Ruvon</span>
                 <span>{money(order?.service_fee ?? priced.service_fee)}</span>
               </div>
               <div className="cart-total">

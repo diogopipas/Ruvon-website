@@ -47,7 +47,7 @@ export function mbwayPayload(order: PaymentOrder, attempt: PaymentAttempt) {
       ...(attempt.email ? { email: attempt.email } : {}),
     },
     capture: {
-      descriptive: `Jola sandbox ${order.id}`,
+      descriptive: `Ruvon sandbox ${order.id}`,
       transaction_key: attempt.id,
     },
   };

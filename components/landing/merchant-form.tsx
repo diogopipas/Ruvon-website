@@ -72,7 +72,9 @@ export default function MerchantForm({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={success ? "Vamos falar." : "A próxima Jola pode sair da tua loja."}
+      title={
+        success ? "Vamos falar." : "A próxima Ruvon pode sair da tua loja."
+      }
       description={
         success
           ? "Recebemos o teu interesse. Entraremos em contacto quando prepararmos o lançamento na tua zona."
@@ -145,7 +147,7 @@ export default function MerchantForm({
           <label className="checkbox-label">
             <input type="checkbox" name="consent" required />
             <span>
-              Quero que a Jola me contacte sobre a parceria e li a{" "}
+              Quero que a Ruvon me contacte sobre a parceria e li a{" "}
               <a href="/privacidade" target="_blank" rel="noreferrer">
                 Privacidade
               </a>

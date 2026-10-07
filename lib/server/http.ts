@@ -80,7 +80,7 @@ export function apiError(
       },
     );
   console.error(
-    "[Jola] Request failed:",
+    "[Ruvon] Request failed:",
     error instanceof Error ? error.name : "StorageError",
     typeof error === "object" &&
       error !== null &&

@@ -2,9 +2,9 @@
 
 The single entry point is `track(name, properties)` in `lib/analytics.ts`. It posts to `/api/events` and dispatches a `jola:analytics` DOM event for a future provider adapter. Development builds also log structured events. No email, phone, name or street is included in event properties.
 
-Vercel Web Analytics separately measures page views through the `Analytics` component in the root layout. Jola's custom events below remain in its own storage; they are not forwarded to Vercel.
+Vercel Web Analytics separately measures page views through the `Analytics` component in the root layout. Ruvon's custom events below remain in its own storage; they are not forwarded to Vercel.
 
-The Meta Pixel (`1319849436755354`) loads only after optional advertising consent and adult age confirmation. It sends `PageView` on the current public route and subsequent client-side public-route changes. It does not receive Jola's product, cart or contact events. Rejection leaves the Meta script unloaded; the privacy page lets visitors change their preference. The no-script image fallback is deliberately omitted because it cannot obtain consent.
+The Meta Pixel (`1319849436755354`) loads only after optional advertising consent and adult age confirmation. It sends `PageView` on the current public route and subsequent client-side public-route changes. It does not receive Ruvon's product, cart or contact events. Rejection leaves the Meta script unloaded; the privacy page lets visitors change their preference. The no-script image fallback is deliberately omitted because it cannot obtain consent.
 
 | Event                | Trigger                                                          | Main properties                                                 |
 | -------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |

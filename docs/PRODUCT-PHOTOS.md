@@ -2,7 +2,7 @@
 
 Added 25 September 2026 to replace the 15 remaining SVG catalog illustrations. Files are hosted locally in `public/images/products`, resized to at most 600 × 600 and compressed to WebP. No new generated imagery was used for these products.
 
-These are public product photographs used as prelaunch references, not evidence of a supply arrangement or permission from the rights holders. Generic extras illustrate the product type; the quantity shown in the catalog defines the selection. Generated pack scenes remain unchanged. The 2 kg ice image uses a photographed bag instead of the generated Jola-branded preview.
+These are public product photographs used as prelaunch references, not evidence of a supply arrangement or permission from the rights holders. Generic extras illustrate the product type; the quantity shown in the catalog defines the selection. Generated pack scenes remain unchanged. The 2 kg ice image uses a photographed bag instead of the generated Ruvon-branded preview.
 
 Lay’s Originais now displays 160 g to match the photographed Portuguese pack; its price is unchanged.
 

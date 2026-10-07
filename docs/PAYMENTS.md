@@ -1,6 +1,6 @@
 # MB WAY sandbox
 
-The Jola catalogue and configurable packs remain authoritative. This integration is **sandbox only**: the provider URL is fixed to `https://api.test.easypay.pt/2.0`; production deployments return 404 for all payment endpoints, even if `JOLA_PAYMENTS_MODE=sandbox` is mistakenly set. The normal production checkout still collects launch interest.
+The Ruvon catalogue and configurable packs remain authoritative. This integration is **sandbox only**: the provider URL is fixed to `https://api.test.easypay.pt/2.0`; production deployments return 404 for all payment endpoints, even if `JOLA_PAYMENTS_MODE=sandbox` is mistakenly set. The normal production checkout still collects launch interest.
 
 ## Credentials and setup
 
@@ -18,12 +18,12 @@ JOLA_SANDBOX_SUPABASE_URL=https://YOUR_TEST_PROJECT.supabase.co
 JOLA_SANDBOX_SUPABASE_SERVICE_ROLE_KEY=YOUR_TEST_SERVICE_ROLE_KEY
 ```
 
-The webhook username/password are **Jola's callback authentication**, not your Easypay login password or ApiKey. Initial values were generated in `.env.local` during implementation if they were absent. Configure the same values in the provider's notification BasicAuth settings; don't print or commit them. None of these variables may have a `NEXT_PUBLIC_` prefix. Keep drafts and test contacts synthetic.
+The webhook username/password are **Ruvon's callback authentication**, not your Easypay login password or ApiKey. Initial values were generated in `.env.local` during implementation if they were absent. Configure the same values in the provider's notification BasicAuth settings; don't print or commit them. None of these variables may have a `NEXT_PUBLIC_` prefix. Keep drafts and test contacts synthetic.
 
 4. Restart `npm run dev`. Add products to the catalogue and open `/checkout`. Sandbox carts are stored separately from normal carts. The first button, **Rever pagamento**, obtains the server quote and establishes the HttpOnly cookie without charging. The next button, **Pagar {total} com MB WAY**, creates a Single Sale request. Phone is required; email is optional; city only, no postcode. Customers are not enrolled in the waitlist. `?interesse=1` retains the interest-only form against the test dataset.
 5. On Vercel, use a dedicated protected **Preview branch** (`codex/mbway-sandbox`), with these variables scoped to that branch's Preview environment. With Vercel CLI 62.5.0, use `vercel env add <NAME> preview --git-branch codex/mbway-sandbox --project jola-website --scope diogos-projects-f6903add --sensitive`, supplying the value through stdin. Keep `JOLA_PAYMENTS_MODE=disabled` in Production. Redeploy the preview after setting variables. Upgrade older CLIs with `npm i -g vercel@latest`. `.vercelignore` excludes environment files and local datasets from deployment uploads.
 
-The Vercel Marketplace refused the Free Supabase resource with `Billing plan is disabled: free (400)`; it did not create a test database. Direct Supabase provisioning is the fallback. Supabase permits two active Free projects across organizations owned/administered by the account, so a separate free test project needs an available slot. Do not pause another application, upgrade a plan or reuse Jola's production database to bypass this restriction without the owner's explicit decision. See [Supabase billing](https://supabase.com/docs/guides/platform/billing-on-supabase).
+The Vercel Marketplace refused the Free Supabase resource with `Billing plan is disabled: free (400)`; it did not create a test database. Direct Supabase provisioning is the fallback. Supabase permits two active Free projects across organizations owned/administered by the account, so a separate free test project needs an available slot. Do not pause another application, upgrade a plan or reuse Ruvon's production database to bypass this restriction without the owner's explicit decision. See [Supabase billing](https://supabase.com/docs/guides/platform/billing-on-supabase).
 
 ## Webhook configuration
 

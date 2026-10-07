@@ -21,16 +21,16 @@ const body = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
-  title: { default: "Jola — Bebidas e gelo à porta", template: "%s · Jola" },
+  title: { default: "Ruvon — Bebidas e gelo à porta", template: "%s · Ruvon" },
   description:
-    "Acabou a bebida? Jola leva cerveja gelada, gelo, mixers, snacks e tudo o que falta para salvar a noite.",
+    "Acabou a bebida? Ruvon leva cerveja gelada, gelo, mixers, snacks e tudo o que falta para salvar a noite.",
   openGraph: {
-    title: "Acabou a bebida? Nós levamos. | Jola",
+    title: "Acabou a bebida? Nós levamos. | Ruvon",
     description:
       "Cerveja gelada, gelo, mixers e snacks. Não vás buscar. Pede. Em breve, zona a zona.",
     locale: "pt_PT",
     type: "website",
-    siteName: "Jola",
+    siteName: "Ruvon",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },

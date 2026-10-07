@@ -20,8 +20,6 @@ export const productImages: Record<string, string> = {
       "pringles",
       "agua",
       "agua-6",
-      "amendoins",
-      "copos",
       "copos-10",
       "seven-up",
       "heineken",
@@ -45,6 +43,8 @@ export const productImages: Record<string, string> = {
   "somersby-8": "/images/products/somersby.webp",
   "somersby-16": "/images/products/somersby.webp",
   "super-bock-zero-12": "/images/products/super-bock-zero.webp",
+  amendoins: "/images/products/ruvon-amendoins.webp",
+  copos: "/images/products/ruvon-copos.webp",
   gelo: "/images/products/gelo-2kg.webp",
 };
 

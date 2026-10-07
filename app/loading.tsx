@@ -4,7 +4,7 @@ export default function Loading() {
       id="main"
       className="catalog-skeleton container"
       role="status"
-      aria-label="A preparar a Jola"
+      aria-label="A preparar a Ruvon"
     >
       <div />
       {Array.from({ length: 4 }, (_, i) => (

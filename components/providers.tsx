@@ -335,7 +335,7 @@ export function Providers({
         </h2>
         <p>
           {denied
-            ? "A Jola destina-se a adultos. Não podes continuar para o catálogo."
+            ? "A Ruvon destina-se a adultos. Não podes continuar para o catálogo."
             : "Boas noites, com responsabilidade. Confirma a tua idade para entrares."}
         </p>
         {!denied ? (

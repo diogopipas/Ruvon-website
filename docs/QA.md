@@ -7,9 +7,9 @@ Use a private browser profile and a synthetic contact such as `qa@example.com`. 
 1. Open `/?utm_source=instagram&utm_campaign=qa_mobile&utm_content=night_2347` at 390 × 844.
 2. Confirm the age gate is visible and focus is trapped in the dialog. Choose “Não”: the catalogue stays blocked. Return and confirm 18+.
 3. Verify hero, primary CTA and preview messaging. Refresh; age confirmation should persist.
-4. Click “Pedir uma Jola”. Add one each: Super Bock Original 6 × 33 cl, Saco de gelo 2 kg, Coca-Cola Original 1,75 L, Doritos Tex-Mex 225 g.
+4. Click “Pedir uma Ruvon”. Add one each: Super Bock Original 6 × 33 cl, Saco de gelo 2 kg, Coca-Cola Original 1,75 L, Doritos Tex-Mex 225 g.
 5. Verify the floating cart shows four articles. Open it.
-6. Confirm subtotal **14,46 €**, delivery **2,99 €**, Jola fee **0,89 €**, total **18,34 €**. Increment/decrement and check the total changes.
+6. Confirm subtotal **14,46 €**, delivery **2,99 €**, Ruvon fee **0,89 €**, total **18,34 €**. Increment/decrement and check the total changes.
 7. Choose “Continuar para a minha zona”, select **Lisboa**, and continue to the launch-notification form. No postcode field should appear.
 8. Confirm the zone-by-zone launch message and the “Quero saber quando chegar” CTA. Refresh; the location, basket and contact step must survive.
 9. Enter a synthetic email or valid-format Portuguese phone, check consent, submit.
