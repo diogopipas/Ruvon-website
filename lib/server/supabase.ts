@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { sandboxDatabaseConfig, sandboxRequested } from "./payment-config";
 export const STORAGE_TIMEOUT_MS = 8000;
 
 export function fetchWithTimeout(
@@ -16,8 +17,9 @@ export function fetchWithTimeout(
 }
 
 export function getSupabase() {
-  const url = process.env.SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const sandbox = sandboxRequested() ? sandboxDatabaseConfig() : null;
+  const url = sandbox?.url ?? process.env.SUPABASE_URL?.trim();
+  const key = sandbox?.key ?? process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url && !key) return null;
   if (!url || !key) throw new Error("Supabase configuration is incomplete.");
   return createClient(url, key, {
@@ -27,8 +29,9 @@ export function getSupabase() {
 }
 export function isLocalStorage() {
   return (
+    !sandboxRequested() &&
     !process.env.VERCEL &&
-    process.env.JOLA_LOCAL_DEMO === "true" &&
+    (process.env.RUVON_LOCAL_DEMO ?? process.env.JOLA_LOCAL_DEMO) === "true" &&
     !process.env.SUPABASE_URL?.trim() &&
     !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   );

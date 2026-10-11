@@ -3,6 +3,23 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import type { Database } from "@/types";
 const headers = { origin: "http://localhost:3100" };
+test("production refuses sandbox payment endpoints and preserves the public checkout", async ({
+  request,
+}) => {
+  const id = randomUUID();
+  for (const path of [
+    "/api/payment-orders",
+    `/api/payment-orders/${id}/mbway`,
+    "/api/webhooks/easypay",
+  ])
+    expect((await request.post(path, { headers, data: {} })).status()).toBe(
+      404,
+    );
+  expect((await request.get(`/api/payment-orders/${id}`)).status()).toBe(404);
+  const checkout = await request.get("/checkout");
+  expect(checkout.status()).toBe(200);
+  expect(await checkout.text()).not.toContain("Modo de teste — sem cobrança");
+});
 async function database(): Promise<Database> {
   return JSON.parse(await readFile(".data/integration/jola.json", "utf8"));
 }

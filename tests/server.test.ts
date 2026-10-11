@@ -26,8 +26,8 @@ let directory: string;
 let storage: typeof import("@/lib/server/storage");
 beforeAll(async () => {
   directory = await mkdtemp(path.join(tmpdir(), "jola-storage-test-"));
-  vi.stubEnv("JOLA_DATA_DIR", path.relative(process.cwd(), directory));
-  vi.stubEnv("JOLA_LOCAL_DEMO", "true");
+  vi.stubEnv("RUVON_DATA_DIR", path.relative(process.cwd(), directory));
+  vi.stubEnv("RUVON_LOCAL_DEMO", "true");
   vi.stubEnv("VERCEL", "");
   vi.stubEnv("SUPABASE_URL", "");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");

@@ -12,12 +12,15 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 60000,
     env: {
-      JOLA_LOCAL_DEMO: "true",
-      JOLA_DATA_DIR: ".data/integration",
+      RUVON_LOCAL_DEMO: "true",
+      RUVON_DATA_DIR: ".data/integration",
       ADMIN_PASSWORD: "jola-integration-only",
       SUPABASE_URL: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
       NEXT_PUBLIC_SITE_URL: "http://localhost:3100",
+      // Production must retain the waitlist even with an accidentally set flag.
+      RUVON_PAYMENTS_MODE: "sandbox",
+      VERCEL_ENV: "production",
     },
   },
 });

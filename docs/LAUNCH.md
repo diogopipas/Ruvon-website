@@ -4,7 +4,7 @@ These are concrete outstanding deployment/business requirements from the second-
 
 1. **Revoke the exposed Supabase service-role credential.** An earlier Git commit included it in `.env.example`. The current template is clean; history still contains the old value. Replace the credential in Vercel and your ignored local environment. Never paste it into issues or chat.
 2. Apply unapplied migrations in filename order, including `supabase/migrations/003_city_only.sql` before deploying the city-only form. It removes the postcode requirement from new leads.
-3. Configure `JOLA_OPERATOR_NAME` with the actual legal person/company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` with a monitored inbox you control. A personal project can name its actual operator; the code cannot invent that identity. Rebuild after changing these values.
+3. Configure `RUVON_OPERATOR_NAME` with the actual legal person/company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` with a monitored inbox you control. A personal project can name its actual operator; the code cannot invent that identity. Rebuild after changing these values.
 4. Review the proposed 12-month retention period. Arrange a monthly review and deletion/anonymisation of expired records in all four tables, including backups under your provider's policy. Browser state and server records are separate. This MVP has no scheduled purge.
 5. Confirm Supabase/Vercel region and processing arrangements, and the privacy basis for demand measurement.
 6. Deploy and repeat the synthetic acceptance journey in `QA.md`, checking the saved rows and protected dashboard. Code tests use local data and cannot prove a remote project has the correct secrets or migrations.

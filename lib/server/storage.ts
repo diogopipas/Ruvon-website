@@ -20,7 +20,7 @@ const empty = (): Database => ({
 });
 const file = path.join(
   process.cwd(),
-  process.env.JOLA_DATA_DIR || ".data",
+  (process.env.RUVON_DATA_DIR ?? process.env.JOLA_DATA_DIR) || ".data",
   "jola.json",
 );
 const globalQueue = globalThis as typeof globalThis & {
