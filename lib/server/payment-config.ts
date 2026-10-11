@@ -4,15 +4,22 @@ import { RequestError } from "./http";
 /** A production deployment cannot opt into sandbox by changing just the flag. */
 export function sandboxRequested() {
   return (
-    process.env.JOLA_PAYMENTS_MODE === "sandbox" &&
+    (process.env.RUVON_PAYMENTS_MODE ?? process.env.JOLA_PAYMENTS_MODE) ===
+      "sandbox" &&
     process.env.VERCEL_ENV !== "production" &&
     (!process.env.VERCEL || process.env.VERCEL_ENV === "preview")
   );
 }
 
 export function sandboxDatabaseConfig() {
-  const url = process.env.JOLA_SANDBOX_SUPABASE_URL?.trim();
-  const key = process.env.JOLA_SANDBOX_SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const url = (
+    process.env.RUVON_SANDBOX_SUPABASE_URL ??
+    process.env.JOLA_SANDBOX_SUPABASE_URL
+  )?.trim();
+  const key = (
+    process.env.RUVON_SANDBOX_SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.JOLA_SANDBOX_SUPABASE_SERVICE_ROLE_KEY
+  )?.trim();
   if (!url || !key)
     throw new RequestError("Falta configurar a base de dados de testes.", 503);
   const origin = new URL(url).origin;

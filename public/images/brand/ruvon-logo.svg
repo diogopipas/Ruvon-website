@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 76" fill="none">
+  <title>Ruvon</title>
+  <g stroke="#EFB735" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" transform="translate(2 7)">
+    <path d="M66 24 48 12C31 1 10 9 8 29 6 44 15 56 28 56V38C28 32 32 30 37 33L54 44C72 56 90 45 90 27V8"/>
+    <path d="m78 17 12-9v15"/>
+  </g>
+  <g stroke="#F4EEDF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M124 62V40q0-18 18-18h3"/>
+    <path d="M169 22v23q0 17 17 17t17-17V22"/>
+    <path d="m226 22 16 40 16-40"/>
+    <circle cx="293" cy="42" r="20"/>
+    <path d="M335 62V39q0-17 17-17t17 17v23"/>
+  </g>
+</svg>

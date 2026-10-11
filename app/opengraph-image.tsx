@@ -6,6 +6,9 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default async function Image() {
+  const logo = await readFile(
+    path.join(process.cwd(), "public/images/brand/ruvon-logo.svg"),
+  );
   const font = await readFile(
     path.join(
       process.cwd(),
@@ -32,7 +35,12 @@ export default async function Image() {
           alignItems: "center",
         }}
       >
-        <span style={{ fontSize: 61, fontStyle: "italic" }}>RUVON</span>
+        <img
+          src={`data:image/svg+xml;base64,${logo.toString("base64")}`}
+          alt="Ruvon"
+          width={260}
+          height={52}
+        />
         <span style={{ fontSize: 26, color: "#bbc2a6" }}>
           Em breve, zona a zona
         </span>

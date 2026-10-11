@@ -31,7 +31,7 @@ export function isLocalStorage() {
   return (
     !sandboxRequested() &&
     !process.env.VERCEL &&
-    process.env.JOLA_LOCAL_DEMO === "true" &&
+    (process.env.RUVON_LOCAL_DEMO ?? process.env.JOLA_LOCAL_DEMO) === "true" &&
     !process.env.SUPABASE_URL?.trim() &&
     !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   );

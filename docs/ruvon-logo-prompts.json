@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-11",
+  "mode": "Built-in image_gen",
+  "use_case": "logo-brand",
+  "concept": "docs/brand/ruvon-logo-concept.png",
+  "generated_source": "/Users/diogoporto/.codex/generated_images/01a12bd2-c2fb-7c93-9e61-9e3ddfda49ed/exec-7f27514f-e916-4170-adac-19bb11652f6d.png",
+  "production_assets": [
+    "public/images/brand/ruvon-logo.svg",
+    "public/images/brand/ruvon-symbol.svg",
+    "public/images/brand/ruvon-logo.png",
+    "app/icon.svg"
+  ],
+  "production_method": "Manually redrawn as native SVG paths from the generated route-and-lowercase concept; PNG exported from SVG with Sharp.",
+  "prompt": "Use case: logo-brand.\nAsset type: new identity / horizontal primary logo for the Portuguese drinks, ice and snack delivery brand Ruvon.\nPrimary request: design a sophisticated, memorable new logo for Ruvon, replacing its current slanted capital R monogram which feels too close to Rockstar. Explore a fresh abstract route/connection symbol with a compact friendly silhouette, paired with a bespoke upright lowercase wordmark.\nSubject: one amber abstract looping route emblem to the left of the exact cream wordmark \"ruvon\". The emblem should feel like a continuous rounded ribbon turning a corner, with a purposeful small opening and a subtly upward directional terminal. Strong simple geometry, open negative space, attractive at 24 pixels. Avoid a literal capital R. Wordmark: five lowercase letters r-u-v-o-n, heavy geometric rounded sans serif, upright, close optical spacing, warm and confident with a distinctive v.\nColor palette: emblem solid amber #EFB735; lettering solid warm cream #F4EEDF. The website has a charcoal #171815 background but the delivered image must have a genuinely transparent background.\nStyle/medium: premium flat vector-like logo, precise smooth contours, one clean horizontal lockup, no rendering effects.\nComposition/framing: landscape canvas, tight but safe transparent margin around entire lockup, logo fills most of width, emblem and wordmark optically balanced.\nText (verbatim): \"ruvon\". This is the only text.\nConstraints: new original visual direction; no italic or slanted letters, no capital R monogram, no star, no yellow square badge, no outline box, no stock delivery scooter, no bottle illustration, no map pin, no gradients, no shadows, no textures, no mockup, no presentation board, no watermarks. Do not recreate any existing brand logo."
+}

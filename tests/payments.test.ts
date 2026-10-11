@@ -174,6 +174,9 @@ async function transport(input: RequestInfo | URL, init?: RequestInit) {
 }
 
 beforeEach(() => {
+  vi.stubEnv("RUVON_PAYMENTS_MODE", undefined);
+  vi.stubEnv("RUVON_SANDBOX_SUPABASE_URL", undefined);
+  vi.stubEnv("RUVON_SANDBOX_SUPABASE_SERVICE_ROLE_KEY", undefined);
   vi.stubEnv("JOLA_PAYMENTS_MODE", "sandbox");
   vi.stubEnv("VERCEL", "");
   vi.stubEnv("VERCEL_ENV", "");
@@ -543,6 +546,34 @@ describe("MB WAY sandbox payment flow", () => {
         .status,
     ).toBe(404);
     expect(createCalls).toHaveLength(0);
+  });
+
+  it("supports the renamed RUVON sandbox configuration without legacy variables", () => {
+    vi.stubEnv("JOLA_PAYMENTS_MODE", undefined);
+    vi.stubEnv("JOLA_SANDBOX_SUPABASE_URL", undefined);
+    vi.stubEnv("JOLA_SANDBOX_SUPABASE_SERVICE_ROLE_KEY", undefined);
+    vi.stubEnv("RUVON_PAYMENTS_MODE", "sandbox");
+    vi.stubEnv("RUVON_SANDBOX_SUPABASE_URL", "https://sandbox.supabase.co");
+    vi.stubEnv(
+      "RUVON_SANDBOX_SUPABASE_SERVICE_ROLE_KEY",
+      "renamed-sandbox-key",
+    );
+    expect(sandboxRequested()).toBe(true);
+    expect(sandboxDatabaseConfig()).toEqual({
+      url: "https://sandbox.supabase.co",
+      key: "renamed-sandbox-key",
+    });
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(sandboxRequested()).toBe(false);
+  });
+
+  it("gives explicit RUVON configuration precedence over legacy values", () => {
+    vi.stubEnv("RUVON_PAYMENTS_MODE", "disabled");
+    expect(sandboxRequested()).toBe(false);
+    vi.stubEnv("RUVON_SANDBOX_SUPABASE_URL", "");
+    expect(() => sandboxDatabaseConfig()).toThrow("base de dados");
+    vi.stubEnv("RUVON_SANDBOX_SUPABASE_URL", "https://production.supabase.co");
+    expect(() => sandboxDatabaseConfig()).toThrow("separado");
   });
 
   it("fails closed when the test database is missing or aliases production", async () => {

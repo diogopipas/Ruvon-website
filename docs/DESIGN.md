@@ -13,7 +13,19 @@ The brief calls for the feeling of a Portuguese night in: warm, cold drinks at h
 | Secondary text      | `#B2B3A7` |
 | Divider             | `#36372F` |
 
-Headings and wordmark use Barlow Condensed 800; body/UI use DM Sans. Both fonts are bundled and served locally. The condensed lettering and product photography carry the identity; dark/amber alone would be too generic for the brand. The layout is left-aligned, with the headline and bag balanced on desktop and a CTA-first stacked composition on mobile. Product and pack colours come from their contents.
+Headings use Barlow Condensed 800; body/UI use DM Sans. Both fonts are bundled and served locally. The wordmark is custom upright lowercase vector lettering, paired with an amber route symbol. The layout is left-aligned, with the headline and bag balanced on desktop and a CTA-first stacked composition on mobile. Product and pack colours come from their contents.
+
+## Logo refresh — 11 October 2026
+
+The former slanted R favicon on a yellow square was replaced to move the identity away from its resemblance to Rockstar. The new symbol is an open looping route with a directional terminal. Rounded lowercase lettering and the existing amber/cream palette connect the logo to Ruvon's friendly delivery identity.
+
+- Concept generated using the built-in `image_gen` tool: `docs/brand/ruvon-logo-concept.png`.
+- Production artwork redrawn as clean SVG paths: `public/images/brand/ruvon-logo.svg` and `ruvon-symbol.svg`. The lettering does not depend on a font being installed.
+- Transparent PNG export: `public/images/brand/ruvon-logo.png`.
+- The shared `Wordmark` component serves the SVG in navigation, footer, catalogue, checkout and admin. OpenGraph uses the same file; `app/icon.svg` uses the standalone symbol on charcoal.
+- Exact generation prompt and provenance: [logo prompts](ruvon-logo-prompts.json).
+
+The photographed packaging retains the earlier printed uppercase wordmark; the new digital logo does not alter product photos.
 
 ## Mobile interaction rules
 
@@ -34,7 +46,7 @@ Headings and wordmark use Barlow Condensed 800; body/UI use DM Sans. Both fonts 
 - Peanut, paper-cup and legacy ice-bag previews were also edited to show Ruvon. The catalog uses `ruvon-amendoins.webp` and `ruvon-copos.webp`; ice continues to use the sourced 2 kg product photograph. Branded preview paths changed so image caches request the refreshed assets.
 - The old branded raster files were removed from `public`.
 
-Exact edit prompts: [Ruvon image prompts](ruvon-image-prompts.json). The edited rasters were inspected and optimized with Sharp without changing their depicted content. OpenGraph imagery is generated locally using Next.js `ImageResponse` and the same typography/palette. The favicon uses an R monogram.
+Exact edit prompts: [Ruvon image prompts](ruvon-image-prompts.json). The edited rasters were inspected and optimized with Sharp without changing their depicted content. OpenGraph imagery is generated locally using Next.js `ImageResponse`, the shared vector logo and the same typography/palette. The favicon uses the route symbol described above.
 
 ## Pack art direction
 

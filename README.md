@@ -13,7 +13,7 @@ npm ci
 cp .env.example .env.local
 ```
 
-Set `ADMIN_PASSWORD` to at least 12 characters. Keep `JOLA_LOCAL_DEMO=true` to test without Supabase, then:
+Set `ADMIN_PASSWORD` to at least 12 characters. Keep `RUVON_LOCAL_DEMO=true` to test without Supabase, then:
 
 ```bash
 npm run dev
@@ -49,9 +49,9 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_SERVICE_ROLE_KEY
 ADMIN_PASSWORD=YOUR_LONG_RANDOM_PASSWORD
 NEXT_PUBLIC_SITE_URL=https://YOUR_DEPLOYED_DOMAIN
 NEXT_PUBLIC_CONTACT_EMAIL=YOUR_REAL_PRIVACY_CONTACT
-JOLA_OPERATOR_NAME=YOUR_ACTUAL_LEGAL_NAME_OR_COMPANY
-JOLA_RETENTION_MONTHS=12
-JOLA_LOCAL_DEMO=false
+RUVON_OPERATOR_NAME=YOUR_ACTUAL_LEGAL_NAME_OR_COMPANY
+RUVON_RETENTION_MONTHS=12
+RUVON_LOCAL_DEMO=false
 ```
 
 4. Restart the server and submit an `example.com` test contact.
@@ -71,9 +71,9 @@ The full local flow and PostgreSQL migrations are tested without touching produc
 4. Deploy. After choosing the domain, set `NEXT_PUBLIC_SITE_URL` to that origin and redeploy so metadata is correct.
 5. Complete the [QA checklist](docs/QA.md) against the deployment with a synthetic contact, then verify the Supabase rows and protected dashboard.
 
-Before inviting public traffic, set `JOLA_OPERATOR_NAME` to the real person or company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` to an inbox you control, then rebuild. A brand name alone is not the operator identity. If the project is operated personally, use your actual legal name; do not invent a company or mailbox. See [launch requirements](docs/LAUNCH.md).
+Before inviting public traffic, set `RUVON_OPERATOR_NAME` to the real person or company responsible and `NEXT_PUBLIC_CONTACT_EMAIL` to an inbox you control, then rebuild. A brand name alone is not the operator identity. If the project is operated personally, use your actual legal name; do not invent a company or mailbox. See [launch requirements](docs/LAUNCH.md).
 
-The privacy page contains a proposed 12-month prelaunch retention policy, configurable through `JOLA_RETENTION_MONTHS` (1–24). Set up a recurring deletion/anonymisation process before collecting public contacts; this MVP does not automatically purge records. Confirm your hosting/database region and processing terms.
+The privacy page contains a proposed 12-month prelaunch retention policy, configurable through `RUVON_RETENTION_MONTHS` (1–24). Set up a recurring deletion/anonymisation process before collecting public contacts; this MVP does not automatically purge records. Confirm your hosting/database region and processing terms.
 
 The application is prepared for Vercel; no public deployment was made as part of this implementation.
 

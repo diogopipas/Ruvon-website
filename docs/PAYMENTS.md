@@ -1,6 +1,6 @@
 # MB WAY sandbox
 
-The Ruvon catalogue and configurable packs remain authoritative. This integration is **sandbox only**: the provider URL is fixed to `https://api.test.easypay.pt/2.0`; production deployments return 404 for all payment endpoints, even if `JOLA_PAYMENTS_MODE=sandbox` is mistakenly set. The normal production checkout still collects launch interest.
+The Ruvon catalogue and configurable packs remain authoritative. This integration is **sandbox only**: the provider URL is fixed to `https://api.test.easypay.pt/2.0`; production deployments return 404 for all payment endpoints, even if `RUVON_PAYMENTS_MODE=sandbox` is mistakenly set. The normal production checkout still collects launch interest.
 
 ## Credentials and setup
 
@@ -9,19 +9,21 @@ The Ruvon catalogue and configurable packs remain authoritative. This integratio
 3. Append the following server-only variables to the ignored `.env.local`. Keep the production Supabase values unchanged; the application switches all storage to the explicit test project in sandbox mode. Blank/incomplete/identical-to-production test configuration fails closed, with no local-JSON fallback.
 
 ```dotenv
-JOLA_PAYMENTS_MODE=sandbox
+RUVON_PAYMENTS_MODE=sandbox
 EASYPAY_ACCOUNT_ID=YOUR_SANDBOX_PAYMENT_ACCOUNT_ID
 EASYPAY_API_KEY=YOUR_SANDBOX_API_KEY
 EASYPAY_WEBHOOK_USERNAME=YOUR_WEBHOOK_USERNAME
 EASYPAY_WEBHOOK_PASSWORD=YOUR_RANDOM_PASSWORD_AT_LEAST_32_CHARACTERS
-JOLA_SANDBOX_SUPABASE_URL=https://YOUR_TEST_PROJECT.supabase.co
-JOLA_SANDBOX_SUPABASE_SERVICE_ROLE_KEY=YOUR_TEST_SERVICE_ROLE_KEY
+RUVON_SANDBOX_SUPABASE_URL=https://YOUR_TEST_PROJECT.supabase.co
+RUVON_SANDBOX_SUPABASE_SERVICE_ROLE_KEY=YOUR_TEST_SERVICE_ROLE_KEY
 ```
+
+`RUVON_*` is the current configuration prefix. Legacy `JOLA_*` variables remain supported; an explicit `RUVON_*` value takes precedence, including `disabled` or an empty value. The database key may be a server-only Supabase secret key (`sb_secret_...`) or the legacy `service_role` key; never use the publishable/anon key.
 
 The webhook username/password are **Ruvon's callback authentication**, not your Easypay login password or ApiKey. Initial values were generated in `.env.local` during implementation if they were absent. Configure the same values in the provider's notification BasicAuth settings; don't print or commit them. None of these variables may have a `NEXT_PUBLIC_` prefix. Keep drafts and test contacts synthetic.
 
 4. Restart `npm run dev`. Add products to the catalogue and open `/checkout`. Sandbox carts are stored separately from normal carts. The first button, **Rever pagamento**, obtains the server quote and establishes the HttpOnly cookie without charging. The next button, **Pagar {total} com MB WAY**, creates a Single Sale request. Phone is required; email is optional; city only, no postcode. Customers are not enrolled in the waitlist. `?interesse=1` retains the interest-only form against the test dataset.
-5. On Vercel, use a dedicated protected **Preview branch** (`codex/mbway-sandbox`), with these variables scoped to that branch's Preview environment. With Vercel CLI 62.5.0, use `vercel env add <NAME> preview --git-branch codex/mbway-sandbox --project jola-website --scope diogos-projects-f6903add --sensitive`, supplying the value through stdin. Keep `JOLA_PAYMENTS_MODE=disabled` in Production. Redeploy the preview after setting variables. Upgrade older CLIs with `npm i -g vercel@latest`. `.vercelignore` excludes environment files and local datasets from deployment uploads.
+5. On Vercel, use a dedicated protected **Preview branch** (`codex/mbway-sandbox`), with these variables scoped to that branch's Preview environment. With Vercel CLI 62.5.0, use `vercel env add <NAME> preview --git-branch codex/mbway-sandbox --project ruvon-website --scope diogos-projects-f6903add --sensitive`, supplying the value through stdin. Keep `RUVON_PAYMENTS_MODE=disabled` in Production. Redeploy the preview after setting variables. Upgrade older CLIs with `npm i -g vercel@latest`. `.vercelignore` excludes environment files and local datasets from deployment uploads.
 
 The Vercel Marketplace refused the Free Supabase resource with `Billing plan is disabled: free (400)`; it did not create a test database. Direct Supabase provisioning is the fallback. Supabase permits two active Free projects across organizations owned/administered by the account, so a separate free test project needs an available slot. Do not pause another application, upgrade a plan or reuse Ruvon's production database to bypass this restriction without the owner's explicit decision. See [Supabase billing](https://supabase.com/docs/guides/platform/billing-on-supabase).
 
@@ -73,8 +75,16 @@ npm run test:e2e
 
 The payment suite runs the actual Supabase client and payment migration against a local PostgreSQL engine, with controlled provider transport fixtures. It covers custom-pack price authority, private order ownership, concurrent starts, lost responses, HTTP 500, verified/forged/duplicated callbacks, immutable quotes, terminal paid state, explicit retries, database isolation and production lockout. These automated fixtures are not a claim that your hosted integration has been verified.
 
-Implementation checks: 92 unit/database tests, six HTTP integration tests, typecheck and lint passed. The production build passed using `npm run build -- --webpack`; Turbopack's CSS subprocess could not bind a local port in the restricted agent environment. The user's real Easypay sandbox account accepted four synthetic €6.00 Single Sale requests: the asynchronous GET results were paid, failed, failed and pending for the four numbers above. The pending case subsequently returned timeout with a failed full-value capture. Lookup by merchant key recovered each of the same four resource IDs without another POST. Mobile layout, configured pack contents and the missing-test-database guard were checked at 390 px. No hosted database or callback delivery has been verified yet.
+Implementation checks: 94 unit/database tests, six HTTP integration tests, typecheck and lint passed. The local production build passed with Webpack; the protected hosted preview also built successfully with the standard Turbopack build. Production still serves the interest-only checkout and rejects the payment endpoint with 404.
 
-After setting up the real test database and webhook, run the four scenarios through the application, verify matching `payment_orders` / `payment_attempts` in the test project, reload while pending, and confirm the cart is cleared once on success. Confirm the live production waitlist is unchanged. Database persistence and hosted webhook delivery must pass before considering the sandbox complete. Commercial activation is a separate delivery: live credentials/contract, actual delivery addresses/operations, invoicing and refunds are not enabled here.
+The protected [sandbox preview](https://ruvon-website-8jzxwj5jl-diogos-projects-f6903add.vercel.app) uses the new test database with the branch-scoped RUVON configuration. Four synthetic purchases through the hosted application persisted canonical custom packs and one attempt each: successful, failed, declined and pending. The fixture includes default Absolut, separate 7Up/Coca-Cola Zero mixers and removed ice, totalling €43.02 including delivery/service. Hosted checks passed for quote retries, double start, forged browser totals, cross-customer access, refresh with the owner cookie, invalid callback authentication, mismatched provider IDs, repeated callbacks and out-of-order status notifications. Callback tests invoke the hosted endpoint directly and verify the actual Easypay API; they do not prove automatic provider delivery.
+
+A Chrome test at 390 px completed a sandbox purchase after deliberately losing the payment response. The interface blocked a new attempt, recovered the same order after refresh, cleared the purchased pack once, retained an unrelated item added after the quote and produced no horizontal overflow, postcode field or Meta request.
+
+All six hosted test tables and all four payment functions are now accessible. The validation tables were verified empty after the payment tests, so no contact or simulated order was created. [setup-sandbox-validation.sql](../supabase/setup-sandbox-validation.sql) is a convenience bootstrap for a new test project where migration 005 was applied first; it refuses to run when validation tables already exist.
+
+Automatic provider delivery was verified on 2026-10-11 at 17:00 UTC after configuring Generic notifications and BasicAuth from the private ignored `.env.easypay-webhook.local` file. A fresh €43.02 sandbox purchase returned pending; with no client status requests or manually sent callbacks, Easypay delivered `POST /api/webhooks/easypay` at 17:00:19 UTC and received HTTP 200. A direct database read at 17:00:23 UTC confirmed the same order paid with exactly one attempt. The Vercel request log confirms delivery through preview protection, and the database transition confirms provider verification and persistence. The hosted sandbox flow is complete.
+
+The protected Preview branch is enabled; the current local `.env.local` retains `RUVON_PAYMENTS_MODE=disabled`, so enable `sandbox` and restart the development server if you also want to use the payment checkout locally. Commercial activation remains a separate delivery: live credentials/contract, actual delivery addresses/operations, invoicing and refunds are not enabled here.
 
 Provider references: [Single Sale creation](https://docs.easypay.pt/pt/openapi/single-payment/single-post), [authoritative payment status](https://docs.easypay.pt/pt/openapi/single-payment/single-id-get), [notifications](https://docs.easypay.pt/docs/guides/webhooks), [idempotency](https://docs.easypay.pt/docs/idempotency).
