@@ -1,5 +1,7 @@
 # Before paid traffic
 
+Automated real orders have separate, unmet launch gates. The commerce implementation is incomplete and disabled; do not enable live checkout from this validation checklist. Follow [implementation status](IMPLEMENTATION-STATUS.md) and [one-store pilot requirements](PRODUCTION-PILOT.md). New commerce migrations have not been applied to production and no new commerce deployment was made.
+
 These are concrete outstanding deployment/business requirements from the second-pass audit, not completed account changes.
 
 1. **Revoke the exposed Supabase service-role credential.** An earlier Git commit included it in `.env.example`. The current template is clean; history still contains the old value. Replace the credential in Vercel and your ignored local environment. Never paste it into issues or chat.

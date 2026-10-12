@@ -1,5 +1,9 @@
 # Manual QA and verification
 
+The historical checks below concern demand validation and the legacy payment sandbox. New commerce verification is tracked separately in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Run `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test:e2e`, and `npm run test:commerce-browser`. The commerce browser suite uses explicitly synthetic browser responses with provider credentials blanked; it tests UI recovery and preparation guards, **not real provider acceptance**. Actual checkout → capture → delivery → merchant settlement with zero admin commands remains unrun and blocked by the prerequisites in [PRODUCTION-PILOT.md](PRODUCTION-PILOT.md).
+
+Current commerce verification: 133 automated tests across eleven files, seven production HTTP integration tests and two mobile browser journeys passed. The browser suite ran with installed Chrome using `PLAYWRIGHT_CHANNEL=chrome npm run test:commerce-browser`. The webpack production build, lint and TypeScript passed; default Turbopack hit a local sandbox port-binding restriction. Changed files pass formatting; repository-wide formatting reports 24 pre-existing files. These results do not supersede the required real-provider and outage/restart acceptance tests.
+
 Use a private browser profile and a synthetic contact such as `qa@example.com`. Do not use real customer data in local testing.
 
 ## Exact acceptance journey
@@ -75,7 +79,7 @@ Historical results below use the previous prices and three-feature layout; the c
 - Safari's inspector showed an error-count badge but no message in the console, including after clearing and reloading. The source could not be identified through the native controls. Console validation remains unconfirmed; no claim of a clean console or Lighthouse result is made.
 - Final generated assets were visually inspected. Packaging is illustrative, not a claim of manufacturer approval or exact supplier appearance.
 
-Repeat the pack journey against hosted Supabase/Vercel before paid traffic. Browser automation is not part of the test suite.
+Repeat the pack journey against hosted Supabase/Vercel before paid traffic. This historical validation pass did not include browser automation; the new commerce suite described above does.
 
 ## Core and extras revision
 

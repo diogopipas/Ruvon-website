@@ -4,6 +4,8 @@
 
 An opt-in **Easypay MB WAY sandbox checkout** is also implemented. It uses the real test API, immutable server-priced orders, private cookies and verified webhooks; it moves no money and books no delivery. The public production checkout remains a waitlist. See [MB WAY setup and verification](docs/PAYMENTS.md).
 
+The automated commerce plan now has an **incomplete, disabled local implementation**: additive order/inventory/job migrations, provider adapters, merchant/customer/admin surfaces and focused tests. Notification sending, safe delivery cancellation, actual merchant settlement and full exception acceptance are still outstanding. No commerce deployment or hosted migration was performed. See the exact [implementation status and remaining work](docs/IMPLEMENTATION-STATUS.md) before changing flags, and the [operating runbook](docs/ORDER-OPERATIONS.md) for setup.
+
 ## Run locally
 
 Requires Node.js 22.12+ and npm.

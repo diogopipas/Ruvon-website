@@ -3,6 +3,29 @@ import type { Attribution } from "@/types";
 import { attributionSchema, eventNames } from "./validation";
 type EventName = (typeof eventNames)[number];
 const memoryStorage = new Map<string, string>();
+export function validationJourneyAllowed(
+  mode: string | undefined,
+  pathname: string,
+  search = "",
+) {
+  if (/^\/(admin|merchant|pedido)(\/|$)/.test(pathname)) return false;
+  if (mode === "sandbox") return false;
+  return (
+    mode !== "commerce" ||
+    (pathname === "/checkout" &&
+      new URLSearchParams(search).get("interesse") === "1")
+  );
+}
+function canTrack() {
+  if (typeof window === "undefined") return false;
+  return validationJourneyAllowed(
+    typeof document === "undefined"
+      ? undefined
+      : document.documentElement.dataset.ruvonMode,
+    window.location.pathname ?? "/",
+    window.location.search,
+  );
+}
 export function readLocal<T>(key: string, fallback: T): T {
   try {
     const data = memoryStorage.get(key) ?? localStorage.getItem(key);
@@ -36,6 +59,7 @@ export function getSession() {
   return memorySession;
 }
 export function captureAttribution(): Attribution {
+  if (!canTrack()) return {};
   const parsed = attributionSchema.safeParse(readLocal("jola_utm", {}));
   const previous = parsed.success ? parsed.data : {};
   if (typeof window === "undefined") return previous;
@@ -69,6 +93,7 @@ export function trackOnce(
   properties: Record<string, unknown> = {},
   key: string = name,
 ) {
+  if (!canTrack()) return;
   const identity = `${getSession()}:${key}`;
   if (seenEvents.has(identity)) return;
   try {
@@ -84,6 +109,7 @@ export function track(
   name: EventName,
   properties: Record<string, unknown> = {},
 ) {
+  if (!canTrack()) return;
   const payload = {
     id: crypto.randomUUID(),
     session_id: getSession(),

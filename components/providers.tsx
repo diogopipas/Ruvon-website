@@ -16,6 +16,7 @@ import {
   readLocal,
   track,
   trackOnce,
+  validationJourneyAllowed,
   writeLocal,
 } from "@/lib/analytics";
 import { getCatalogItem, packById } from "@/lib/products";
@@ -54,9 +55,11 @@ export function useCart() {
 export function Providers({
   children,
   sandbox = false,
+  commerce = false,
 }: {
   children: React.ReactNode;
   sandbox?: boolean;
+  commerce?: boolean;
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [location, setDelivery] = useState<Location | null>(null);
@@ -68,6 +71,15 @@ export function Providers({
   const [storageError, setStorageError] = useState(false);
   const ageConfirmed = ready && !ageOpen && !denied;
   const pathname = usePathname();
+  const [hydratedPath, setHydratedPath] = useState("");
+  const cartAllowed = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    return validationJourneyAllowed(
+      commerce ? "commerce" : "validation",
+      window.location.pathname,
+      window.location.search,
+    );
+  }, [commerce]);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const writeQueue = useRef<((payload: OrderInput) => Promise<void>) | null>(
     null,
@@ -81,6 +93,7 @@ export function Providers({
   const paidOrders = useRef<string[]>([]);
   const persistCart = useCallback(
     (next: CartItem[]) => {
+      if (!cartAllowed()) return;
       if (sandbox)
         writeLocal("jola_sandbox_cart", {
           items: next,
@@ -88,7 +101,7 @@ export function Providers({
         });
       else writeLocal("jola_cart", next);
     },
-    [sandbox],
+    [sandbox, cartAllowed],
   );
   const clearPaidOrder = useCallback(
     (orderId: string, purchased: CartItem[]) => {
@@ -103,8 +116,11 @@ export function Providers({
     [sandbox, persistCart],
   );
   useEffect(() => {
-    captureAttribution();
-    getSession();
+    const allowed = cartAllowed();
+    if (allowed && !sandbox) {
+      captureAttribution();
+      getSession();
+    }
     const saved = readLocal<{ items?: CartItem[]; paidOrders?: string[] }>(
       "jola_sandbox_cart",
       {},
@@ -113,10 +129,14 @@ export function Providers({
       ? saved.paidOrders.filter((id) => typeof id === "string")
       : [];
     const cart = cartSchema.safeParse(
-      sandbox ? (saved.items ?? []) : readLocal("jola_cart", []),
+      !allowed
+        ? []
+        : sandbox
+          ? (saved.items ?? [])
+          : readLocal("jola_cart", []),
     );
     const savedLocation = locationSchema.safeParse(
-      readLocal("jola_location", null),
+      allowed ? readLocal("jola_location", null) : null,
     );
     // Hydrate browser-persisted state once after the server render.
     itemsRef.current = cart.success ? cart.data : [];
@@ -135,7 +155,8 @@ export function Providers({
     setDenied(refused);
     setAgeOpen(!allowedRef.current);
     setReady(true);
-  }, [sandbox]);
+    setHydratedPath(pathname);
+  }, [sandbox, cartAllowed, pathname]);
   const notify = useCallback((message: string) => {
     setToast(message);
     clearTimeout(timer.current);
@@ -144,7 +165,7 @@ export function Providers({
   useEffect(() => () => clearTimeout(timer.current), []);
   const syncOrder = useCallback(
     (checkout = false, delivery?: Location) => {
-      if (sandbox) return Promise.resolve();
+      if (sandbox || !cartAllowed()) return Promise.resolve();
       if (!allowedRef.current) return Promise.resolve();
       if (checkout) {
         checkoutReached.current = true;
@@ -173,10 +194,10 @@ export function Providers({
         reached_checkout: checkoutReached.current,
       });
     },
-    [sandbox],
+    [sandbox, cartAllowed],
   );
   useEffect(() => {
-    if (!ageConfirmed) return;
+    if (!ageConfirmed || hydratedPath !== pathname || !cartAllowed()) return;
     persistCart(items);
     if (!started.current && !items.length) return;
     started.current = true;
@@ -184,7 +205,16 @@ export function Providers({
       void syncOrder().catch(() => undefined);
     }, 350);
     return () => clearTimeout(timeout);
-  }, [items, location, ageConfirmed, syncOrder, persistCart]);
+  }, [
+    items,
+    location,
+    ageConfirmed,
+    syncOrder,
+    persistCart,
+    hydratedPath,
+    pathname,
+    cartAllowed,
+  ]);
   const add = (id: string, options?: PackOptions) => {
     const product = getCatalogItem(id);
     if (!allowedRef.current || !product) return;
@@ -294,6 +324,8 @@ export function Providers({
   };
   const isPrivate =
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/merchant") ||
+    pathname.startsWith("/pedido") ||
     pathname === "/privacidade" ||
     pathname === "/termos";
   return (

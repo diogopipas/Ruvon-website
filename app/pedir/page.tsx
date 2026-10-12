@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Catalog } from "@/components/ordering/catalog";
+import {
+  commerceEnvironment,
+  commerceExposed,
+} from "@/lib/server/commerce-config";
+import { CommerceCheckout } from "@/components/checkout/commerce-checkout";
 export const metadata: Metadata = { title: "O que te falta?" };
 export default function Page() {
   return (
@@ -18,7 +23,11 @@ export default function Page() {
         </div>
       }
     >
-      <Catalog />
+      {commerceExposed() ? (
+        <CommerceCheckout environment={commerceEnvironment()} />
+      ) : (
+        <Catalog />
+      )}
     </Suspense>
   );
 }

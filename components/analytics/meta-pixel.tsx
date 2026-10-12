@@ -85,6 +85,9 @@ export function MetaPixel() {
   const trackedPath = useRef<string | null>(null);
   const privatePage =
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/merchant") ||
+    pathname.startsWith("/pedido") ||
+    pathname === "/checkout" ||
     pathname === "/privacidade" ||
     pathname === "/termos";
 
@@ -103,6 +106,9 @@ export function MetaPixel() {
 
   const visible =
     !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/merchant") &&
+    !pathname.startsWith("/pedido") &&
+    pathname !== "/checkout" &&
     (ageConfirmed || pathname === "/privacidade" || pathname === "/termos") &&
     (choice === null || editing);
   if (!visible) return null;

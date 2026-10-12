@@ -7,7 +7,7 @@ import { eventNames } from "@/lib/validation";
 const db = new PGlite();
 beforeAll(async () => {
   await db.exec(
-    "create role anon; create role authenticated; create role service_role;",
+    "create role anon; create role authenticated; create role service_role; create schema auth; create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; create function auth.jwt() returns jsonb language sql as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;",
   );
   const migrations = (await readdir("supabase/migrations"))
     .filter((name) => name.endsWith(".sql"))

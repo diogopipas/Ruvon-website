@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:commerce-browser": "playwright test --config playwright.commerce.config.ts",
     "format": "prettier --write app components lib types tests docs README.md *.ts *.mts *.mjs *.json",
     "format:check": "prettier --check app components lib types tests docs README.md *.ts *.mts *.mjs *.json"
   },

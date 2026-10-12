@@ -246,4 +246,29 @@ describe("attribution and analytics lifecycle", () => {
     reloaded.trackOnce("landing_view");
     expect(fetch).toHaveBeenCalledTimes(4);
   });
+
+  it("keeps commerce, sandbox and staff journeys out of validation analytics", async () => {
+    const { validationJourneyAllowed, track, trackOnce, captureAttribution } =
+      await import("@/lib/analytics");
+    expect(validationJourneyAllowed("commerce", "/checkout")).toBe(false);
+    expect(validationJourneyAllowed("sandbox", "/pedir")).toBe(false);
+    expect(
+      validationJourneyAllowed("commerce", "/checkout", "?interesse=1"),
+    ).toBe(true);
+    for (const pathname of ["/merchant", "/admin/orders", "/pedido/owned"]) {
+      window.location.pathname = pathname;
+      window.location.search = "?utm_campaign=private";
+      track("checkout_started", { address: "must never be sent" });
+      trackOnce("landing_view");
+      expect(captureAttribution()).toEqual({});
+    }
+    expect(fetch).not.toHaveBeenCalled();
+    expect(localStorage.getItem("jola_session")).toBeNull();
+    vi.stubGlobal("document", {
+      documentElement: { dataset: { ruvonMode: "commerce" } },
+    });
+    window.location.pathname = "/checkout";
+    track("checkout_started");
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

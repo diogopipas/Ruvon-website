@@ -4,6 +4,11 @@ import { CheckoutFlow } from "@/components/checkout/checkout-flow";
 import { PaymentCheckout } from "@/components/checkout/payment-checkout";
 import { sandboxRequested } from "@/lib/server/payment-config";
 import { connection } from "next/server";
+import {
+  commerceEnvironment,
+  commerceExposed,
+} from "@/lib/server/commerce-config";
+import { CommerceCheckout } from "@/components/checkout/commerce-checkout";
 export const metadata: Metadata = {
   title: "A tua primeira Ruvon",
   robots: { index: false, follow: false },
@@ -23,7 +28,9 @@ export default async function Page({
         </main>
       }
     >
-      {sandboxRequested() && params.interesse !== "1" ? (
+      {commerceExposed() && params.interesse !== "1" ? (
+        <CommerceCheckout environment={commerceEnvironment()} />
+      ) : sandboxRequested() && params.interesse !== "1" ? (
         <PaymentCheckout />
       ) : (
         <CheckoutFlow />

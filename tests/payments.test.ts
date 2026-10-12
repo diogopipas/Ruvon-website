@@ -8,7 +8,7 @@ import {
   vi,
 } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import {
   mbwayPhoneSchema,
@@ -61,11 +61,15 @@ const callbackAuth = `Basic ${Buffer.from(`jola-test:${"p".repeat(40)}`).toStrin
 
 beforeAll(async () => {
   await db.exec(
-    "create role anon; create role authenticated; create role service_role;",
+    "create role anon; create role authenticated; create role service_role;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql as $$select null::uuid$$;create function auth.jwt() returns jsonb language sql as $$select '{}'::jsonb$$;",
   );
   await db.exec(
     await readFile("supabase/migrations/005_mbway_sandbox.sql", "utf8"),
   );
+  for (const file of (await readdir("supabase/migrations"))
+    .filter((f) => /^00[6-9]|^01[01]/.test(f))
+    .sort())
+    await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 }, 20000);
 afterAll(async () => {
   await db.close();

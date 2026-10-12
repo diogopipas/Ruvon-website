@@ -3,9 +3,17 @@ import { apiError, RequestError } from "@/lib/server/http";
 import { verifyWebhookAuth, webhookJson } from "@/lib/server/payment-http";
 import { paymentStore } from "@/lib/server/payment-store";
 import { reconcilePayment } from "@/lib/server/payment-service";
+import { ingestEasypay } from "@/lib/server/webhooks/inbox";
+import { nudgeJobs } from "@/lib/server/jobs/nudge";
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   try {
+    if (process.env.RUVON_COMMERCE_WEBHOOK_INBOX_ENABLED === "true") {
+      await ingestEasypay(request);
+      nudgeJobs();
+      return NextResponse.json({ ok: true });
+    }
     verifyWebhookAuth(request);
     const notification = await webhookJson(request);
     // This integration creates Single Sale only. Its generic id is the Single

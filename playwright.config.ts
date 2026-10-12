@@ -1,6 +1,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/integration",
+  testIgnore: "**/commerce-browser.spec.ts",
   fullyParallel: false,
   workers: 1,
   timeout: 45000,
@@ -20,6 +21,8 @@ export default defineConfig({
       NEXT_PUBLIC_SITE_URL: "http://localhost:3100",
       // Production must retain the waitlist even with an accidentally set flag.
       RUVON_PAYMENTS_MODE: "sandbox",
+      RUVON_LIVE_CHECKOUT_ENABLED: "false",
+      RUVON_COMMERCE_WEBHOOK_INBOX_ENABLED: "false",
       VERCEL_ENV: "production",
     },
   },

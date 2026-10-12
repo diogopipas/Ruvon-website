@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ValidationAnalytics } from "@/components/analytics/validation-analytics";
 import { Providers } from "@/components/providers";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
+import "./styles/merchant.css";
 import { CartLayer } from "@/components/cart/cart";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { sandboxRequested } from "@/lib/server/payment-config";
 import { connection } from "next/server";
+import { commerceExposed } from "@/lib/server/commerce-config";
 const display = localFont({
   src: "../node_modules/@fontsource/barlow-condensed/files/barlow-condensed-latin-800-normal.woff2",
   variable: "--font-display",
@@ -47,20 +48,28 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const sandbox = sandboxRequested();
+  const commerce = commerceExposed();
+  const privateCommerce =
+    commerce || process.env.RUVON_PAYMENTS_MODE === "live";
   if (sandbox) await connection();
   return (
-    <html lang="pt-PT" className={`${display.variable} ${body.variable}`}>
+    <html
+      lang="pt-PT"
+      className={`${display.variable} ${body.variable}`}
+      data-ruvon-mode={
+        commerce ? "commerce" : sandbox ? "sandbox" : "validation"
+      }
+    >
       <body>
         <a href="#main" className="skip-link">
           Saltar para o conteúdo
         </a>
-        <Providers sandbox={sandbox}>
+        <Providers sandbox={sandbox} commerce={commerce}>
           {children}
-          <CartLayer />
-          {!sandbox && <MetaPixel />}
+          {!commerce && <CartLayer />}
+          {!sandbox && !privateCommerce && <MetaPixel />}
         </Providers>
-        {!sandbox && <Analytics />}
-        {!sandbox && <SpeedInsights />}
+        {!sandbox && !privateCommerce && <ValidationAnalytics />}
       </body>
     </html>
   );

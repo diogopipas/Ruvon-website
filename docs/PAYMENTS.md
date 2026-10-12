@@ -1,5 +1,7 @@
 # MB WAY sandbox
 
+This document describes the existing **flow 1 Single Sale sandbox**. New flow 2 commerce uses authorisation followed by capture and separate fulfilment/refund facts; it is incomplete and disabled. Its additive migrations have not been applied remotely. See [commerce status](IMPLEMENTATION-STATUS.md), [provider contracts/evidence](PROVIDER-CAPABILITIES.md) and [operations setup](ORDER-OPERATIONS.md). The old routes remain sandbox-only compatibility entry points. With the commerce inbox flag enabled, legacy Single Sale callbacks are durably queued and reconciled by the worker; that compatibility still requires hosted verification.
+
 The Ruvon catalogue and configurable packs remain authoritative. This integration is **sandbox only**: the provider URL is fixed to `https://api.test.easypay.pt/2.0`; production deployments return 404 for all payment endpoints, even if `RUVON_PAYMENTS_MODE=sandbox` is mistakenly set. The normal production checkout still collects launch interest.
 
 ## Credentials and setup

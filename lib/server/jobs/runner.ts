@@ -1,0 +1,114 @@
+import "server-only";
+import { orderRepository } from "../orders/repository";
+import { handleJob } from "./handlers";
+import type { Job } from "../payments/service";
+import { ProviderError } from "../payments/http";
+import { withProviderDeadline } from "../payments/http";
+export function retryDelay(
+  attempt: number,
+  retryAfter = 0,
+  random = Math.random,
+) {
+  return Math.max(
+    retryAfter * 1000,
+    [5000, 30000, 120000, 300000, 900000][
+      Math.min(Math.max(attempt - 1, 0), 4)
+    ] *
+      (0.8 + random() * 0.4),
+  );
+}
+export async function runJobs() {
+  const repo = orderRepository();
+  const started = Date.now();
+  let processed = 0;
+  await repo.rpc("commerce_worker_health", { p_success: false });
+  await repo.rpc("commerce_sweep");
+  async function consume(jobs: Job[], next: () => Job | undefined) {
+    while (jobs.length && Date.now() - started < 14000) {
+      const job = next();
+      if (!job) break;
+      try {
+        await withProviderDeadline(started + 20000, () => handleJob(job));
+        if (
+          await repo.rpc<boolean>("commerce_finish_job", {
+            p_id: job.id,
+            p_token: job.lease_token,
+          })
+        )
+          processed++;
+      } catch (error) {
+        const classification =
+          error instanceof ProviderError
+            ? error.classification
+            : error instanceof Error && error.message === "pending"
+              ? "pending"
+              : "job_retry";
+        const exhausted = job.attempts >= 12 && classification !== "pending";
+        if (exhausted && job.order_id)
+          await repo.rpc("commerce_open_case", {
+            p_order: job.order_id,
+            p_key: `job-failed:${job.id}`,
+            p_type: "automation",
+            p_reason: "AUTOMATION_EXHAUSTED",
+          });
+        await repo.rpc("commerce_finish_job", {
+          p_id: job.id,
+          p_token: job.lease_token,
+          p_error: classification,
+          p_retry_at: exhausted
+            ? null
+            : new Date(
+                Date.now() +
+                  retryDelay(
+                    job.attempts,
+                    error instanceof ProviderError ? error.retryAfter : 0,
+                  ),
+              ).toISOString(),
+        });
+        console.error(
+          "[Ruvon] job",
+          JSON.stringify({
+            job_id: job.id,
+            order_id: job.order_id,
+            kind: job.kind,
+            error_class: classification,
+          }),
+        );
+      }
+    }
+  }
+  // Drain newly committed work within the same budget, so a confirmed capture
+  // can book immediately without waiting for the next Cron invocation.
+  let claimed = 0;
+  while (claimed < 10 && Date.now() - started < 14000) {
+    const jobs = await repo.rpc<Job[]>("commerce_claim_jobs", {
+      p_limit: 10 - claimed,
+    });
+    if (!jobs.length) break;
+    claimed += jobs.length;
+    let cursor = 0;
+    const next = () => jobs[cursor++];
+    await Promise.all([consume(jobs, next), consume(jobs, next)]);
+  }
+  await repo.rpc("commerce_worker_health", {
+    p_success: true,
+    p_jobs: processed,
+  });
+  const heartbeat = process.env.CHECKLY_HEARTBEAT_URL;
+  if (heartbeat) {
+    const url = new URL(heartbeat);
+    if (
+      url.protocol !== "https:" ||
+      !["ping.checklyhq.com", "api.checklyhq.com"].includes(url.hostname)
+    )
+      throw new Error("Invalid heartbeat destination");
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!response.ok) throw new Error("Heartbeat failed");
+  }
+  return { processed };
+}
