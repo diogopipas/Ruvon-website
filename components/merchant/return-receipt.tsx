@@ -1,19 +1,17 @@
 "use client";
-import { useState } from "react";
 import type { CommerceLine } from "@/lib/commerce";
-import { postJson } from "@/lib/client-request";
+import type { MerchantIntent } from "./use-order-commands";
 export function ReturnReceipt({
-  id,
   version,
   items,
+  disabled,
+  onSubmit,
 }: {
-  id: string;
   version: number;
   items: CommerceLine[];
+  disabled: boolean;
+  onSubmit: (intent: MerchantIntent) => void;
 }) {
-  const [busy, setBusy] = useState(false),
-    [done, setDone] = useState(false),
-    [error, setError] = useState("");
   const quantities = new Map<string, number>();
   for (const item of items)
     for (const p of item.recipe)
@@ -21,40 +19,23 @@ export function ReturnReceipt({
         p.sku,
         (quantities.get(p.sku) ?? 0) + p.quantity * item.quantity,
       );
-  async function submit(form: HTMLFormElement) {
+  function submit(form: HTMLFormElement) {
+    if (disabled) return;
     const data = new FormData(form);
-    setBusy(true);
-    setError("");
-    try {
-      await postJson(`/api/merchant/orders/${id}/commands`, {
-        command_id: crypto.randomUUID(),
-        expected_version: version,
-        command: "return_received",
-        reason: String(data.get("condition")),
-        saleable: Object.fromEntries(
-          [...quantities.keys()].map((sku) => [sku, Number(data.get(sku))]),
-        ),
-      });
-      setDone(true);
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Não foi possível guardar a receção.",
-      );
-    } finally {
-      setBusy(false);
-    }
+    onSubmit({
+      expected_version: version,
+      command: "return_received",
+      reason: String(data.get("condition")),
+      saleable: Object.fromEntries(
+        [...quantities.keys()].map((sku) => [sku, Number(data.get(sku))]),
+      ),
+    });
   }
-  if (done)
-    return (
-      <p role="status">
-        Receção guardada. A resolução financeira fica em análise.
-      </p>
-    );
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        void submit(e.currentTarget);
+        submit(e.currentTarget);
       }}
     >
       <h3>Confirmar receção da devolução</h3>
@@ -73,7 +54,7 @@ export function ReturnReceipt({
             step="1"
             defaultValue="0"
             required
-            disabled={busy}
+            disabled={disabled}
           />
         </label>
       ))}
@@ -84,11 +65,10 @@ export function ReturnReceipt({
           required
           minLength={3}
           maxLength={400}
-          disabled={busy}
+          disabled={disabled}
         />
       </label>
-      <p role="alert">{error}</p>
-      <button className="button button-secondary" disabled={busy}>
+      <button className="button button-secondary" disabled={disabled}>
         Guardar receção e condição
       </button>
     </form>

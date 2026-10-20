@@ -45,6 +45,91 @@ test.beforeEach(async ({ page }) => {
     );
   });
 });
+test("store craft units survive reload and quote recovery without entering the validation cart", async ({
+  page,
+}) => {
+  const sku = "brewery-fixture-ipa-330",
+    id = `sku:${sku}`;
+  const saved = order();
+  saved.items = [
+    {
+      id,
+      name: "IPA de teste",
+      quantity: 2,
+      unit_price: 537,
+      line_price: 1074,
+      recipe: [{ sku, quantity: 1 }],
+      components: [{ sku, quantity: 1, unit_price: 537 }],
+    },
+  ];
+  saved.subtotal = 1074;
+  saved.total = 1674;
+  let quotes = 0;
+  await page.route("**/api/commerce/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/commerce/catalog")
+      return route.fulfill({
+        json: [
+          {
+            id: randomUUID(),
+            name: "Cervejaria sintética",
+            catalog: [
+              {
+                id,
+                name: "IPA de teste",
+                unit: "garrafa de 33 cl",
+                unit_price: 537,
+              },
+            ],
+          },
+        ],
+      });
+    if (path === "/api/commerce/quotes") {
+      quotes++;
+      expect(route.request().postDataJSON().items).toEqual([
+        { id, quantity: 2 },
+      ]);
+      return route.fulfill({ json: saved, status: 201 });
+    }
+    if (path === `/api/commerce/orders/${saved.id}`)
+      return route.fulfill({ json: saved });
+    return route.fulfill({
+      status: 503,
+      json: { error: "Unexpected fixture request" },
+    });
+  });
+  await page.goto("/checkout");
+  await expect(
+    page.getByText("garrafa de 33 cl", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Pack Clássica" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await page.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Retirar · 2" })).toBeVisible();
+  await page.getByLabel("Morada", { exact: true }).fill("Rua Sintética 1");
+  await page.getByLabel("Código postal").fill("1000-001");
+  await page.getByLabel("Cidade", { exact: true }).fill("Lisboa");
+  await page
+    .getByRole("button", { name: "Confirmar preços e entrega" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Revê o teu pedido" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Revê o teu pedido" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("2 × IPA de teste", { exact: false }),
+  ).toBeVisible();
+  expect(quotes).toBe(1);
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("jola_cart")!)),
+  ).toEqual([{ id: "gelo", quantity: 9 }]);
+});
 test("checkout resumes one pending order after refresh and clears only purchased quantities once", async ({
   page,
 }) => {
@@ -238,6 +323,13 @@ test("merchant acceptance confirms stock and preparation waits for captured paym
   saved.operational_status = "preparing";
   saved.payment_status = "paid";
   saved.version++;
+  await page.reload();
+  await expect(
+    page.getByText("A aguardar confirmação", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Selado e pronto para recolha" }),
+  ).toHaveCount(0);
   preparationAllowed = true;
   await page.reload();
   await expect(page.getByText("Podes preparar", { exact: true })).toBeVisible();
@@ -247,3 +339,220 @@ test("merchant acceptance confirms stock and preparation waits for captured paym
     .click();
   await expect.poll(() => readied).toBe(1);
 });
+
+function merchantSnapshot() {
+  const saved = order();
+  const store = randomUUID();
+  return {
+    orders: [{ ...saved, store_id: store, preparation_allowed: false }],
+    stores: [{ id: store, name: "Loja privada de teste", paused: false }],
+    inventory: [
+      {
+        store_id: store,
+        sku: "gelo",
+        name: "Stock privado de teste",
+        unit: "saco",
+        stock_on_hand: 5,
+        reserved_quantity: 1,
+        enabled: true,
+        version: 0,
+      },
+    ],
+  };
+}
+
+for (const status of [401, 403])
+  test(`merchant removes orders and stock and stops heartbeats after polling returns ${status}`, async ({
+    page,
+  }) => {
+    const data = merchantSnapshot();
+    let authorized = true;
+    let reads = 0;
+    let heartbeats = 0;
+    await page.clock.install();
+    await page.route("**/api/merchant/**", (route) => {
+      const path = new URL(route.request().url()).pathname;
+      if (path === "/api/merchant/orders") {
+        reads++;
+        return authorized
+          ? route.fulfill({ json: data })
+          : route.fulfill({ status, json: { error: "Não autorizado" } });
+      }
+      if (path === "/api/merchant/inventory")
+        return route.fulfill({ json: data.inventory });
+      if (path === "/api/merchant/heartbeat") {
+        heartbeats++;
+        return route.fulfill({ json: { ok: true } });
+      }
+      return route.fulfill({ status: 503 });
+    });
+    await page.goto("/merchant");
+    await expect(
+      page.getByRole("heading", { name: "Stock privado de teste · saco" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(data.stores[0].name, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: `Pedido ${data.orders[0].id.slice(0, 8)}`,
+      }),
+    ).toBeVisible();
+    await expect.poll(() => heartbeats).toBeGreaterThan(0);
+    authorized = false;
+    await page.clock.fastForward(5000);
+    await expect(
+      page.getByRole("main").getByRole("alert").first(),
+    ).toContainText("Inicia sessão novamente");
+    await expect(
+      page.getByText(data.stores[0].name, { exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Inventário da loja" }),
+    ).toHaveCount(0);
+    await expect(page.locator("article.commerce-card")).toHaveCount(0);
+    const stoppedReads = reads;
+    const stoppedHeartbeats = heartbeats;
+    await page.clock.fastForward(30000);
+    expect(reads).toBe(stoppedReads);
+    expect(heartbeats).toBe(stoppedHeartbeats);
+  });
+
+test("inventory access denial clears the dashboard and a late successful poll cannot restore it", async ({
+  page,
+}) => {
+  const data = merchantSnapshot();
+  let reads = 0;
+  let inventoryDenied = false;
+  let held = false;
+  let holdReads = false;
+  let release: () => void = () => {};
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.clock.install();
+  await page.route("**/api/merchant/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/merchant/orders") {
+      reads++;
+      if (holdReads) {
+        held = true;
+        await pending;
+      }
+      return route.fulfill({ json: data });
+    }
+    if (path === "/api/merchant/inventory") {
+      if (route.request().method() === "POST") {
+        inventoryDenied = true;
+        return route.fulfill({ json: { ok: true } });
+      }
+      return inventoryDenied
+        ? route.fulfill({ status: 403, json: { error: "Não autorizado" } })
+        : route.fulfill({ json: data.inventory });
+    }
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.goto("/merchant");
+  await expect(
+    page.getByRole("heading", { name: "Stock privado de teste · saco" }),
+  ).toBeVisible();
+  holdReads = true;
+  await page.clock.fastForward(5000);
+  await expect.poll(() => held).toBe(true);
+  const heldReads = reads;
+  await page.getByRole("button", { name: "Guardar disponibilidade" }).click();
+  await expect(page.getByRole("main").getByRole("alert").first()).toContainText(
+    "Inicia sessão novamente",
+  );
+  const response = page.waitForResponse("**/api/merchant/orders");
+  release();
+  await response;
+  await expect(
+    page.getByText(data.stores[0].name, { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator("article.commerce-card")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Inventário da loja" }),
+  ).toHaveCount(0);
+  await page.clock.fastForward(30000);
+  expect(reads).toBe(heldReads);
+});
+
+test("a transient merchant read failure preserves the session and a later poll recovers", async ({
+  page,
+}) => {
+  const data = merchantSnapshot();
+  let failing = false;
+  await page.clock.install();
+  await page.route("**/api/merchant/**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/merchant/orders")
+      return failing
+        ? route.fulfill({ status: 503, json: { error: "Indisponível" } })
+        : route.fulfill({ json: data });
+    if (path === "/api/merchant/inventory")
+      return route.fulfill({ json: data.inventory });
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.goto("/merchant");
+  await expect(
+    page.getByRole("heading", { name: "Stock privado de teste · saco" }),
+  ).toBeVisible();
+  failing = true;
+  await page.clock.fastForward(5000);
+  await expect(page.getByRole("main").getByRole("alert").first()).toContainText(
+    "Não foi possível atualizar",
+  );
+  await expect(page.locator("article.commerce-card")).toHaveCount(1);
+  await expect(
+    page.getByRole("heading", { name: "Stock privado de teste · saco" }),
+  ).toBeVisible();
+  failing = false;
+  await page.clock.fastForward(5000);
+  await expect(page.getByRole("main").getByRole("alert").first()).toBeEmpty();
+});
+
+for (const endpoint of ["inventory", "heartbeat"])
+  test(`merchant clears private data when the ${endpoint} write loses access`, async ({
+    page,
+  }) => {
+    const data = merchantSnapshot();
+    let deny = false;
+    await page.clock.install();
+    await page.route("**/api/merchant/**", (route) => {
+      const path = new URL(route.request().url()).pathname;
+      if (path === "/api/merchant/orders") return route.fulfill({ json: data });
+      if (
+        deny &&
+        path === `/api/merchant/${endpoint}` &&
+        route.request().method() === "POST"
+      )
+        return route.fulfill({
+          status: 403,
+          json: { error: "Não autorizado" },
+        });
+      if (path === "/api/merchant/inventory")
+        return route.fulfill({ json: data.inventory });
+      return route.fulfill({ json: { ok: true } });
+    });
+    await page.goto("/merchant");
+    await expect(
+      page.getByRole("heading", { name: "Stock privado de teste · saco" }),
+    ).toBeVisible();
+    deny = true;
+    if (endpoint === "inventory")
+      await page
+        .getByRole("button", { name: "Guardar disponibilidade" })
+        .click();
+    else await page.clock.fastForward(30000);
+    await expect(
+      page.getByRole("main").getByRole("alert").first(),
+    ).toContainText("Inicia sessão novamente");
+    await expect(page.locator("article.commerce-card")).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Inventário da loja" }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText(data.stores[0].name, { exact: true }),
+    ).toHaveCount(0);
+  });

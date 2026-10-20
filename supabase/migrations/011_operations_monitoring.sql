@@ -206,7 +206,7 @@ begin
   return true;
 end $$;
 create function public.commerce_sweep() returns void language plpgsql security definer set search_path='' as $$
-declare o public.payment_orders; op public.provider_operations; bucket text:=floor(extract(epoch from now())/60)::text;
+declare o public.payment_orders; op public.provider_operations; c public.order_cases; reminder text; bucket text:=floor(extract(epoch from now())/60)::text;
 begin
   for o in select * from public.payment_orders where flow_version=2 and current_attempt_id is not null and operational_status not in ('completed','cancelled') loop
     if o.operational_status='awaiting_merchant' then perform public.commerce_enqueue('merchant_timeout',o.id,'timeout-sweep:'||o.id||':'||bucket,greatest(now(),o.acceptance_deadline)); end if;
@@ -218,6 +218,11 @@ begin
       perform public.commerce_enqueue('operation_reconcile',o.id,'op-sweep:'||op.id||':'||bucket,now(),'{}',op.id);
       if op.created_at<now()-interval '5 minutes' and op.status in ('dispatching','unknown') then perform public.commerce_open_case(o.id,'uncertain:'||op.id,op.provider,case when op.provider='uber' then 'DELIVERY_BOOKING_UNCERTAIN' else 'PAYMENT_UNCERTAIN' end); end if;
     end loop;
+  end loop;
+  for c in select * from public.order_cases where state='open' and created_at<=now()-interval '30 minutes' loop
+    reminder:=floor(extract(epoch from (now()-c.created_at))/1800)::text;
+    perform public.commerce_enqueue('operator_alert',c.order_id,'case-reminder-email:'||c.id||':'||reminder,now(),jsonb_build_object('channel','email'),c.id);
+    perform public.commerce_enqueue('operator_alert',c.order_id,'case-reminder-sms:'||c.id||':'||reminder,now()+interval '5 minutes',jsonb_build_object('channel','sms'),c.id);
   end loop;
 end $$;
 -- Supabase-only scheduling is explicitly installed after Vault secrets exist.

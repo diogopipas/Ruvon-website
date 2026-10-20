@@ -1,6 +1,6 @@
 # Before paid traffic
 
-Automated real orders have separate, unmet launch gates. The commerce implementation is incomplete and disabled; do not enable live checkout from this validation checklist. Follow [implementation status](IMPLEMENTATION-STATUS.md) and [one-store pilot requirements](PRODUCTION-PILOT.md). New commerce migrations have not been applied to production and no new commerce deployment was made.
+Automated real orders have separate, unmet launch gates. The commerce implementation is incomplete and disabled; do not enable live checkout from this validation checklist. Follow [implementation status](IMPLEMENTATION-STATUS.md) and [one-store pilot requirements](PRODUCTION-PILOT.md). Commerce migrations 006–011 and the protected sandbox Preview are deployed and verified for schema/worker/email transport. Production has not been migrated or promoted, and real order acceptance remains outstanding.
 
 These are concrete outstanding deployment/business requirements from the second-pass audit, not completed account changes.
 

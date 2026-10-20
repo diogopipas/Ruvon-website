@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { OrderView } from "@/lib/commerce";
 import { money } from "@/lib/pricing";
-import { postJson } from "@/lib/client-request";
+import { HttpResponseError, postJson } from "@/lib/client-request";
 import { providerCents } from "@/lib/payments";
 type Summary = {
   id: string;
@@ -17,6 +17,13 @@ type Detail = {
   order: OrderView;
   remaining_refundable: number;
   remaining_components: { products: number; service: number; delivery: number };
+  refunds: {
+    id: string;
+    amount: number;
+    status: string;
+    reason: string;
+    allocation: { products: number; service: number; delivery: number };
+  }[];
   events: {
     id: string;
     sequence: number;
@@ -32,55 +39,158 @@ type Detail = {
     state: string;
     last_error: string | null;
   }[];
+  notifications: {
+    id: string;
+    channel: string;
+    purpose: string;
+    status: string;
+    last_error: string | null;
+  }[];
+};
+type CommandInput = {
+  command_id: string;
+  expected_version: number;
+  command: string;
+  reason: string;
+  confirmed: true;
+  reference_id?: string;
+  amount?: number;
+  allocation?: Record<string, number>;
+  resolution?: Record<string, string>;
+};
+type Attempt = {
+  input: CommandInput;
+  phase: "pending" | "confirmed" | "rejected";
+  busy: boolean;
+  error: string;
 };
 export function OrderOperations({ id }: { id?: string }) {
   const [orders, setOrders] = useState<Summary[]>([]),
     [detail, setDetail] = useState<Detail | null>(null),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  async function load() {
+    [message, setMessage] = useState(""),
+    [attempt, setAttempt] = useState<Attempt | null>(null);
+  const pending = useRef<Attempt | null>(null),
+    mounted = useRef(false),
+    accessDenied = useRef(false),
+    readSequence = useRef(0),
+    appliedRead = useRef(0);
+  const busy = attempt !== null;
+  const refundPending =
+    detail?.refunds.some((r) =>
+      ["requested", "processing", "unknown"].includes(r.status),
+    ) ?? false;
+  const clearSession = useCallback(() => {
+    accessDenied.current = true;
+    pending.current = null;
+    setAttempt(null);
+    setDetail(null);
+    setOrders([]);
+    setMessage("");
+    setError("A sessão terminou ou perdeu acesso. Inicia sessão novamente.");
+  }, []);
+  const load = useCallback(async () => {
+    if (accessDenied.current)
+      throw new HttpResponseError("Inicia sessão novamente.", 401);
+    const sequence = ++readSequence.current;
     const r = await fetch(
       id ? `/api/admin/orders/${id}` : "/api/admin/orders",
-      { cache: "no-store" },
+      { cache: "no-store", signal: AbortSignal.timeout(10000) },
     );
-    if (!r.ok)
-      throw new Error("Inicia sessão com uma conta de operações autorizada.");
+    if (!mounted.current) return;
+    if (r.status === 401 || r.status === 403) {
+      clearSession();
+      throw new HttpResponseError("Inicia sessão novamente.", r.status);
+    }
+    if (!r.ok) throw new Error("Não foi possível atualizar os pedidos.");
     const data = await r.json();
+    if (!mounted.current) return;
+    if (accessDenied.current)
+      throw new HttpResponseError("Inicia sessão novamente.", 401);
+    if (sequence < appliedRead.current) return;
+    appliedRead.current = sequence;
     if (id) setDetail(data);
     else setOrders(data);
-  }
+    setError("");
+  }, [id, clearSession]);
   useEffect(() => {
-    let active = true;
+    mounted.current = true;
+    let stopped = false,
+      polling = false;
     async function refresh() {
+      if (stopped || polling || accessDenied.current || document.hidden) return;
+      polling = true;
       try {
-        const r = await fetch(
-          id ? `/api/admin/orders/${id}` : "/api/admin/orders",
-          { cache: "no-store" },
-        );
-        if (!r.ok)
-          throw new Error(
-            "Inicia sessão com uma conta de operações autorizada.",
-          );
-        const data = await r.json();
-        if (active) {
-          if (id) setDetail(data);
-          else setOrders(data);
-          setError("");
-        }
+        await load();
       } catch (e) {
-        if (active)
+        if (!stopped && !accessDenied.current)
           setError(
             e instanceof Error ? e.message : "Não foi possível carregar.",
           );
+      } finally {
+        polling = false;
       }
     }
     void refresh();
     const timer = setInterval(refresh, 10000);
+    document.addEventListener("visibilitychange", refresh);
     return () => {
-      active = false;
+      stopped = true;
+      mounted.current = false;
+      pending.current = null;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
     };
-  }, [id]);
+  }, [load]);
+  async function send(current: Attempt) {
+    if (
+      !id ||
+      !mounted.current ||
+      accessDenied.current ||
+      current.busy ||
+      pending.current !== current
+    )
+      return;
+    const valid = () =>
+      mounted.current && !accessDenied.current && pending.current === current;
+    current.busy = true;
+    current.error = "";
+    setAttempt({ ...current });
+    try {
+      if (current.phase === "pending") {
+        await postJson(`/api/admin/orders/${id}/commands`, current.input);
+        if (!valid()) return;
+        current.phase = "confirmed";
+      }
+      await load();
+      if (!valid()) return;
+      pending.current = null;
+      setAttempt(null);
+      setMessage(
+        current.phase === "rejected"
+          ? "Pedido atualizado. Revê o estado antes de escolher outra ação."
+          : "Ação registada e pedido atualizado. O resultado do prestador continua no histórico.",
+      );
+    } catch (e) {
+      if (!valid()) return;
+      if (e instanceof HttpResponseError) {
+        if (e.status === 401 || e.status === 403) {
+          clearSession();
+          return;
+        }
+        if (
+          current.phase === "pending" &&
+          [400, 404, 409, 413, 415, 422].includes(e.status)
+        )
+          current.phase = "rejected";
+      }
+      current.error =
+        e instanceof Error ? e.message : "Não foi possível confirmar a ação.";
+    } finally {
+      current.busy = false;
+      if (valid()) setAttempt({ ...current });
+    }
+  }
   async function command(
     command: string,
     reference?: string,
@@ -88,38 +198,57 @@ export function OrderOperations({ id }: { id?: string }) {
     allocation?: Record<string, number>,
     resolution?: Record<string, string>,
   ) {
-    if (!detail || !id) return;
+    if (
+      !detail ||
+      !id ||
+      pending.current ||
+      accessDenied.current ||
+      (command === "refund" && refundPending)
+    )
+      return;
     const reason = window.prompt(
       "Motivo obrigatório para o registo de auditoria:",
     );
     if (!reason) return;
+    if (reason.trim().length < 3 || reason.trim().length > 400) {
+      setError("Indica um motivo entre 3 e 400 caracteres.");
+      return;
+    }
     if (
       command === "refund" &&
       !window.confirm(
-        `Confirmar reembolso de ${money(amount!)}? Saldo disponível: ${money(detail.remaining_refundable)}. A recuperação à loja fica separada e pode exigir análise.`,
+        `Confirmar reembolso de ${money(amount!)}?\nProdutos: ${money(allocation?.products ?? 0)} · Taxa Ruvon: ${money(allocation?.service ?? 0)} · Entrega: ${money(allocation?.delivery ?? 0)}\nSaldo disponível: ${money(detail.remaining_refundable)}. Após esta reserva: ${money(detail.remaining_refundable - amount!)}.\nRecuperação à loja: separada e ainda por confirmar${["released", "bank_settlement_pending", "settled"].includes(detail.order.settlement_status) ? "; a alocação já foi libertada" : ""}.\nMotivo: ${reason.trim()}`,
       )
     )
       return;
-    setBusy(true);
-    try {
-      await postJson(`/api/admin/orders/${id}/commands`, {
+    const current: Attempt = {
+      phase: "pending",
+      busy: false,
+      error: "",
+      input: Object.freeze({
         command_id: crypto.randomUUID(),
         expected_version: detail.order.version,
         command,
-        reason,
+        reason: reason.trim(),
         confirmed: true,
         ...(reference ? { reference_id: reference } : {}),
-        ...(amount ? { amount, allocation } : {}),
-        ...(resolution
-          ? { resolution: { ...resolution, summary: reason } }
+        ...(amount
+          ? { amount, allocation: Object.freeze({ ...allocation }) }
           : {}),
-      });
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível guardar.");
-    } finally {
-      setBusy(false);
-    }
+        ...(resolution
+          ? {
+              resolution: Object.freeze({
+                ...resolution,
+                summary: reason.trim(),
+              }),
+            }
+          : {}),
+      }),
+    };
+    pending.current = current;
+    setMessage("");
+    setError("");
+    void send(current);
   }
   async function partialRefund(form: HTMLFormElement) {
     const data = new FormData(form),
@@ -140,8 +269,35 @@ export function OrderOperations({ id }: { id?: string }) {
   return (
     <main id="main" className="container commerce-page">
       <h1>Operações · Pedidos</h1>
+      <Link href="/admin/orders/health">Saúde, falhas e pausas de loja</Link>
       <Link href="/merchant/login">Entrar com conta pessoal</Link>
       <p role="alert">{error}</p>
+      {message && <p role="status">{message}</p>}
+      {attempt && (
+        <section className="commerce-card" aria-label="Ação em recuperação">
+          <p role="status">
+            {attempt.phase === "pending"
+              ? "A confirmar a mesma ação. Aguarda antes de iniciar outra."
+              : "A atualizar o estado do pedido."}
+          </p>
+          {attempt.input.command === "refund" && (
+            <p>
+              Reembolso solicitado: {money(attempt.input.amount!)} ·{" "}
+              {attempt.input.reason}
+            </p>
+          )}
+          {attempt.error && <p role="alert">{attempt.error}</p>}
+          <button
+            className="button button-secondary"
+            disabled={attempt.busy}
+            onClick={() => pending.current && void send(pending.current)}
+          >
+            {attempt.phase === "pending"
+              ? "Repetir a mesma ação"
+              : "Atualizar pedido"}
+          </button>
+        </section>
+      )}
       {!id ? (
         <div className="commerce-grid">
           {orders.map((o) => (
@@ -164,6 +320,12 @@ export function OrderOperations({ id }: { id?: string }) {
               {detail.order.settlement_status}
             </p>
             <p>Reembolsável: {money(detail.remaining_refundable)}</p>
+            {refundPending && (
+              <p role="status">
+                Há um reembolso por confirmar. Consulta o histórico e reconcilia
+                a mesma operação antes de criar outro.
+              </p>
+            )}
             <div className="commerce-actions">
               <button
                 className="button button-secondary"
@@ -174,7 +336,7 @@ export function OrderOperations({ id }: { id?: string }) {
               </button>
               <button
                 className="button button-secondary"
-                disabled={busy || !detail.remaining_refundable}
+                disabled={busy || refundPending || !detail.remaining_refundable}
                 onClick={() =>
                   command(
                     "refund",
@@ -217,11 +379,14 @@ export function OrderOperations({ id }: { id?: string }) {
                       step="0.01"
                       defaultValue="0"
                       required
-                      disabled={busy}
+                      disabled={busy || refundPending}
                     />
                   </label>
                 ))}
-                <button className="button button-secondary" disabled={busy}>
+                <button
+                  className="button button-secondary"
+                  disabled={busy || refundPending}
+                >
                   Rever e confirmar reembolso parcial
                 </button>
               </form>
@@ -283,6 +448,30 @@ export function OrderOperations({ id }: { id?: string }) {
                 )}
               </article>
             ))}
+            <h2>Reembolsos</h2>
+            {detail.refunds.map((r) => (
+              <article key={r.id} className="commerce-card">
+                <p>
+                  {money(r.amount)} ·{" "}
+                  {(
+                    {
+                      requested: "Solicitado",
+                      processing: "Em processamento",
+                      unknown: "Resultado por confirmar",
+                      succeeded: "Confirmado pelo prestador",
+                      failed: "Falhou",
+                    } as Record<string, string>
+                  )[r.status] ?? r.status}
+                </p>
+                <p>
+                  Produtos: {money(r.allocation.products)} · Taxa Ruvon:{" "}
+                  {money(r.allocation.service)} · Entrega:{" "}
+                  {money(r.allocation.delivery)}
+                </p>
+                <p>{r.reason}</p>
+                <p>Recuperação à loja tratada separadamente.</p>
+              </article>
+            ))}
             <h2>Operações dos prestadores</h2>
             {detail.operations.map((o) => (
               <p key={o.id}>
@@ -300,6 +489,22 @@ export function OrderOperations({ id }: { id?: string }) {
             {detail.jobs.map((j) => (
               <p key={j.id}>
                 {j.kind} · {j.state} · {j.last_error}
+              </p>
+            ))}
+            <h2>Notificações</h2>
+            <p>
+              «Aceite para envio» confirma a receção pelo prestador. «Entregue»
+              confirma a entrega ao servidor de email do destinatário.
+            </p>
+            {detail.notifications?.map((n) => (
+              <p key={n.id}>
+                {n.channel} · {n.purpose} ·{" "}
+                {n.status === "sent"
+                  ? "Aceite para envio"
+                  : n.status === "delivered"
+                    ? "Entregue"
+                    : n.status}{" "}
+                · {n.last_error}
               </p>
             ))}
             <h2>Histórico</h2>

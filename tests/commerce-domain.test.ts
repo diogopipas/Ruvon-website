@@ -90,6 +90,8 @@ const stock = (sku: string, price = 100, quantity = 100): StoreProduct => ({
   stock_on_hand: quantity,
   reserved_quantity: 0,
   catalog_skus: {
+    name: `Artigo sintético ${sku}`,
+    unit: "unidade",
     enabled: true,
     contains_alcohol: sku.includes("mini"),
     requires_age_verification: sku.includes("mini"),

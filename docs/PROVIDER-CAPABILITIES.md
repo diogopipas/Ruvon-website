@@ -1,6 +1,6 @@
 # Provider contracts and evidence
 
-Public contracts reviewed 2026-10-12. **All account-specific capabilities below are NEEDS VERIFICATION.** No capability evidence is inserted by migrations or fixtures into hosted projects. Current implementation limits are in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md).
+Public contracts reviewed 2026-10-12. **Financial, delivery and end-to-end notification capabilities remain NEEDS VERIFICATION.** The independent Resend sender test passed on 2026-10-13; see the notification evidence below. No capability evidence is inserted by migrations or fixtures into hosted projects. Current implementation limits are in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md).
 
 ## Easypay
 
@@ -26,11 +26,14 @@ Sources: [published OpenAPI](https://docs.easypay.pt/_bundle/openapi.json?downlo
 
 ## Uber Direct
 
+On 20 October the user reported that account onboarding is awaiting a provider contact in 1–3 days. Test credentials and Portugal/alcohol approval remain unavailable.
+
 Use only the DaaS family `https://api.uber.com/v1/customers/{customer_id}`. OAuth uses client credentials at `https://auth.uber.com/oauth/v2/token`, scope `eats.deliveries`. Test/live credentials and `live_mode` must agree with the commerce environment.
 
 - Quotes: `POST /delivery_quotes`, exact structured PT address JSON strings; persist ID, EUR fee, ETA, provider expiry and both address payloads.
 - Outbound booking: `POST /deliveries`, persisted operation UUID as `idempotency_key`, order UUID as `external_id`, quote ID, contact and manifest. One local outbound intent is enforced independently of jobs.
 - Reads: `GET /deliveries/{del_or_ret_id}`. Delivery creation is not pickup. A `ret_` leg belongs to its original outbound delivery and its delivered status is a return to the store.
+- Status contract rechecked 2026-10-18: `pending` has no assigned courier; `pickup` has one. An original outbound delivery can progress from `canceled` to `returned` as its separate return leg reaches `delivered`. Migration 014 tests that distinction and preserves dispute holds; it is applied to the isolated sandbox with schema/grant parity. The matching worker is deployed to Preview; a real Uber return exercise remains outstanding. Deadline checks require an authoritative read and do not imply safe cancellation/refund.
 - Webhooks: `x-uber-signature`, HMAC-SHA256 over exact raw bytes with a dedicated signing key; verify customer and environment. Persist only references, event time and hash. Worker reads the delivery authoritatively.
 - Alcohol: explicit SKU metadata, meet at door, supported `identification.min_age: 18`, return on failed handoff. Retain only verification outcome/time, never document fields. Portugal/account approval is not established.
 
@@ -40,8 +43,8 @@ Sources: [getting started](https://developer.uber.com/docs/deliveries/get-starte
 
 ## Notifications and independent monitoring
 
-Resend provisioning requires an owned domain/region; verified sending and actual adapters/callbacks remain outstanding. Twilio credentials, Portuguese sender configuration and SMS tests are missing. No local intent row is evidence of sending or delivery.
+The user now owns `ruvon.store` through Vercel and explicitly chose a free direct Resend account rather than the paid Marketplace plans. The domain is Verified in Ireland; the user created a Sending-access key, saved locally and as a sensitive Vercel Preview secret. A real synthetic email was delivered and same-key replay returned the same ID. Email code/tables are deployed to the protected sandbox. Hosted authentic sent/delivered callbacks and duplicate replay passed with durable inbox/jobs; the uncorrelated test is quarantined safely. Real order notification acceptance remains outstanding. See [email setup](EMAIL-SETUP.md). Twilio credentials authenticate to Trial/active. Read-only provider evidence identifies an earlier Console SMS delivered at 21:59:52 Lisbon on 20 October; the user confirmed receipt. A separate one-shot fixed-template probe at 22:39:37 returned HTTP 403/code 572003 without a Message SID. These are distinct transactions; the rejected call's cause is unverified and was not retried. The default-disabled operational adapter, signed callback inbox and six durable read jobs are implemented, with migration 015 applied to the sandbox. The adapter blocks custom content on Trial accounts and never reposts a dispatched notification. No Twilio secret was uploaded. Custom-content eligibility, sender/routing and correlated real-order callback/delivery acceptance remain outstanding. See [SMS setup](SMS-SETUP.md). No local intent row is evidence of sending or delivery.
 
-Checkly was provisioned with paused heartbeat/health checks and operator email/SMS channels. Activate only after verifying deployment origin, worker scheduling and channel delivery. Independent Checkly alerts must work while the application/database is unavailable. Its ping URL is secret operational configuration, not a public health endpoint.
+Checkly was provisioned with heartbeat/health checks and operator email/SMS channels. The worker heartbeat is now active, healthy and receiving deployed pings; the separate HTTP check remains paused. Channel delivery and actual outage/recovery tests remain outstanding. The current account is a trial; no paid upgrade was performed. Independent Checkly alerts must work while the application/database is unavailable. Its ping URL is secret operational configuration, not a public health endpoint.
 
 Sources: [Resend Marketplace setup](https://resend.com/docs/guides/vercel-marketplace-integration), [Portugal SMS guidance](https://www.twilio.com/en-us/guidelines/pt/sms), [Checkly heartbeat monitoring](https://www.checklyhq.com/product/heartbeat-monitoring/).

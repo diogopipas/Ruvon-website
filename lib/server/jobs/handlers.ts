@@ -17,6 +17,7 @@ import type { ProviderOperation } from "../payments/provider";
 import type { Store } from "../orders/routing";
 import { processInbox } from "../webhooks/inbox";
 import { sendNotification } from "../notifications/service";
+import { reconcileSms } from "../notifications/sms-service";
 import { deliveryFact } from "../delivery/facts";
 const pending = () => {
   throw new Error("pending");
@@ -368,9 +369,14 @@ async function reconcileDelivery(job: Job, o: CommerceOrder) {
     provider_delivery_id: string;
     direction: string;
   }>("deliveries", o.id);
-  const ids = job.payload.delivery_id
-    ? [String(job.payload.delivery_id)]
-    : deliveries.map((d) => d.provider_delivery_id);
+  const policyCheck = ["courier_check", "delivery_overdue"].includes(job.kind);
+  const ids = policyCheck
+    ? deliveries
+        .filter((d) => d.direction === "outbound")
+        .map((d) => d.provider_delivery_id)
+    : job.payload.delivery_id
+      ? [String(job.payload.delivery_id)]
+      : deliveries.map((d) => d.provider_delivery_id);
   for (const id of ids) {
     const d = await provider.read(id);
     await repo.rpc("commerce_apply_delivery", {
@@ -384,6 +390,13 @@ async function reconcileDelivery(job: Job, o: CommerceOrder) {
       p_job: job.id,
       p_token: job.lease_token,
     });
+    if (policyCheck)
+      await repo.rpc("commerce_delivery_deadline", {
+        p_job: job.id,
+        p_token: job.lease_token,
+        p_delivery: d.id,
+        p_status: d.status,
+      });
   }
 }
 async function clearing(job: Job, o: CommerceOrder) {
@@ -433,6 +446,7 @@ export async function handleJob(job: Job) {
     await processInbox(job);
     return;
   }
+  if (job.kind === "notification_reconcile") return reconcileSms(job);
   if (!job.order_id) throw new ProviderError("order_missing");
   const repo = orderRepository(),
     o = await repo.order(job.order_id);
@@ -463,6 +477,7 @@ export async function handleJob(job: Job) {
       return repo.rpc("commerce_deadline", { p_order: o.id, p_kind: job.kind });
     case "delivery_reconcile":
     case "courier_check":
+    case "delivery_overdue":
       return reconcileDelivery(job, o);
     case "schedule_clearing":
       return clearing(job, o);
@@ -474,8 +489,11 @@ export async function handleJob(job: Job) {
         p_reason: "SETTLEMENT_EVIDENCE_NEEDS_VERIFICATION",
       });
     case "merchant_notify":
+    case "merchant_preparation":
     case "operator_alert":
     case "preparation_reminder":
+    case "customer_update":
+    case "customer_refund":
       return sendNotification(job, o);
     default:
       throw new ProviderError("unknown_job_kind");

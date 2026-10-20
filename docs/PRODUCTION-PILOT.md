@@ -4,13 +4,13 @@
 
 ## Required before sandbox acceptance
 
-- Uber Direct test credentials and approved test customer; Twilio account/Portuguese sender; owned Resend sending domain and provisioned verified resource.
-- One real store's pickup/contact details, exact postcode coverage, Lisbon hours, named staff, approved 20–30 SKU prices/stock/compliance and four main pack recipes.
+- Uber Direct test credentials and approved test customer; a provisioned Twilio Portuguese SMS route with verified transactional content and destination; deployed Resend callbacks and durable notification tests. The free Resend account/domain are configured; a synthetic operator email was delivered.
+- One real store's pickup/contact details, exact postcode coverage, Lisbon hours, named staff and approved SKU prices/stock/compliance. The user selected a craft-beer A.M.O. pilot: the user has supplied three 33 cl bottle names/prices (450/400/400 cents, VAT included), but stock and compliance/transport details are still missing. The earlier indicative variety count is not an approved assortment. Build packs only from confirmed SKUs; agree the final smaller assortment before launch rather than filling the original 20–30 SKU target with invented products.
 - Verified Easypay marketplace structure, method-specific authorisation/capture/void/refund, split holding, future clearing and actual settlement correlation.
 - Complete the missing notification, cancellation, settlement, exceptions and monitoring work listed in the status document.
-- Apply/verify 006–011 on the isolated test project; deploy a protected sandbox with durable Cron, real callbacks and sender/monitoring tests.
+- Hosted 001–015 schema/grant parity, protected Preview, 30-second Cron, real Resend callback/replay transport and worker heartbeat now pass. Complete correlated order notifications, external alert delivery/outage tests and real payment/delivery/settlement acceptance.
 
-User has confirmed the Uber/Twilio/store/domain prerequisites are not currently available. No demo store or substitute payment mechanism is included.
+On 20 October the user reported that Uber will contact them in 1–3 days, supplied provisional A.M.O. Brewery details and chose a craft-beer pilot. The Twilio Console accepts the user's Portuguese number and a From value is saved locally. One explicitly authorised fixed-template test was rejected with HTTP 403/code 572003, without a Message SID. A read-only query also found an earlier Console SMS marked delivered, and the user confirmed receipt. That proves this trial transport worked, separately from the rejected probe. Default-disabled durable SMS and signed callbacks are implemented; custom-content/routing and correlated Ruvon delivery remain unverified. No repeat, paid upgrade or Twilio secret transfer occurred. Three bottle names/prices and revised pickup windows are recorded; stock, compliance/transport metadata, pickup contacts, postcodes and commercial agreement remain unconfirmed. The user confirmed the combined pickup schedule and Sunday closure. See [A.M.O. preparation](PILOT-AMO.md) and [SMS setup](SMS-SETUP.md). The domain prerequisite is resolved by the purchase of `ruvon.store`; the Resend sender is verified and tested; hosted callback transport/replay now pass; correlated order email acceptance and SMS remain outstanding. No demo store or substitute payment mechanism is included.
 
 ## Required acceptance evidence
 

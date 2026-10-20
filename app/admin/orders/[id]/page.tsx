@@ -12,5 +12,5 @@ export default async function Page({
 }) {
   const id = z.uuid().safeParse((await params).id);
   if (!id.success) notFound();
-  return <OrderOperations id={id.data} />;
+  return <OrderOperations key={id.data} id={id.data} />;
 }

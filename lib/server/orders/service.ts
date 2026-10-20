@@ -1,8 +1,6 @@
 import "server-only";
 import type { z } from "zod";
 import { quoteSchema, startOrderSchema } from "@/lib/commerce";
-import { products, packs } from "@/lib/products";
-import { cartSchema } from "@/lib/validation";
 import { privacyConfig } from "@/lib/privacy";
 import {
   commerceEnvironment,
@@ -15,7 +13,7 @@ import { RequestError } from "../http";
 import { UberDirectProvider } from "../delivery/uber-direct";
 import { orderRepository } from "./repository";
 import { eligibleStore } from "./routing";
-import { priceStoreBasket } from "./pricing";
+import { buildStoreCatalog, priceStoreBasket } from "./pricing";
 
 export async function checkoutReady(method = "MBW") {
   if (!commerceExposed())
@@ -39,30 +37,7 @@ export async function commerceCatalog() {
   return Promise.all(
     stores.map(async (store) => {
       const stock = await repo.products(store.id);
-      const catalog = [
-        ...products,
-        ...packs.filter((p) => p.tier === "primary"),
-      ].flatMap((p) => {
-        try {
-          const line = priceStoreBasket(
-            cartSchema.parse([{ id: p.id, quantity: 1 }]),
-            stock,
-            0,
-            0,
-            store.commission_bps,
-          ).items[0];
-          return [
-            {
-              id: p.id,
-              name: p.name,
-              unit_price: line.unit_price,
-              options: line.options,
-            },
-          ];
-        } catch {
-          return [];
-        }
-      });
+      const catalog = buildStoreCatalog(stock, store.commission_bps);
       return {
         id: store.id,
         name: store.name,

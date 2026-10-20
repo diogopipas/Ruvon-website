@@ -16,6 +16,12 @@ export class ProviderError extends Error {
     super(classification);
   }
 }
+/** Reserve time for persisting intent and the subsequent provider request. */
+export function requireProviderBudget(minimumMs: number) {
+  const deadline = deadlines.getStore();
+  if (deadline !== undefined && deadline - Date.now() < minimumMs)
+    throw new ProviderError("worker_budget_expired");
+}
 export async function providerJson(url: string, init: RequestInit) {
   let response: Response;
   const deadline = deadlines.getStore();

@@ -1,7 +1,12 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/integration",
-  testMatch: "commerce-browser.spec.ts",
+  testMatch: [
+    "commerce-browser.spec.ts",
+    "operations-browser.spec.ts",
+    "merchant-commands-browser.spec.ts",
+    "admin-financial-browser.spec.ts",
+  ],
   workers: 1,
   fullyParallel: false,
   timeout: 60000,
@@ -19,6 +24,7 @@ export default defineConfig({
     timeout: 60000,
     reuseExistingServer: false,
     env: {
+      RUVON_BROWSER_TEST: "true",
       RUVON_PAYMENTS_MODE: "sandbox",
       RUVON_DELIVERY_MODE: "disabled",
       RUVON_LIVE_CHECKOUT_ENABLED: "true",
@@ -32,6 +38,15 @@ export default defineConfig({
       UBER_CLIENT_SECRET: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
       RUVON_SANDBOX_SUPABASE_SERVICE_ROLE_KEY: "",
+      RESEND_API_KEY: "",
+      RESEND_WEBHOOK_SECRET: "",
+      TWILIO_ACCOUNT_SID: "",
+      TWILIO_AUTH_TOKEN: "",
+      TWILIO_FROM_NUMBER: "",
+      TWILIO_MESSAGING_SERVICE_SID: "",
+      RUVON_SMS_ENABLED: "false",
+      TWILIO_STATUS_CALLBACK_URL: "",
+      CHECKLY_HEARTBEAT_URL: "",
     },
   },
 });

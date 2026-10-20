@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { cartSchema } from "./validation";
+import { commerceCartSchema } from "./commerce";
 import { subtractPurchasedBasket } from "./payments";
 import type { CartItem } from "@/types";
 
 const savedCart = z.object({
-  items: cartSchema,
+  items: commerceCartSchema,
   confirmedOrders: z.array(z.uuid()).max(500),
 });
 export type CommerceCart = z.infer<typeof savedCart>;

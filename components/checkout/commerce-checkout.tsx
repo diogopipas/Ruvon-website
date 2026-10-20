@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { CartItem, PackOptions } from "@/types";
-import type { OrderView } from "@/lib/commerce";
+import type { CommerceCatalogItem, OrderView } from "@/lib/commerce";
 import { packById } from "@/lib/products";
 import { componentChoices, packOptions } from "@/lib/packs";
 import { parseCommerceCart } from "@/lib/commerce-cart";
@@ -13,19 +13,13 @@ import { money } from "@/lib/pricing";
 import { Wordmark } from "@/components/ui/wordmark";
 import { useCart } from "@/components/providers";
 type Quote = OrderView & { quote_expires_at: string; eta: string };
-type Catalog = {
-  id: string;
-  name: string;
-  unit_price: number;
-  options?: PackOptions;
-};
 export function CommerceCheckout({
   environment,
 }: {
   environment: "sandbox" | "live";
 }) {
   const { ageConfirmed } = useCart();
-  const [catalog, setCatalog] = useState<Catalog[]>([]),
+  const [catalog, setCatalog] = useState<CommerceCatalogItem[]>([]),
     [items, setItems] = useState<CartItem[]>([]),
     [quote, setQuote] = useState<Quote | null>(null),
     [error, setError] = useState(""),
@@ -190,6 +184,7 @@ export function CommerceCheckout({
                 <h2>{p.name}</h2>
                 <p>
                   {money(p.unit_price)}
+                  {p.unit ? ` · ${p.unit}` : ""}
                   {pack ? " · configuração base" : ""}
                 </p>
                 <div className="commerce-actions">

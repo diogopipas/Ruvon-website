@@ -1,6 +1,17 @@
-import type { Allocation, CommerceLine } from "@/lib/commerce";
+import {
+  commerceCartSchema,
+  storeSkuFromId,
+  storeSkuId,
+  type Allocation,
+  type CommerceLine,
+  type CommerceCatalogItem,
+} from "@/lib/commerce";
 import type { CartItem } from "@/types";
-import { getCatalogItem } from "@/lib/products";
+import {
+  getCatalogItem,
+  products as demoProducts,
+  packs,
+} from "@/lib/products";
 import { aggregateRecipe, resolveRecipe } from "./recipes";
 
 export type StoreProduct = {
@@ -10,6 +21,8 @@ export type StoreProduct = {
   stock_on_hand: number;
   reserved_quantity: number;
   catalog_skus: {
+    name: string;
+    unit: string;
     enabled: boolean;
     contains_alcohol: boolean;
     requires_age_verification: boolean;
@@ -47,7 +60,7 @@ export function priceStoreBasket(
   commissionBps = 1000,
 ) {
   const catalog = new Map(products.map((p) => [p.sku, p]));
-  const lines: CommerceLine[] = items.map((item) => {
+  const lines: CommerceLine[] = commerceCartSchema.parse(items).map((item) => {
     const recipe = resolveRecipe(item);
     const components = recipe.map((part) => {
       const product = catalog.get(part.sku);
@@ -64,9 +77,14 @@ export function priceStoreBasket(
       (sum, c) => sum + c.quantity * c.unit_price,
       0,
     );
+    const sku = storeSkuFromId(item.id);
+    const name = sku
+      ? catalog.get(sku)!.catalog_skus.name
+      : getCatalogItem(item.id)!.name;
+    if (!name?.trim()) throw new Error("Informação do artigo incompleta.");
     return {
       ...item,
-      name: getCatalogItem(item.id)!.name,
+      name,
       unit_price,
       line_price: unit_price * item.quantity,
       recipe,
@@ -100,4 +118,61 @@ export function priceStoreBasket(
       (r) => catalog.get(r.sku)!.catalog_skus.requires_age_verification,
     ),
   };
+}
+
+/** Public catalogue is derived from enabled, priced and available store stock.
+ * Legacy bundle recipes remain available only when every component is stocked.
+ * No stock counts, account references or fallback prices leave this boundary.
+ */
+export function buildStoreCatalog(
+  stock: StoreProduct[],
+  commissionBps: number,
+): CommerceCatalogItem[] {
+  const catalog: CommerceCatalogItem[] = [];
+  for (const product of stock) {
+    try {
+      if (!product.catalog_skus.unit?.trim()) continue;
+      const id = storeSkuId(product.sku);
+      const line = priceStoreBasket(
+        [{ id, quantity: 1 }],
+        stock,
+        0,
+        0,
+        commissionBps,
+      ).items[0];
+      catalog.push({
+        id,
+        name: line.name,
+        unit: product.catalog_skus.unit,
+        unit_price: line.unit_price,
+      });
+    } catch {
+      // Incomplete, disabled or unavailable inventory is not offered.
+    }
+  }
+  for (const item of [
+    ...demoProducts,
+    ...packs.filter((p) => p.tier === "primary"),
+  ]) {
+    try {
+      const line = priceStoreBasket(
+        [{ id: item.id, quantity: 1 }],
+        stock,
+        0,
+        0,
+        commissionBps,
+      ).items[0];
+      // Physical units are already listed above under their store name.
+      if (line.recipe.length === 1 && line.recipe[0].quantity === 1) continue;
+      catalog.push({
+        id: line.id,
+        name: line.name,
+        unit_price: line.unit_price,
+        options: line.options,
+      });
+    } catch {
+      // A validation/demo offering never supplies missing stock or prices.
+    }
+  }
+  return catalog;
 }

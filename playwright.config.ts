@@ -1,7 +1,12 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/integration",
-  testIgnore: "**/commerce-browser.spec.ts",
+  testIgnore: [
+    "**/commerce-browser.spec.ts",
+    "**/operations-browser.spec.ts",
+    "**/merchant-commands-browser.spec.ts",
+    "**/admin-financial-browser.spec.ts",
+  ],
   fullyParallel: false,
   workers: 1,
   timeout: 45000,

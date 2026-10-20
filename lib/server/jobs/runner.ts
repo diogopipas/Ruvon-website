@@ -4,6 +4,7 @@ import { handleJob } from "./handlers";
 import type { Job } from "../payments/service";
 import { ProviderError } from "../payments/http";
 import { withProviderDeadline } from "../payments/http";
+import { pingWorkerHeartbeat } from "./heartbeat";
 export function retryDelay(
   attempt: number,
   retryAfter = 0,
@@ -44,7 +45,8 @@ export async function runJobs() {
               ? "pending"
               : "job_retry";
         const exhausted = job.attempts >= 12 && classification !== "pending";
-        if (exhausted && job.order_id)
+        // A failed operator alert must not recursively create another alert case.
+        if (exhausted && job.order_id && job.kind !== "operator_alert")
           await repo.rpc("commerce_open_case", {
             p_order: job.order_id,
             p_key: `job-failed:${job.id}`,
@@ -90,25 +92,11 @@ export async function runJobs() {
     const next = () => jobs[cursor++];
     await Promise.all([consume(jobs, next), consume(jobs, next)]);
   }
+  // Leave margin inside pg_net's 25-second timeout for the final DB acknowledgement.
+  await pingWorkerHeartbeat(started + 23000);
   await repo.rpc("commerce_worker_health", {
     p_success: true,
     p_jobs: processed,
   });
-  const heartbeat = process.env.CHECKLY_HEARTBEAT_URL;
-  if (heartbeat) {
-    const url = new URL(heartbeat);
-    if (
-      url.protocol !== "https:" ||
-      !["ping.checklyhq.com", "api.checklyhq.com"].includes(url.hostname)
-    )
-      throw new Error("Invalid heartbeat destination");
-    const response = await fetch(url, {
-      method: "GET",
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(2000),
-    });
-    if (!response.ok) throw new Error("Heartbeat failed");
-  }
   return { processed };
 }

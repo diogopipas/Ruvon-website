@@ -42,10 +42,44 @@ export const addressSchema = z
   })
   .strict();
 export type DeliveryAddress = z.infer<typeof addressSchema>;
+// Namespaced physical stock units cannot collide with validation catalogue IDs.
+// Shape validation grants no availability: the server must find the SKU in the
+// selected store's enabled inventory before quoting or reserving it.
+const stockUnitPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/;
+export function storeSkuFromId(id: string): string | null {
+  if (!id.startsWith("sku:")) return null;
+  const sku = id.slice(4);
+  return stockUnitPattern.test(sku) ? sku : null;
+}
+export function storeSkuId(sku: string): string {
+  if (!stockUnitPattern.test(sku)) throw new Error("Referência inválida.");
+  return `sku:${sku}`;
+}
+export const commerceCartSchema = z
+  .array(
+    z.union([
+      cartSchema.element,
+      z
+        .object({
+          id: z.string().refine((id) => storeSkuFromId(id) !== null),
+          quantity: z.number().int().min(1).max(30),
+        })
+        .strict(),
+    ]),
+  )
+  .max(50)
+  .refine((items) => new Set(items.map((i) => i.id)).size === items.length);
+export type CommerceCatalogItem = {
+  id: string;
+  name: string;
+  unit_price: number;
+  unit?: string;
+  options?: import("@/types").PackOptions;
+};
 export const quoteSchema = z
   .object({
     checkout_key: z.uuid(),
-    items: cartSchema.min(1),
+    items: commerceCartSchema.min(1),
     address: addressSchema,
   })
   .strict();
@@ -86,6 +120,7 @@ export const commandSchema = z
     saleable: z.record(z.string(), z.number().int().nonnegative()).optional(),
   })
   .strict();
+export type MerchantCommand = z.infer<typeof commandSchema>;
 export const cancelSchema = z
   .object({
     command_id: z.uuid(),

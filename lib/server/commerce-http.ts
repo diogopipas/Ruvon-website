@@ -38,8 +38,15 @@ export function workerAuth(request: Request) {
   )
     throw new RequestError("Não autorizado.", 401);
 }
-export async function rawBody(request: Request, maximum = 16000) {
-  if (!request.headers.get("content-type")?.includes("application/json"))
+export async function rawBody(
+  request: Request,
+  maximum = 16000,
+  contentType = "application/json",
+) {
+  if (
+    request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !==
+    contentType
+  )
     throw new RequestError("Formato inválido.", 415);
   const reader = request.body?.getReader();
   if (!reader) throw new RequestError("Pedido inválido.");

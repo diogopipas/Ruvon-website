@@ -29,7 +29,7 @@ export function deliveryFact(
     status: delivery.status,
     eta: delivery.dropoff_eta,
     parent_id:
-      parentId ?? related.find((r) => r.relationship === "original")?.id,
+      related.find((r) => r.relationship === "original")?.id ?? parentId,
     return_id: related.find((r) => r.relationship === "returned")?.id,
     ...(passed === undefined ? {} : { verification_passed: passed }),
   };

@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "status": "draft_not_imported",
+  "source": "user_supplied_2026-10-20",
+  "store": {
+    "name": "A A.M.O. Brewery",
+    "pickup_address": {
+      "street_address": ["Rua Bernardim Ribeiro, 53"],
+      "city": "Lisboa",
+      "zip_code": "1150-069",
+      "country": "PT"
+    },
+    "timezone": "Europe/Lisbon",
+    "enabled": false,
+    "paused": true,
+    "contact_name": null,
+    "email": null,
+    "phone": null,
+    "delivery_postcodes": [],
+    "easypay_account_id": null,
+    "commercial_terms_confirmed": false
+  },
+  "hours": {
+    "status": "confirmed_by_user_2026-10-20",
+    "supplied_windows": [
+      {
+        "days": [2, 3, 4],
+        "start": "16:00",
+        "end": "22:00"
+      },
+      {
+        "days": [5, 6],
+        "start": "16:00",
+        "end": "00:00"
+      },
+      {
+        "days": [1, 2, 3, 4, 5],
+        "start": "09:00",
+        "end": "15:00"
+      }
+    ],
+    "sunday_confirmed": true,
+    "sunday_closed": true,
+    "opening_hours": {
+      "0": [],
+      "1": [
+        {
+          "start": "09:00",
+          "end": "15:00"
+        }
+      ],
+      "2": [
+        {
+          "start": "09:00",
+          "end": "15:00"
+        },
+        {
+          "start": "16:00",
+          "end": "22:00"
+        }
+      ],
+      "3": [
+        {
+          "start": "09:00",
+          "end": "15:00"
+        },
+        {
+          "start": "16:00",
+          "end": "22:00"
+        }
+      ],
+      "4": [
+        {
+          "start": "09:00",
+          "end": "15:00"
+        },
+        {
+          "start": "16:00",
+          "end": "22:00"
+        }
+      ],
+      "5": [
+        {
+          "start": "09:00",
+          "end": "15:00"
+        },
+        {
+          "start": "16:00",
+          "end": "00:00"
+        }
+      ],
+      "6": [
+        {
+          "start": "16:00",
+          "end": "00:00"
+        }
+      ]
+    }
+  },
+  "products": [
+    {
+      "ruvon_sku": "amo-most-wanted-ipa-330",
+      "name": "Most wanted IPA",
+      "unit": "garrafa de 33 cl",
+      "volume_ml": 330,
+      "price_cents": 450,
+      "vat_included": true,
+      "vat_bps_supplied": 2300,
+      "stock_on_hand": null,
+      "contains_alcohol": null,
+      "requires_age_verification": null,
+      "weight_grams": null,
+      "dimensions": null,
+      "ingredients_allergens": null,
+      "enabled": false
+    },
+    {
+      "ruvon_sku": "amo-borboletas-apa-330",
+      "name": "Borboletas APA",
+      "unit": "garrafa de 33 cl",
+      "volume_ml": 330,
+      "price_cents": 400,
+      "vat_included": true,
+      "vat_bps_supplied": 2300,
+      "stock_on_hand": null,
+      "contains_alcohol": null,
+      "requires_age_verification": null,
+      "weight_grams": null,
+      "dimensions": null,
+      "ingredients_allergens": null,
+      "enabled": false
+    },
+    {
+      "ruvon_sku": "amo-alley-cat-amber-330",
+      "name": "Alley Cat Amber",
+      "unit": "garrafa de 33 cl",
+      "volume_ml": 330,
+      "price_cents": 400,
+      "vat_included": true,
+      "vat_bps_supplied": 2300,
+      "stock_on_hand": null,
+      "contains_alcohol": null,
+      "requires_age_verification": null,
+      "weight_grams": null,
+      "dimensions": null,
+      "ingredients_allergens": null,
+      "enabled": false
+    }
+  ],
+  "pack_recipes": []
+}

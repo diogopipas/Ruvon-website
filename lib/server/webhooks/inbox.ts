@@ -15,6 +15,7 @@ import { UberDirectProvider } from "../delivery/uber-direct";
 import { deliveryFact } from "../delivery/facts";
 import { paymentStore } from "../payment-store";
 import { reconcilePayment } from "../payment-service";
+import { reconcileSms } from "../notifications/sms-service";
 const generic = z.object({
   id: z.uuid(),
   key: z.string().min(1).max(50),
@@ -120,7 +121,20 @@ export async function processInbox(job: Job) {
       p_bind_only: bindOnly,
     });
   if (event.state === "quarantined") return;
-  if (event.provider === "easypay") {
+  if (event.provider === "twilio") {
+    if (event.state === "processed") return;
+    if (event.payload.quarantine_reason) {
+      await complete(undefined, event.payload.quarantine_reason);
+      return;
+    }
+    await reconcileSms(job, event);
+  } else if (event.provider === "resend") {
+    await repo.rpc("commerce_apply_notification_event", {
+      p_event: event.id,
+      p_job: job.id,
+      p_token: job.lease_token,
+    });
+  } else if (event.provider === "easypay") {
     const p = generic.parse(event.payload);
     const key = z.uuid().safeParse(p.key);
     if (!key.success) {

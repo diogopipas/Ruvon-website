@@ -64,3 +64,24 @@
   font-weight: 700;
   margin: 24px 0;
 }
+.operations-monitor section {
+  margin-block: 28px;
+}
+.operations-monitor section > .commerce-card {
+  margin-block: 16px;
+}
+.operations-monitor p,
+.operations-monitor li {
+  overflow-wrap: anywhere;
+}
+.operations-monitor form {
+  margin-block: 32px;
+}
+.operations-monitor h2,
+.operations-monitor h3 {
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.operations-monitor .commerce-card .button {
+  margin-block: 12px;
+}

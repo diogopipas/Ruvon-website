@@ -11,6 +11,7 @@ test("disabled commerce fails closed without changing validation or exposing pri
     `/api/commerce/orders/${id}/payment`,
     "/api/merchant/orders",
     "/api/admin/orders",
+    "/api/admin/operations",
     `/api/admin/orders/${id}`,
   ]) {
     const response = await request.get(path);
@@ -22,6 +23,7 @@ test("disabled commerce fails closed without changing validation or exposing pri
     "/api/commerce/orders",
     `/api/commerce/orders/${id}/cancel`,
     `/api/commerce/orders/${id}/issues`,
+    "/api/admin/operations/commands",
   ])
     expect([401, 403, 404, 503]).toContain(
       (await request.post(path, { headers: origin, data: {} })).status(),
@@ -29,6 +31,11 @@ test("disabled commerce fails closed without changing validation or exposing pri
   expect(
     (await request.post("/api/internal/jobs/run", { data: {} })).status(),
   ).toBe(401);
+  const callback = await request.post("/api/webhooks/twilio", {
+    form: { MessageStatus: "delivered", Body: "untrusted" },
+  });
+  expect(callback.status()).toBe(401);
+  expect(await callback.text()).not.toContain("untrusted");
   const health = await request.get("/api/health");
   expect(health.status()).toBe(503);
   expect(await health.json()).toEqual({ ok: false });

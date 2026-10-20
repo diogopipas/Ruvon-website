@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLatestWriter, postJson } from "@/lib/client-request";
+import {
+  createLatestWriter,
+  HttpResponseError,
+  postJson,
+} from "@/lib/client-request";
 import { checkoutKey, locationKey } from "@/lib/journey";
 
 function browserStorage() {
@@ -71,9 +75,14 @@ describe("recoverable client requests", () => {
     await expect(postJson("/api/orders", { items: [] })).resolves.toEqual({
       ok: true,
     });
-    await expect(postJson("/api/leads", {})).rejects.toThrow(
-      "Indica a tua cidade.",
+    const rejected = await postJson("/api/leads", {}).catch(
+      (error: unknown) => error,
     );
+    expect(rejected).toBeInstanceOf(HttpResponseError);
+    expect(rejected).toMatchObject({
+      status: 400,
+      message: "Indica a tua cidade.",
+    });
   });
 
   it("bounds a stalled request so the caller can retry", async () => {

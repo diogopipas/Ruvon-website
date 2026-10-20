@@ -1,5 +1,15 @@
 "use client";
 
+export class HttpResponseError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "HttpResponseError";
+  }
+}
+
 /** One running write and one replaceable pending snapshot, rather than an
  * unbounded promise chain when a connection is slow. All callers share the
  * flush result; failure stops the flush and a later call can retry. */
@@ -50,10 +60,11 @@ export async function postJson<T = unknown>(
         result && typeof result === "object" && "error" in result
           ? result.error
           : null;
-      throw new Error(
+      throw new HttpResponseError(
         typeof message === "string"
           ? message
           : "Não conseguimos guardar agora. Tenta novamente.",
+        response.status,
       );
     }
     if (result === null)

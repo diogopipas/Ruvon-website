@@ -2,6 +2,7 @@ import { packById, productById } from "@/lib/products";
 import { packOptions } from "@/lib/packs";
 import type { CartItem } from "@/types";
 import type { Recipe } from "@/lib/commerce";
+import { storeSkuFromId } from "@/lib/commerce";
 
 // Stock units are explicit. Multipacks share the underlying physical SKU.
 const individual: Record<string, Recipe> = {
@@ -36,6 +37,12 @@ const cores: Record<string, Recipe> = {
   "pack-sem-ressacas": [{ sku: "red-bull-25", quantity: 4 }],
 };
 export function resolveRecipe(item: CartItem): Recipe {
+  const sku = storeSkuFromId(item.id);
+  if (sku) {
+    if (item.options && Object.keys(item.options).length)
+      throw new Error("Opção indisponível para este artigo.");
+    return [{ sku, quantity: 1 }];
+  }
   const pack = packById.get(item.id);
   if (!pack) {
     if (!productById.has(item.id)) throw new Error("Artigo desconhecido.");

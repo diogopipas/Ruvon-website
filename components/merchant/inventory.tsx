@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { postJson } from "@/lib/client-request";
+import { useCallback, useEffect, useState } from "react";
+import { HttpResponseError, postJson } from "@/lib/client-request";
 type Product = {
   store_id: string;
   sku: string;
@@ -11,15 +11,26 @@ type Product = {
   enabled: boolean;
   version: number;
 };
-export function MerchantInventory() {
+export function MerchantInventory({
+  onAccessDenied,
+}: {
+  onAccessDenied: () => void;
+}) {
   const [products, setProducts] = useState<Product[]>([]),
     [error, setError] = useState(""),
     [busy, setBusy] = useState("");
-  async function load() {
-    const r = await fetch("/api/merchant/inventory", { cache: "no-store" });
+  const load = useCallback(async () => {
+    const r = await fetch("/api/merchant/inventory", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+    if (r.status === 401 || r.status === 403) {
+      onAccessDenied();
+      throw new Error("Inicia sessão novamente para consultar o inventário.");
+    }
     if (!r.ok) throw new Error("Não foi possível consultar o inventário.");
     return r.json() as Promise<Product[]>;
-  }
+  }, [onAccessDenied]);
   useEffect(() => {
     let active = true;
     load()
@@ -32,7 +43,7 @@ export function MerchantInventory() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [load]);
   async function save(product: Product, form: HTMLFormElement) {
     setBusy(product.sku);
     setError("");
@@ -47,6 +58,13 @@ export function MerchantInventory() {
       });
       setProducts(await load());
     } catch (e) {
+      if (
+        e instanceof HttpResponseError &&
+        (e.status === 401 || e.status === 403)
+      ) {
+        onAccessDenied();
+        return;
+      }
       setError(e instanceof Error ? e.message : "Atualiza antes de guardar.");
     } finally {
       setBusy("");

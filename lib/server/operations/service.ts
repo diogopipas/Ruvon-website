@@ -2,6 +2,55 @@ import "server-only";
 import { orderRepository } from "../orders/repository";
 import { staffSession } from "../merchant/auth";
 import { RequestError } from "../http";
+import type { OperationsControl, OperationsMonitor } from "@/lib/operations";
+import {
+  commerceEnvironment,
+  commerceExposed,
+  easypayCommerceConfig,
+  uberConfig,
+} from "../commerce-config";
+import { emailConfig } from "../notifications/resend";
+
+function configured(read: () => unknown) {
+  try {
+    read();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function operationsMonitor(): Promise<OperationsMonitor> {
+  const { client } = await staffSession(true);
+  const environment = commerceEnvironment();
+  const { data, error } = await client.rpc("operations_monitor", {
+    p_environment: environment,
+  });
+  if (error) throw error;
+  return {
+    ...data,
+    configuration: {
+      environment,
+      checkout_exposed: commerceExposed(),
+      easypay: configured(easypayCommerceConfig),
+      uber: configured(uberConfig),
+      email: configured(emailConfig),
+    },
+  };
+}
+
+export async function operationsControl(input: OperationsControl) {
+  return adminCommand(
+    {
+      p_command: input.command_id,
+      p_action: input.action,
+      p_target: input.target_id,
+      p_version: input.expected_version,
+      p_reason: input.reason,
+    },
+    "operations_control",
+  );
+}
 export async function operationalOrders() {
   await staffSession(true);
   const { data, error } = await orderRepository()
@@ -16,20 +65,33 @@ export async function orderOperations(id: string) {
   await staffSession(true);
   const repo = orderRepository();
   const order = await repo.order(id);
-  const [events, cases, refunds, operations, jobs, splits, deliveries] =
-    await Promise.all([
-      repo.list("order_events", id),
-      repo.list("order_cases", id),
-      repo.list<{
-        status: string;
-        amount: number;
-        allocation: { products: number; service: number; delivery: number };
-      }>("refunds", id),
-      repo.list("provider_operations", id),
-      repo.list("background_jobs", id),
-      repo.list("payment_splits", id),
-      repo.list("deliveries", id),
-    ]);
+  const [
+    events,
+    cases,
+    refunds,
+    operations,
+    jobs,
+    splits,
+    deliveries,
+    notificationResult,
+  ] = await Promise.all([
+    repo.list("order_events", id),
+    repo.list("order_cases", id),
+    repo.list<{
+      status: string;
+      amount: number;
+      allocation: { products: number; service: number; delivery: number };
+    }>("refunds", id),
+    repo.list("provider_operations", id),
+    repo.list("background_jobs", id),
+    repo.list("payment_splits", id),
+    repo.list("deliveries", id),
+    repo.db
+      .from("notifications")
+      .select("id,channel,purpose,status,provider_status,attempts,last_error")
+      .eq("order_id", id),
+  ]);
+  if (notificationResult.error) throw notificationResult.error;
   return {
     order: await repo.view(order),
     events,
@@ -58,6 +120,7 @@ export async function orderOperations(id: string) {
     }),
     splits,
     deliveries,
+    notifications: notificationResult.data,
     remaining_components: {
       products:
         order.subtotal -
@@ -86,14 +149,21 @@ export async function orderOperations(id: string) {
 }
 export async function adminCommand(
   args: Record<string, unknown>,
-  name: "operations_command" | "operations_resolve_case" = "operations_command",
+  name:
+    | "operations_command"
+    | "operations_resolve_case"
+    | "operations_control" = "operations_command",
 ) {
   const { client } = await staffSession(true);
   const { data, error } = await client.rpc(name, args);
   if (error?.code === "40001" || error?.code === "23505")
-    throw new RequestError("O pedido mudou. Atualiza antes de continuar.", 409);
+    throw new RequestError("O estado mudou. Atualiza antes de continuar.", 409);
   if (error?.code === "42501")
     throw new RequestError("Acesso não autorizado.", 403);
+  if (error?.code === "22023")
+    throw new RequestError("A ação não é permitida neste estado.", 400);
+  if (error?.code === "P0002")
+    throw new RequestError("Registo indisponível.", 404);
   if (error) throw error;
   return data;
 }
