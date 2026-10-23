@@ -1,6 +1,10 @@
 # A.M.O. Brewery — preparação do piloto
 
-Atualizado em 20 de outubro de 2026, com os dados fornecidos pelo utilizador. **Três produtos e respetivos preços foram comunicados para preparar o piloto; a ativação continua pendente dos restantes dados e condições.** Não foi criada uma loja ativa, inventado stock ou alterado o catálogo público. Os dados estruturados estão em [amo-draft.json](pilot/amo-draft.json), sem execução automática ou importação para a base de dados.
+Atualizado em 23 de outubro de 2026, com os dados fornecidos pelo utilizador. **Os três produtos e preços têm agora uma apresentação na homepage e no início de `/pedir`, assinalada como «Em breve» e «Encomendas ainda indisponíveis».** A ativação de vendas continua pendente dos restantes dados e condições. Não foi criada uma loja ativa nem inventado stock. Os dados estruturados estão em [amo-draft.json](pilot/amo-draft.json), sem execução automática ou importação para a base de dados.
+
+Publicado em [ruvon.store/pedir#amo](https://www.ruvon.store/pedir#amo) e na homepage em 23 de outubro. A presença dos três artigos foi confirmada num browser público sem sessão de administrador, em telemóvel e desktop.
+
+A apresentação lê apenas nomes, formatos e preços desse rascunho num componente de servidor. Não disponibiliza compra ou adição ao carrinho, nem inclui dados operacionais privados no JavaScript do browser. Não são apresentadas fotografias, teores alcoólicos ou descrições que a loja ainda não forneceu. A visibilidade dos produtos é independente da ativação do checkout; não constitui confirmação de stock ou de entrega.
 
 ## Dados recebidos
 

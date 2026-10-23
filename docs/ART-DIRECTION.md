@@ -33,3 +33,7 @@ Compact individual products
 Two recurring devices: large cold-product crops and the perforated receipt edge. No popularity badge, feature checklist, decorative CTA arrows or repeated icon-heading-paragraph cards. The menu stays simple: at most beer and mixer substitutions. Cart lines remain whole packs, with their chosen options.
 
 Generated pack scenes are illustrative prelaunch assets, not supplier-approved product photographs. Keep these isolated under `public/images/packs` and record their prompts/provenance before handoff.
+
+## A.M.O. pilot presentation — 23 October 2026
+
+Use the existing charcoal, cream, amber, Barlow Condensed and DM Sans. A single cream section groups the three confirmed bottle names, 33 cl units and VAT-inclusive prices. Product columns share dividers on desktop and become a vertical list on mobile. Show the upcoming status and unavailable ordering once for the group. No invented packshots, labels, tasting notes, alcohol percentages or stock badges. The homepage links to `/pedir#amo`, where the section precedes the validation packs. No quantity or purchase action appears in the pilot presentation.

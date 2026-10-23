@@ -1117,6 +1117,11 @@
   .container {
     width: calc(100% - 30px);
   }
+  .category-chips,
+  .category-grid {
+    margin-right: -15px;
+    padding-right: 15px;
+  }
   .hero {
     padding-inline: 15px;
   }

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, MapPin, Search, ShoppingBag, X } from "lucide-react";
@@ -72,7 +73,7 @@ function ProductCard({ product }: { product: Product }) {
     </article>
   );
 }
-export function Catalog() {
+export function Catalog({ pilotCatalog }: { pilotCatalog?: ReactNode }) {
   const params = useSearchParams();
   const router = useRouter();
   const requested = params.get("categoria") || "packs";
@@ -204,22 +205,23 @@ export function Catalog() {
         </div>
       </header>
       <main id="main" className="container shop-layout">
+        <div className="catalog-intro">
+          <div>
+            <h1>
+              {active === "packs"
+                ? "A noite, resolvida."
+                : "O que é que falta?"}
+            </h1>
+          </div>
+          <span className="catalog-time">
+            <MapPin size={16} />
+            Acesso antecipado
+          </span>
+        </div>
+        {pilotCatalog}
         <div
           className={`catalog-main ${active === "packs" ? "is-pack-view" : ""}`}
         >
-          <div className="catalog-intro">
-            <div>
-              <h1>
-                {active === "packs"
-                  ? "A noite, resolvida."
-                  : "O que é que falta?"}
-              </h1>
-            </div>
-            <span className="catalog-time">
-              <MapPin size={16} />
-              Acesso antecipado
-            </span>
-          </div>
           <div className="catalog-controls" ref={controlsRef}>
             <div className="search-field">
               <Search size={18} />

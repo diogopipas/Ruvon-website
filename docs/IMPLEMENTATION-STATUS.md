@@ -1,6 +1,20 @@
 # Automated orders implementation status
 
-Updated 2026-10-20. **This is an incomplete, disabled implementation. It is not a launch or a successful end-to-end provider acceptance test.** Migrations 006–015 are applied to the isolated hosted sandbox. The complete schema/grant reference matches across 25 public tables and 59 application functions, and the seven legacy orders/ten attempts retain their pre-migration hashes. Supabase authentication is restored. The deadline/recovery worker, financial command recovery, store-SKU catalogue and default-disabled SMS code are deployed to the protected Preview; verification is recorded below. No live money movement or complete provider order acceptance has been attempted.
+Updated 2026-10-23. **This is an incomplete, disabled implementation. It is not a launch or a successful end-to-end provider acceptance test.** Migrations 006–015 are applied to the isolated hosted sandbox. The complete schema/grant reference matches across 25 public tables and 59 application functions, and the seven legacy orders/ten attempts retain their pre-migration hashes. Supabase authentication is restored. The deadline/recovery worker, financial command recovery, store-SKU catalogue and default-disabled SMS code are deployed to the protected Preview; verification is recorded below. No live money movement or complete provider order acceptance has been attempted.
+
+## Visible A.M.O. catalogue — 2026-10-23
+
+The three user-confirmed 33 cl beers now have a presentation section on the homepage and above the validation catalogue at `/pedir#amo`: Most wanted IPA (€4.50), Borboletas APA (€4.00) and Alley Cat Amber (€4.00), VAT included. The section explicitly states **Em breve** and **Encomendas ainda indisponíveis**, with no purchase/quantity controls. Its server component reads the existing merchant draft and renders only the public product fields; the draft is not imported into a client component. Missing photos, stock, descriptions and alcohol content are not invented.
+
+This is a display change independent of commerce activation. No store/SKU import, inventory reservation, database migration, provider operation or capability approval is included. Operational launch gates remain outstanding.
+
+Release evidence for this presentation:
+
+- Public URL: [A.M.O. catalogue](https://www.ruvon.store/pedir#amo), also visible on the homepage. Production deployment `dpl_F62MoKFxp7dzMk2nXWjFXi1Wu5Ye` is READY, target production, with a 35-second build. It replaces the 23 October preflight baseline `dpl_ckgVDxtheVPttVhHnGMXYwq8dFkM`. This is a marketing/catalogue release; the production trading pilot is not enabled. No production migration or local/Preview secret transfer occurred. Existing production configuration is inherited with checkout explicitly false in build/runtime.
+- Protected Preview `dpl_JhGYVR4mCRGvLRKwBBpGKbNNBTxz` is READY in 28 seconds and assigned to the stable sandbox alias. Sandbox health returned 200, private merchant reads 401 and disabled commerce catalogue 404. Two subsequent scheduled worker requests returned 200.
+- Both releases use Next.js 16.3.5, publishing CLI 65.2.0 and the modified workspace based on `6572b14`; no commit/push was made. Upload review covered 281 regular files with zero private paths or actual local-secret matches.
+- Build, TypeScript, lint and the seven existing HTTP regressions passed. Eight local browser checks cover both pages at 320/390/768/1440 px. Four additional anonymous production-browser checks cover both pages at 390/1440 px, including the hydrated catalogue. All three products are visible with no purchase controls, horizontal overflow or page errors. No new test-provider, payment, delivery or notification acceptance is implied.
+- Anonymous production GETs returned 200 for home, `/pedir` and the existing interest checkout; commerce catalogue returned 404. The rendered application stays in validation mode. The initial five-minute production runtime scan returned zero error records. No observability drain or monitoring integration was added or certified by this display change. Private evidence and screenshots are in ignored `.data/amo-*`.
 
 ## Implemented in code
 

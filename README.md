@@ -6,6 +6,8 @@ An opt-in **Easypay MB WAY sandbox checkout** is also implemented. It uses the r
 
 The automated commerce plan has an **incomplete, disabled implementation deployed to a protected sandbox**: additive order/inventory/job migrations, provider adapters, merchant/customer/admin surfaces and focused tests. Hosted migrations 006–011, a 30-second Cron worker, real Resend callback/replay transport and the Checkly worker heartbeat are verified. Named-admin health/failure queues and audited pause/callback controls are deployed in that sandbox; migrations 012–013 add their audit and narrow service permissions. Correlated order notifications/SMS, safe delivery cancellation, actual merchant settlement and full provider/exception acceptance remain outstanding. Production checkout is unchanged. See the exact [implementation status and remaining work](docs/IMPLEMENTATION-STATUS.md) before changing flags, and the [operating runbook](docs/ORDER-OPERATIONS.md) for setup.
 
+The homepage and `/pedir#amo` also present the three confirmed A.M.O. pilot beers, with 33 cl bottle prices including VAT. This section is explicitly upcoming and has no purchase controls. It reads the existing draft on the server without importing or enabling operational stock. See [pilot preparation](docs/PILOT-AMO.md).
+
 ## Run locally
 
 Requires Node.js 22.12+ and npm.

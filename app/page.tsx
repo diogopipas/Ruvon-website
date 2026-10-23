@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PackBrowser } from "@/components/packs/pack-browser";
+import { AmoPilotCatalog } from "@/components/ordering/amo-pilot-catalog";
 import { Suspense } from "react";
 import { ArrowDown, Clock3, MapPin, Snowflake, Zap } from "lucide-react";
 import { Header } from "@/components/ui/header";
@@ -85,6 +86,9 @@ export default function Home() {
           <span>✳</span>
           <span>RUVON.</span>
           <span>✳</span>
+        </div>
+        <div className="container amo-pilot-home">
+          <AmoPilotCatalog home />
         </div>
         <section className="section packs-section container" id="packs">
           <div className="section-heading">

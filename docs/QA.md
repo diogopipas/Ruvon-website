@@ -1,3 +1,10 @@
+## Visible A.M.O. catalogue — 23 October 2026
+
+- The three confirmed 33 cl bottle names and VAT-inclusive prices appear on the homepage and above the validation packs at `/pedir#amo`, explicitly marked upcoming and unavailable for orders. No purchase controls, stock, alcohol percentages or unapproved images were added.
+- Build, TypeScript, ESLint and seven HTTP regression tests pass. Eight local browser checks cover the two pages at 320/390/768/1440 px, with zero page errors and no horizontal overflow. A 5 px overflow in the existing category gutters at 320 px was corrected for both pages.
+- The protected Preview passed health/auth/disabled-commerce checks. Production `dpl_F62MoKFxp7dzMk2nXWjFXi1Wu5Ye` is READY. Four anonymous production-browser checks cover both pages at 390/1440 px, including the catalogue after hydration, with all products visible, no purchase controls and zero page errors. Public pages/interest checkout return 200, commerce catalogue 404, and the initial five-minute runtime error scan returned zero records. Sandbox Cron still returns 200 after its alias update.
+- The merchant draft remains unimported and operational launch gates are unchanged. No production database migration, credential transfer, paid subscription, real order or provider mutation was performed. This presentation is not end-to-end fulfilment acceptance. See [implementation status](IMPLEMENTATION-STATUS.md) for release identities and remaining work.
+
 ## Durable SMS verification — 20 October 2026
 
 - **229 tests across seventeen files**, TypeScript, ESLint and the webpack production build pass. The final service-response refinement passes the focused twelve SMS tests and typecheck. Seven production HTTP tests pass, including unsigned SMS callback rejection without reflecting untrusted content.
