@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DeliveryAddress } from "@/lib/commerce";
 import { uberConfig } from "../commerce-config";
@@ -29,15 +30,57 @@ const deliverySchema = z
       .optional(),
   })
   .passthrough();
-let cachedToken: { client: string; value: string; until: number } | undefined;
+let cachedToken: { key: string; value: string; until: number } | undefined;
 export class UberDirectProvider implements DeliveryProvider {
   private config = uberConfig();
+  assertOperation(op: ProviderOperation) {
+    if (
+      op.provider !== "uber" ||
+      op.account !== this.config.customer ||
+      op.environment !== this.config.environment
+    )
+      throw new ProviderError("delivery_configuration_conflict");
+    const body = op.request.body;
+    if (
+      op.kind !== "delivery_create" ||
+      op.request.path !== "/deliveries" ||
+      op.request.method !== "POST" ||
+      !z.uuid().safeParse(op.order_id).success ||
+      !z.uuid().safeParse(op.idempotency_key).success ||
+      body.idempotency_key !== op.idempotency_key ||
+      body.external_id !== op.order_id ||
+      !/^dqt_[A-Za-z0-9_-]+$/.test(String(body.quote_id))
+    )
+      throw new ProviderError("invalid_delivery_operation");
+    if (this.config.environment === "sandbox") {
+      if (
+        !z
+          .object({
+            robo_courier_specification: z.object({
+              mode: z.enum(["auto", "custom"]),
+            }),
+          })
+          .safeParse(body.test_specifications).success
+      )
+        throw new ProviderError("sandbox_courier_required");
+    } else if (body.test_specifications !== undefined)
+      throw new ProviderError("invalid_delivery_operation");
+  }
   async request(path: string, method = "GET", body?: unknown) {
     if (!/^\/(?:delivery_quotes|deliveries)(?:[/?]|$)/.test(path))
       throw new ProviderError("invalid_destination");
+    const credentialKey = createHash("sha256")
+      .update(
+        JSON.stringify([
+          this.config.environment,
+          this.config.client,
+          this.config.secret,
+        ]),
+      )
+      .digest("hex");
     if (
       !cachedToken ||
-      cachedToken.client !== this.config.client ||
+      cachedToken.key !== credentialKey ||
       cachedToken.until <= Date.now()
     ) {
       const result = await providerJson(
@@ -60,7 +103,7 @@ export class UberDirectProvider implements DeliveryProvider {
         })
         .parse(result);
       cachedToken = {
-        client: this.config.client,
+        key: credentialKey,
         value: token.access_token,
         until: Date.now() + (token.expires_in - 60) * 1000,
       };
@@ -124,6 +167,7 @@ export class UberDirectProvider implements DeliveryProvider {
   }
   async mutate(op: ProviderOperation): Promise<ProviderFact> {
     try {
+      this.assertOperation(op);
       const response = await this.request(
         op.request.path,
         op.request.method,
@@ -159,6 +203,7 @@ export class UberDirectProvider implements DeliveryProvider {
     }
   }
   async reconcile(op: ProviderOperation, hint?: string): Promise<ProviderFact> {
+    this.assertOperation(op);
     if (!op.provider_resource_id && !hint)
       return { state: "unknown", error_class: "booking_identity_unknown" };
     const d = await this.read(op.provider_resource_id ?? hint!);

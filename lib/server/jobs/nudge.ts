@@ -5,7 +5,7 @@ import { runJobs } from "./runner";
 export function nudgeJobs() {
   after(async () => {
     try {
-      await runJobs();
+      await runJobs("immediate");
     } catch {
       console.error("[Ruvon] worker immediate_attempt_failed");
     }

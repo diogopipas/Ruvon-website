@@ -7,8 +7,8 @@ export function Header() {
       <div className="container nav-inner">
         <Wordmark />
         <nav aria-label="Navegação principal">
-          <Link href="/#como-funciona" className="nav-link">
-            Como funciona
+          <Link href="/pedir?categoria=todos" className="nav-link">
+            Produtos
           </Link>
           <Link href="/?loja=1#lojas" className="nav-link">
             Quero vender na Ruvon

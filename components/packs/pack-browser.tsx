@@ -26,7 +26,15 @@ function recordPackView(pack: Pack) {
     `product_viewed:${pack.id}`,
   );
 }
-function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
+function PackProduct({
+  pack,
+  onChoose,
+  compact = false,
+}: {
+  pack: Pack;
+  onChoose: () => void;
+  compact?: boolean;
+}) {
   const ref = useRef<HTMLButtonElement>(null);
   const { items, ageConfirmed } = useCart();
   const item = items.find((item) => item.id === pack.id);
@@ -77,17 +85,21 @@ function PackProduct({ pack, onChoose }: { pack: Pack; onChoose: () => void }) {
         </span>
         <h3>{pack.name}</h3>
         <p className="pack-core-value">{pack.summary}</p>
-        <p className="pack-line">{pack.description}</p>
-        <p className="pack-summary">
-          {quantity
-            ? "Marcas e extras à tua maneira."
-            : "Extras incluídos. Troca ou retira o que não precisas."}
-        </p>
+        {!compact && <p className="pack-line">{pack.description}</p>}
+        {!compact && (
+          <p className="pack-summary">
+            {quantity
+              ? "Marcas e extras à tua maneira."
+              : "Extras incluídos. Troca ou retira o que não precisas."}
+          </p>
+        )}
         <div className="pack-buy">
           <div>
-            <small className="pack-price-label">
-              {quantity ? "Na tua versão" : "Com extras"}
-            </small>
+            {!compact && (
+              <small className="pack-price-label">
+                {quantity ? "Na tua versão" : "Com extras"}
+              </small>
+            )}
             <strong>{money(configured.price)}</strong>
           </div>
           <button
@@ -220,7 +232,13 @@ function PackDetail({ pack, onClose }: { pack: Pack; onClose: () => void }) {
     </Modal>
   );
 }
-export function PackBrowser({ featured = false }: { featured?: boolean }) {
+export function PackBrowser({
+  featured = false,
+  compact = false,
+}: {
+  featured?: boolean;
+  compact?: boolean;
+}) {
   const [group, setGroup] = useState<GroupSize>("all");
   const [selected, setSelected] = useState<Pack | null>(null);
   const sorted = [...packs].sort(
@@ -234,6 +252,28 @@ export function PackBrowser({ featured = false }: { featured?: boolean }) {
         fitsGroup(pack, group) && (!featured || pack.tier === "primary"),
     )
     .slice(0, packs.length);
+  if (compact)
+    return (
+      <div className="pack-browser compact-packs">
+        <div className="pack-menu">
+          {visible.map((pack) => (
+            <PackProduct
+              compact
+              key={pack.id}
+              pack={pack}
+              onChoose={() => setSelected(pack)}
+            />
+          ))}
+        </div>
+        {selected && (
+          <PackDetail
+            key={selected.id}
+            pack={selected}
+            onClose={() => setSelected(null)}
+          />
+        )}
+      </div>
+    );
   return (
     <div
       className={`pack-browser ${featured ? "featured-packs" : "all-packs"}`}

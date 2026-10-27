@@ -1,159 +1,171 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, MapPin, Search, ShoppingBag, X } from "lucide-react";
-import { categories, products } from "@/lib/products";
-import { money, priceBasket } from "@/lib/pricing";
-import { track, trackOnce } from "@/lib/analytics";
-import { packEvent } from "@/lib/packs";
+import {
+  ArrowRight,
+  ChevronDown,
+  MapPin,
+  Search,
+  ShoppingBag,
+  X,
+} from "lucide-react";
+import { categories, packs, productById, products } from "@/lib/products";
+import { priceBasket } from "@/lib/pricing";
+import { track } from "@/lib/analytics";
 import { PackBrowser } from "@/components/packs/pack-browser";
+import { AmoPilotCatalog, type AmoPilotProduct } from "./amo-pilot-catalog";
+import { ProductCard } from "./product-card";
+import { CategoryGallery } from "./category-gallery";
 import { Wordmark } from "@/components/ui/wordmark";
-import { ProductArt } from "@/components/ui/product-art";
-import { Quantity } from "@/components/cart/quantity";
-import { DesktopCart } from "@/components/cart/cart";
+import { Footer } from "@/components/ui/footer";
+import { MerchantAccess } from "@/components/landing/landing-actions";
 import { useCart } from "@/components/providers";
 import { Modal } from "@/components/ui/modal";
 import { CitySelect } from "@/components/ui/city-select";
 import { locationSchema } from "@/lib/validation";
-import type { Product } from "@/types";
-function ProductCard({ product }: { product: Product }) {
-  const ref = useRef<HTMLElement>(null);
-  const { items, ageConfirmed } = useCart();
-  const quantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
-  useEffect(() => {
-    if (!ageConfirmed) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          trackOnce(
-            "product_viewed",
-            {
-              ...packEvent(product.id),
-              product: product.id,
-              category: product.category,
-            },
-            `product_viewed:${product.id}`,
-          );
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.6 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [product, ageConfirmed]);
-  return (
-    <article
-      className={`product-card ${quantity ? "is-selected" : ""}`}
-      ref={ref}
-    >
-      {product.tag && <span className="product-tag">{product.tag}</span>}
-      <div className="product-picture">
-        <ProductArt product={product} showBundle />
-      </div>
-      <div className="product-info">
-        <h3>{product.name}</h3>
-        <p>{product.size}</p>
-        <span className="product-selection-note" aria-hidden={!quantity}>
-          {quantity ? (
-            <>
-              <Check size={13} /> {quantity} no carrinho
-            </>
-          ) : (
-            "\u00a0"
-          )}
-        </span>
-        <div className="product-bottom">
-          <strong>{money(product.price)}</strong>
-          <Quantity id={product.id} name={product.name} />
-        </div>
-      </div>
-    </article>
-  );
+
+const catalogCategories = [
+  { id: "todos", name: "Tudo", product: null },
+  { id: "cerveja", name: "Cerveja", product: "super-bock" },
+  { id: "packs", name: "Packs", product: null },
+  { id: "amo", name: "A.M.O.", product: null },
+  { id: "cidra", name: "Cidra", product: "somersby" },
+  { id: "spirits", name: "Destilados", product: "gin" },
+  { id: "vinho", name: "Vinho", product: "vinho-tinto" },
+  { id: "gelo-mixers", name: "Gelo e mixers", product: "gelo" },
+  { id: "snacks", name: "Snacks", product: "doritos" },
+  { id: "festa", name: "Extras", product: "copos" },
+];
+const essentialIds = [
+  "super-bock",
+  "somersby",
+  "gelo",
+  "gin",
+  "coca-cola",
+  "vinho-branco",
+  "doritos",
+  "agua",
+];
+const normalizeSearch = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("pt")
+    .trim();
+
+function scrollToCatalogSection(
+  section: HTMLElement | null,
+  onlyWhenHidden = false,
+) {
+  if (!section) return;
+  section.focus({ preventScroll: true });
+  const headerHeight =
+    document.querySelector(".store-header")?.getBoundingClientRect().height ??
+    80;
+  const top = section.getBoundingClientRect().top;
+  if (onlyWhenHidden && top >= headerHeight && top < window.innerHeight - 100)
+    return;
+  window.scrollTo({
+    top:
+      window.scrollY + section.getBoundingClientRect().top - headerHeight - 16,
+    behavior: "instant",
+  });
 }
-export function Catalog({ pilotCatalog }: { pilotCatalog?: ReactNode }) {
+
+export function Catalog({
+  amoProducts,
+  home = false,
+}: {
+  amoProducts: AmoPilotProduct[];
+  home?: boolean;
+}) {
   const params = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
-  const requested = params.get("categoria") || "packs";
+  const defaultCategory = "packs";
+  const requested = params.get("categoria") || defaultCategory;
   const active =
-    requested === "packs" ||
-    requested === "todos" ||
-    requested === "gelo-mixers" ||
+    catalogCategories.some((c) => c.id === requested) ||
     categories.some((c) => c.id === requested)
       ? requested
-      : "packs";
+      : defaultCategory;
   const [search, setSearch] = useState("");
   const [addressOpen, setAddressOpen] = useState(false);
   const [addressError, setAddressError] = useState("");
-  const controlsRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLElement>(null);
   const categoryChanged = useRef(false);
   const { location, setLocation, openCart, items } = useCart();
   const priced = priceBasket(items);
-  const normalizeSearch = (value: string) =>
-    value
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "")
-      .toLocaleLowerCase("pt")
-      .trim();
+  const query = normalizeSearch(search);
   const filtered = products.filter(
     (p) =>
       (active === "todos" ||
         p.category === active ||
         (active === "gelo-mixers" &&
           ["gelo", "mixers"].includes(p.category))) &&
-      normalizeSearch(`${p.name} ${p.size}`).includes(normalizeSearch(search)),
+      normalizeSearch(`${p.name} ${p.size}`).includes(query),
   );
+  const featured = home && active === "todos" && !query;
+  const visible = featured
+    ? essentialIds.map((id) => productById.get(id)!)
+    : home && !query
+      ? filtered.slice(0, 8)
+      : filtered;
+  const amoMatches =
+    amoProducts.length > 0 &&
+    normalizeSearch(
+      `Pack de descoberta A.M.O. Brewery cervejas artesanais ${amoProducts.map((p) => p.name).join(" ")}`,
+    ).includes(query);
+  const resultCount =
+    active === "amo"
+      ? Number(amoMatches)
+      : active === "packs"
+        ? packs.length
+        : filtered.length;
+  const title = query
+    ? `Resultados para “${search}”`
+    : featured
+      ? "Os essenciais"
+      : catalogCategories.find((c) => c.id === active)?.name ||
+        categories.find((c) => c.id === active)?.name ||
+        "Produtos";
+
   useEffect(() => {
-    const row = categoriesRef.current;
-    const selected = row?.querySelector<HTMLElement>("[aria-pressed='true']");
-    if (!row || !selected) return;
-    const reveal = () =>
-      row.scrollTo({
-        left:
-          row.scrollLeft +
-          selected.getBoundingClientRect().left -
-          row.getBoundingClientRect().left -
-          8,
-        behavior: "instant",
-      });
-    reveal();
-    const resize = new ResizeObserver(reveal);
-    resize.observe(row);
-    return () => resize.disconnect();
-  }, [active]);
+    if (!params.has("categoria") && window.location.hash === "#amo") {
+      const next = new URLSearchParams(params.toString());
+      next.set("categoria", "amo");
+      router.replace(`${pathname}?${next}`, { scroll: false });
+    }
+  }, [params, pathname, router]);
+
   useEffect(() => {
     if (!categoryChanged.current || !resultsRef.current) return;
     categoryChanged.current = false;
-    const header =
-      document.querySelector(".shop-header")?.getBoundingClientRect().height ??
-      83;
-    const controls = controlsRef.current?.getBoundingClientRect().height ?? 140;
-    window.scrollTo({
-      top:
-        window.scrollY +
-        resultsRef.current.getBoundingClientRect().top -
-        header -
-        controls -
-        16,
-      behavior: "instant",
-    });
-  }, [active]);
+    scrollToCatalogSection(resultsRef.current, home);
+  }, [active, home]);
+
   function chooseCategory(id: string) {
-    if (id === active) return;
-    categoryChanged.current = true;
-    track("category_clicked", { category: id, source: "catalog" });
     setSearch("");
+    if (id === active) {
+      scrollToCatalogSection(resultsRef.current, home);
+      return;
+    }
+    categoryChanged.current = true;
+    track("category_clicked", {
+      category: id,
+      source: home ? "landing" : "catalog",
+    });
     const next = new URLSearchParams(params.toString());
-    if (id === "packs") next.delete("categoria");
+    if (id === defaultCategory) next.delete("categoria");
     else next.set("categoria", id);
-    router.replace(`/pedir${next.size ? `?${next}` : ""}`, {
+    router.replace(`${pathname}${next.size ? `?${next}` : ""}`, {
       scroll: false,
     });
   }
+
   function saveAddress(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const parsed = locationSchema.safeParse(
@@ -167,184 +179,204 @@ export function Catalog({ pilotCatalog }: { pilotCatalog?: ReactNode }) {
     track("location_entered", parsed.data);
     setAddressOpen(false);
   }
+
   return (
-    <>
-      <header className="shop-header">
-        <div className="container shop-nav">
-          <div className="shop-brand">
-            <Link
-              className="icon-button"
-              href="/"
-              aria-label="Voltar ao início"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-            <Wordmark />
+    <div className="storefront">
+      <header className="store-header">
+        <div className="container store-nav">
+          <Wordmark />
+          <div className="store-search search-field">
+            <Search size={18} aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Procurar produtos"
+              placeholder="Procurar produtos"
+              autoComplete="off"
+              enterKeyHint="search"
+              value={search}
+              onChange={(event) => {
+                if (active !== "todos" && active !== "amo")
+                  chooseCategory("todos");
+                setSearch(event.target.value);
+              }}
+            />
+            {search && (
+              <button
+                type="button"
+                aria-label="Limpar pesquisa"
+                onClick={() => setSearch("")}
+              >
+                <X size={17} />
+              </button>
+            )}
           </div>
           <button
-            className="address-button"
+            className="store-location"
             onClick={() => {
               setAddressError("");
               setAddressOpen(true);
             }}
           >
-            <MapPin size={20} />
-            <span>
-              <small>A tua zona</small>
-              <strong>{location?.city || "Escolher cidade"}</strong>
-            </span>
+            <MapPin size={18} aria-hidden="true" />
+            <span>{location?.city || "Escolher cidade"}</span>
+            <ChevronDown size={14} aria-hidden="true" />
           </button>
           <button
-            className="shop-cart-button"
+            className="store-cart"
             onClick={openCart}
-            aria-label={`Ver carrinho, ${priced.item_count} artigos`}
+            aria-label={`Ver carrinho, ${priced.item_count} ${priced.item_count === 1 ? "artigo" : "artigos"}`}
           >
-            <ShoppingBag size={21} />
+            <ShoppingBag size={21} aria-hidden="true" />
             <span>{priced.item_count}</span>
           </button>
         </div>
       </header>
-      <main id="main" className="container shop-layout">
-        <div className="catalog-intro">
-          <div>
-            <h1>
-              {active === "packs"
-                ? "A noite, resolvida."
-                : "O que é que falta?"}
-            </h1>
-          </div>
-          <span className="catalog-time">
-            <MapPin size={16} />
-            Acesso antecipado
-          </span>
-        </div>
-        {pilotCatalog}
-        <div
-          className={`catalog-main ${active === "packs" ? "is-pack-view" : ""}`}
-        >
-          <div className="catalog-controls" ref={controlsRef}>
-            <div className="search-field">
-              <Search size={18} />
-              <input
-                aria-label="Procurar produtos"
-                value={search}
-                onChange={(event) => {
-                  if (active === "packs") chooseCategory("todos");
-                  setSearch(event.target.value);
-                }}
-                type="search"
-                autoComplete="off"
-                enterKeyHint="search"
-                placeholder="Procuras alguma coisa?"
-              />
-              {search && (
-                <button
-                  aria-label="Limpar pesquisa"
-                  onClick={() => setSearch("")}
-                >
-                  <X size={17} />
-                </button>
-              )}
-            </div>
-            <nav
-              className="category-chips"
-              aria-label="Categorias de produtos"
-              ref={categoriesRef}
-            >
-              <button
-                className={active === "packs" ? "active" : ""}
-                aria-pressed={active === "packs"}
-                onClick={() => chooseCategory("packs")}
-              >
-                Packs
-              </button>
-              <button
-                className={active === "todos" ? "active" : ""}
-                aria-pressed={active === "todos"}
-                onClick={() => chooseCategory("todos")}
-              >
-                Avulso
-              </button>
-              {[
-                "cerveja",
-                "cidra",
-                "spirits",
-                "vinho",
-                "gelo-mixers",
-                "snacks",
-                "festa",
-              ]
-                .map((id) =>
-                  id === "gelo-mixers"
-                    ? { id, name: "Gelo & Mixers" }
-                    : categories.find((c) => c.id === id)!,
-                )
-                .map((c) => (
-                  <button
-                    key={c.id}
-                    className={active === c.id ? "active" : ""}
-                    aria-pressed={active === c.id}
-                    onClick={() => chooseCategory(c.id)}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-            </nav>
-          </div>
-          <div
-            className="catalog-heading"
-            ref={active === "packs" ? undefined : resultsRef}
+      <main id="main" className="container store-main">
+        {home ? (
+          <section
+            className="store-intro"
+            aria-label="Bebidas e essenciais Ruvon"
           >
-            <h2>
-              {search
-                ? `Resultados para “${search}”`
-                : active === "packs"
-                  ? "A noite resolvida"
-                  : active === "todos"
-                    ? "Os essenciais"
-                    : active === "gelo-mixers"
-                      ? "Gelo & Mixers"
-                      : categories.find((c) => c.id === active)?.name}
-            </h2>
-            <span role="status" aria-live="polite">
-              {active === "packs" ? "6 packs" : `${filtered.length} produtos`}
-            </span>
+            <div>
+              <h1>
+                Bebidas, gelo
+                <br />e snacks.
+              </h1>
+            </div>
+            <div className="store-intro-photo">
+              <Image
+                src="/images/ruvon-hero.webp"
+                alt="Bebidas, gelo e snacks no saco Ruvon"
+                width={1100}
+                height={1100}
+                preload
+                sizes="(max-width: 700px) 48vw, 430px"
+              />
+            </div>
+          </section>
+        ) : (
+          <h1 className="store-catalog-title">Escolhe o que falta.</h1>
+        )}
+        <section
+          className="catalog-categories"
+          aria-labelledby="catalog-categories-title"
+          ref={categoriesRef}
+          tabIndex={-1}
+        >
+          <h2 id="catalog-categories-title">Categorias</h2>
+          <CategoryGallery
+            active={
+              ["gelo", "mixers"].includes(active) ? "gelo-mixers" : active
+            }
+            onSelect={chooseCategory}
+          />
+        </section>
+        <section
+          className="store-results"
+          ref={resultsRef}
+          aria-labelledby="store-results-title"
+          tabIndex={-1}
+        >
+          <div className="store-results-heading">
+            <h2 id="store-results-title">{title}</h2>
+            <div className="catalog-heading-actions">
+              {home &&
+              active !== "packs" &&
+              active !== "amo" &&
+              filtered.length > visible.length ? (
+                <Link
+                  className="store-view-all"
+                  href={`/pedir?categoria=${active}`}
+                >
+                  <span>Ver tudo</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              ) : (
+                <span
+                  className="store-result-count"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {resultCount}{" "}
+                  {active === "packs" || active === "amo"
+                    ? resultCount === 1
+                      ? "pack"
+                      : "packs"
+                    : resultCount === 1
+                      ? "produto"
+                      : "produtos"}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => scrollToCatalogSection(categoriesRef.current)}
+              >
+                Ver categorias
+              </button>
+            </div>
           </div>
           {active === "packs" ? (
-            <div className="catalog-packs" ref={resultsRef}>
-              <PackBrowser />
-            </div>
+            <PackBrowser compact />
+          ) : active === "amo" ? (
+            amoMatches && <AmoPilotCatalog products={amoProducts} />
           ) : (
             <div className="product-grid">
-              {filtered.map((product) => (
+              {visible.map((product) => (
                 <ProductCard product={product} key={product.id} />
               ))}
             </div>
           )}
-          {active !== "packs" && !filtered.length && (
+          {active !== "packs" && !resultCount && (
             <div className="search-empty">
-              <Search size={32} />
-              <h3>Ainda não temos isso no saco.</h3>
-              <p>Experimenta outro nome ou espreita as outras categorias.</p>
+              <h3>Sem resultados.</h3>
+              <p>Experimenta outro nome.</p>
               <button
                 className="button button-secondary"
                 onClick={() => {
                   setSearch("");
-                  chooseCategory("todos");
+                  if (active !== "amo") chooseCategory("todos");
                 }}
               >
-                Ver todos os produtos
+                Limpar pesquisa
               </button>
             </div>
           )}
+          {home &&
+            active !== "packs" &&
+            active !== "amo" &&
+            filtered.length > visible.length && (
+              <Link className="store-more" href={`/pedir?categoria=${active}`}>
+                Ver{" "}
+                {featured
+                  ? "todos os produtos"
+                  : `mais ${filtered.length - visible.length} produtos`}
+                <ArrowRight size={17} aria-hidden="true" />
+              </Link>
+            )}
+        </section>
+        <div className="store-info" id="ajuda">
+          <details>
+            <summary>
+              Como funciona
+              <ChevronDown size={15} aria-hidden="true" />
+            </summary>
+            <p>
+              Escolhe os produtos e compõe o teu carrinho. No final, regista o
+              teu interesse na tua cidade para receber avisos de
+              disponibilidade. O registo não conclui uma compra e não exige
+              pagamento.
+            </p>
+          </details>
+          <MerchantAccess />
+          <span>Para maiores de 18 anos.</span>
         </div>
-        <DesktopCart />
       </main>
+      <Footer compact />
       <Modal
         open={addressOpen}
         onOpenChange={setAddressOpen}
-        title="Onde é a festa?"
-        description="Seleciona a tua cidade para registarmos o teu interesse e escolhermos as primeiras zonas."
+        title="A tua cidade"
+        description="Seleciona a cidade onde tens interesse na Ruvon."
       >
         <form className="form-stack" onSubmit={saveAddress}>
           <label>
@@ -356,9 +388,9 @@ export function Catalog({ pilotCatalog }: { pilotCatalog?: ReactNode }) {
               {addressError}
             </p>
           )}
-          <button className="button button-primary">Guardar zona</button>
+          <button className="button button-primary">Guardar cidade</button>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

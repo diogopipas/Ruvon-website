@@ -91,6 +91,7 @@ export function Providers({
   const checkoutReached = useRef(false);
   const started = useRef(false);
   const paidOrders = useRef<string[]>([]);
+  const initialized = useRef(false);
   const persistCart = useCallback(
     (next: CartItem[]) => {
       if (!cartAllowed()) return;
@@ -117,6 +118,14 @@ export function Providers({
   );
   useEffect(() => {
     const allowed = cartAllowed();
+    if (!initialized.current) {
+      initialized.current = true;
+      // Start a catalogue visit empty; keep the basket during navigation and checkout reloads.
+      if (allowed && !sandbox && (pathname === "/" || pathname === "/pedir")) {
+        writeLocal("jola_cart", []);
+        writeLocal("jola_checkout_started", false);
+      }
+    }
     if (allowed && !sandbox) {
       captureAttribution();
       getSession();

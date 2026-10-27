@@ -83,6 +83,7 @@ export async function runOperation(
     op.provider === "easypay"
       ? new EasypayProvider()
       : new UberDirectProvider();
+  provider.assertOperation(op);
   let fact: ProviderFact;
   const terminal = op.status === "succeeded" || op.status === "failed";
   const dispatch =

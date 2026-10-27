@@ -85,9 +85,6 @@
 .checkout-main h1 > span {
   color: var(--amber);
 }
-.checkout-main .launch-badge {
-  margin-bottom: 22px;
-}
 .checkout-description {
   font-size: 14px;
   line-height: 1.85;

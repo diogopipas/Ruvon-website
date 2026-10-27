@@ -34,26 +34,6 @@
   z-index: 2;
   padding-bottom: 55px;
 }
-.launch-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13px;
-  padding: 6px 11px;
-  border: 1px solid #535548;
-  border-radius: 4px;
-  color: #e3e5d3;
-}
-.launch-badge > span:first-child {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #b6c293;
-  box-shadow: 0 0 0 3px #b6c29313;
-}
-.launch-badge svg {
-  margin-left: 9px;
-}
 .hero h1 {
   font-size: clamp(70px, 7.9vw, 116px);
   line-height: 0.92;
@@ -107,29 +87,6 @@
   mask-composite: intersect;
   position: absolute;
   inset: 0;
-}
-.time-sticker {
-  position: absolute;
-  right: 6%;
-  top: 9%;
-  background: var(--cream);
-  color: var(--bg);
-  display: flex;
-  gap: 10px;
-  padding: 15px 18px;
-  align-items: center;
-  transform: rotate(9deg);
-  border-radius: 7px;
-  box-shadow: 0 8px 20px #0003;
-}
-.time-sticker strong {
-  font-family: var(--font-display);
-  font-size: 33px;
-  line-height: 1;
-  display: block;
-}
-.time-sticker span {
-  font-size: 13px;
 }
 .hero-note {
   position: absolute;

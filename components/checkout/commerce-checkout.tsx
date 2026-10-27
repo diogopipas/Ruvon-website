@@ -77,7 +77,7 @@ export function CommerceCheckout({
       .then(async (r) => {
         if (!r.ok)
           throw new Error(
-            "O piloto está em pausa. Podes entrar na lista de interesse.",
+            "Os pedidos estão temporariamente indisponíveis. Podes registar interesse na tua zona.",
           );
         const stores = await r.json();
         if (active) setCatalog(stores[0]?.catalog ?? []);
@@ -159,7 +159,7 @@ export function CommerceCheckout({
       <Wordmark />
       <h1>A tua noite, à porta.</h1>
       {environment === "sandbox" && (
-        <p className="payment-test-badge">Piloto em ambiente de testes</p>
+        <p className="payment-test-badge">Ambiente de testes</p>
       )}
       <p>
         Uma loja prepara o pedido completo. Os preços e a entrega ficam

@@ -84,13 +84,13 @@ export function CartContents({
         <div>
           <ShoppingBag size={34} strokeWidth={1.5} />
         </div>
-        <h3>A noite ainda está em branco.</h3>
+        <h3>O teu carrinho está vazio.</h3>
         <Link
           className="button button-primary"
           href="/pedir"
           onClick={closeCart}
         >
-          Explorar a Ruvon
+          Ver produtos
         </Link>
       </div>
     );
@@ -194,7 +194,7 @@ export function CartContents({
               ? "A guardar o carrinho…"
               : sandbox
                 ? "Continuar para MB WAY"
-                : "Continuar para a minha zona"}
+                : "Checkout"}
           </button>
         )}
         {storageError && (
@@ -217,7 +217,7 @@ export function DesktopCart() {
   return (
     <aside className="desktop-cart">
       <div className="cart-heading">
-        <h2>A tua noite</h2>
+        <h2>Carrinho</h2>
         <ShoppingBag size={21} />
       </div>
       <CartContents />
@@ -242,7 +242,7 @@ export function CartLayer() {
         onOpenChange={(open) => {
           if (!open) closeCart();
         }}
-        title="A tua noite"
+        title="Carrinho"
         className="cart-modal"
       >
         <CartContents />

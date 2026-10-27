@@ -2208,3 +2208,226 @@ describe("durable SMS without provider POST replay", () => {
     });
   });
 });
+
+describe("atomic payment conflict recovery", () => {
+  it.each([
+    "payment_identity_conflict",
+    "authorisation_state_conflict",
+    "operation_amount_conflict",
+    "split_identity_conflict",
+    "checkout_identity_conflict",
+    "unexpected_capture",
+    "multiple_resources",
+  ])(
+    "holds %s with its provider fact, one audit event and deduplicated alerts",
+    async (error_class) => {
+      const { store } = await fixture(),
+        q = await quote(store);
+      await start(q.id);
+      const { op, j } = await operation(q.id);
+      const fact = { state: "unknown", error_class };
+      const apply = () =>
+        rpc(
+          "commerce_apply_operation",
+          ["uuid", "uuid", "uuid", "jsonb"],
+          [op.id, j.id, j.lease_token, fact],
+        );
+      const result = await apply();
+      expect(result).toMatchObject({
+        operational_status: "manual_review",
+        review_reason: "PROVIDER_STATE_CONFLICT",
+        settlement_status: "disputed",
+      });
+      await apply();
+      const cases = await db.query(
+        "select case_key,reason from public.order_cases where order_id=$1",
+        [q.id],
+      );
+      expect(cases.rows).toEqual([
+        {
+          case_key: `provider-conflict:${op.id}`,
+          reason: "PROVIDER_STATE_CONFLICT",
+        },
+      ]);
+      expect(
+        (
+          await db.query(
+            "select status,error_class from public.provider_operations where id=$1",
+            [op.id],
+          )
+        ).rows[0],
+      ).toEqual({ status: "unknown", error_class });
+      expect(
+        (
+          await db.query(
+            "select count(*)::int n from public.order_events where order_id=$1 and command_key like 'case:%'",
+            [q.id],
+          )
+        ).rows[0],
+      ).toEqual({ n: 1 });
+      expect(
+        (
+          await db.query(
+            "select count(*)::int n from public.background_jobs where order_id=$1 and kind='operator_alert'",
+            [q.id],
+          )
+        ).rows[0],
+      ).toEqual({ n: 2 });
+      expect(
+        (
+          await db.query(
+            "select count(*)::int n from public.provider_operations where order_id=$1",
+            [q.id],
+          )
+        ).rows[0],
+      ).toEqual({ n: 1 });
+    },
+  );
+  it("rolls back the provider fact, review hold, audit and alerts together on transaction failure", async () => {
+    const { store } = await fixture(),
+      q = await quote(store);
+    await start(q.id);
+    const { op, j } = await operation(q.id),
+      before = await order(q.id);
+    await expect(
+      db.transaction(async (tx) => {
+        await tx.query(
+          "select public.commerce_apply_operation($1::uuid,$2::uuid,$3::uuid,$4::jsonb)",
+          [
+            op.id,
+            j.id,
+            j.lease_token,
+            JSON.stringify({
+              state: "unknown",
+              error_class: "split_identity_conflict",
+            }),
+          ],
+        );
+        throw new Error("simulated_worker_transaction_failure");
+      }),
+    ).rejects.toThrow("simulated_worker_transaction_failure");
+    expect(await order(q.id)).toEqual(before);
+    expect(
+      (
+        await db.query(
+          "select status,error_class from public.provider_operations where id=$1",
+          [op.id],
+        )
+      ).rows[0],
+    ).toEqual({ status: "created", error_class: null });
+    expect(
+      (
+        await db.query(
+          "select count(*)::int n from public.order_cases where order_id=$1",
+          [q.id],
+        )
+      ).rows[0],
+    ).toEqual({ n: 0 });
+    expect(
+      (
+        await db.query(
+          "select count(*)::int n from public.order_events where order_id=$1 and command_key like 'case:%'",
+          [q.id],
+        )
+      ).rows[0],
+    ).toEqual({ n: 0 });
+    expect(
+      (
+        await db.query(
+          "select count(*)::int n from public.background_jobs where order_id=$1 and kind='operator_alert'",
+          [q.id],
+        )
+      ).rows[0],
+    ).toEqual({ n: 0 });
+  });
+  it("rejects an expired lease before opening a review case", async () => {
+    const { store } = await fixture(),
+      q = await quote(store);
+    await start(q.id);
+    const { op, j } = await operation(q.id);
+    await db.query(
+      "update public.background_jobs set lease_expires_at=now()-interval '1 second' where id=$1",
+      [j.id],
+    );
+    await expect(
+      rpc(
+        "commerce_apply_operation",
+        ["uuid", "uuid", "uuid", "jsonb"],
+        [
+          op.id,
+          j.id,
+          j.lease_token,
+          { state: "unknown", error_class: "unexpected_capture" },
+        ],
+      ),
+    ).rejects.toThrow("Lease lost");
+    expect(
+      (
+        await db.query(
+          "select count(*)::int n from public.order_cases where order_id=$1",
+          [q.id],
+        )
+      ).rows[0],
+    ).toEqual({ n: 0 });
+    expect((await order(q.id)).operational_status).toBe("awaiting_payment");
+  });
+  it("keeps routine transport uncertainty recoverable without an immediate conflict case", async () => {
+    const { store } = await fixture(),
+      q = await quote(store);
+    await start(q.id);
+    const { op, j } = await operation(q.id);
+    await rpc(
+      "commerce_apply_operation",
+      ["uuid", "uuid", "uuid", "jsonb"],
+      [
+        op.id,
+        j.id,
+        j.lease_token,
+        { state: "unknown", error_class: "transport_unknown" },
+      ],
+    );
+    expect((await order(q.id)).operational_status).toBe("awaiting_payment");
+    expect(
+      (
+        await db.query(
+          "select count(*)::int n from public.order_cases where order_id=$1",
+          [q.id],
+        )
+      ).rows[0],
+    ).toEqual({ n: 0 });
+  });
+  it("preserves an earlier success while holding a newly verified identity contradiction", async () => {
+    const { store } = await fixture(),
+      q = await quote(store);
+    await start(q.id);
+    await authorised(q.id);
+    const { op, j } = await operation(q.id);
+    const before = (
+      await db.query("select * from public.provider_operations where id=$1", [
+        op.id,
+      ])
+    ).rows[0];
+    await rpc(
+      "commerce_apply_operation",
+      ["uuid", "uuid", "uuid", "jsonb"],
+      [
+        op.id,
+        j.id,
+        j.lease_token,
+        { state: "unknown", error_class: "payment_identity_conflict" },
+      ],
+    );
+    expect(
+      (
+        await db.query("select * from public.provider_operations where id=$1", [
+          op.id,
+        ])
+      ).rows[0],
+    ).toEqual(before);
+    expect(await order(q.id)).toMatchObject({
+      operational_status: "manual_review",
+      payment_status: "authorised",
+      review_reason: "PROVIDER_STATE_CONFLICT",
+    });
+  });
+});

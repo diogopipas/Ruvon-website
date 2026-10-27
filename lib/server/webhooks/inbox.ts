@@ -60,22 +60,40 @@ export async function ingestEasypay(request: Request) {
 }
 export async function ingestUber(request: Request) {
   const raw = await rawBody(request, 64000);
+  const primary = request.headers.get("x-uber-signature");
+  const legacy = request.headers.get("x-postmates-signature");
   if (
     !verifyUberSignature(
       raw,
-      request.headers.get("x-uber-signature") ?? "",
+      primary ?? legacy ?? "",
       requireSecret("UBER_WEBHOOK_SIGNING_KEY"),
     )
-  )
+  ) {
+    console.warn("[Ruvon] uber_webhook_signature_rejected", {
+      uber_header_present: primary !== null,
+      postmates_header_present: legacy !== null,
+      selected_header_hex: /^[a-fA-F0-9]{64}$/.test(primary ?? legacy ?? ""),
+    });
     throw new RequestError("Não autorizado.", 401);
+  }
   const schema = z.object({
     id: z.string().startsWith("evt_"),
     kind: z.string(),
     customer_id: z.string(),
     live_mode: z.boolean(),
     delivery_id: z.string().optional(),
+    status: z.string().max(50).optional(),
+    courier_imminent: z.boolean().optional(),
     created: z.iso.datetime({ offset: true }),
-    data: z.object({ id: z.string(), external_id: z.string().optional() }),
+    data: z.object({
+      id: z.string(),
+      external_id: z.string().optional(),
+      status: z.string().max(50).optional(),
+      related_deliveries: z
+        .array(z.object({ id: z.string(), relationship: z.string() }))
+        .nullable()
+        .optional(),
+    }),
   });
   let p: z.infer<typeof schema>;
   try {
@@ -210,7 +228,29 @@ export async function processInbox(job: Job) {
         .maybeSingle();
       if (parentError) throw parentError;
       orderId = parent?.order_id;
-      if (!orderId) throw new Error("pending"); // Recover the original booking before ingesting its return.
+      if (!orderId) {
+        // Provider-only test deliveries have no commercial order. Quarantine
+        // them, while a known booking still waits for its original ingestion.
+        const original = await provider.read(fact.parent_id);
+        const external = z.uuid().safeParse(original.external_id);
+        const known = external.success
+          ? await repo.db
+              .from("provider_operations")
+              .select("id")
+              .eq("provider", "uber")
+              .eq("order_id", external.data)
+              .eq("kind", "delivery_create")
+              .eq("account", event.account)
+              .eq("environment", event.environment)
+              .maybeSingle()
+          : { data: null, error: null };
+        if (known.error) throw known.error;
+        if (!known.data) {
+          await complete(undefined, "UNMATCHED_RETURN");
+          return;
+        }
+        throw new Error("pending");
+      }
     }
     if (!orderId) {
       if (!d.id.startsWith("del_")) {
@@ -226,6 +266,7 @@ export async function processInbox(job: Job) {
       const op = await repo.db
         .from("provider_operations")
         .select("*")
+        .eq("provider", "uber")
         .eq("order_id", orderId)
         .eq("kind", "delivery_create")
         .eq("account", event.account)

@@ -173,6 +173,52 @@ it("does not ping before database work is successful", async () => {
   await expect(runJobs()).rejects.toThrow("Database unavailable");
   expect(fetch).not.toHaveBeenCalled();
 });
+it("processes immediate webhook work without pinging or masking scheduled-worker health", async () => {
+  vi.stubEnv(
+    "CHECKLY_HEARTBEAT_URL",
+    "https://ping.checklyhq.com/private-test-token",
+  );
+  const fetch = vi
+    .fn()
+    .mockRejectedValue(new Error("must_not_ping_for_each_callback"));
+  vi.stubGlobal("fetch", fetch);
+  const current = job("external_event");
+  let claimed = false;
+  rpc.mockImplementation(async (name) =>
+    name === "commerce_claim_jobs"
+      ? claimed
+        ? []
+        : ((claimed = true), [current])
+      : true,
+  );
+  expect(await runJobs("immediate")).toEqual({ processed: 1 });
+  expect(handleJob).toHaveBeenCalledExactlyOnceWith(current);
+  expect(rpc).toHaveBeenCalledWith("commerce_finish_job", {
+    p_id: current.id,
+    p_token: current.lease_token,
+  });
+  expect(fetch).not.toHaveBeenCalled();
+  expect(
+    rpc.mock.calls.some(([name]) => name === "commerce_worker_health"),
+  ).toBe(false);
+});
+it("continues scheduled heartbeat reporting even when the queue is empty", async () => {
+  vi.stubEnv(
+    "CHECKLY_HEARTBEAT_URL",
+    "https://ping.checklyhq.com/private-test-token",
+  );
+  const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+  vi.stubGlobal("fetch", fetch);
+  rpc.mockImplementation(async (name) =>
+    name === "commerce_claim_jobs" ? [] : true,
+  );
+  expect(await runJobs()).toEqual({ processed: 0 });
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(rpc).toHaveBeenLastCalledWith("commerce_worker_health", {
+    p_success: true,
+    p_jobs: 0,
+  });
+});
 
 it("does not acknowledge worker health when both monitoring attempts fail", async () => {
   vi.stubEnv(

@@ -1,10 +1,14 @@
 # A.M.O. Brewery — preparação do piloto
 
-Atualizado em 23 de outubro de 2026, com os dados fornecidos pelo utilizador. **Os três produtos e preços têm agora uma apresentação na homepage e no início de `/pedir`, assinalada como «Em breve» e «Encomendas ainda indisponíveis».** A ativação de vendas continua pendente dos restantes dados e condições. Não foi criada uma loja ativa nem inventado stock. Os dados estruturados estão em [amo-draft.json](pilot/amo-draft.json), sem execução automática ou importação para a base de dados.
+Atualização de apresentação em 24 de outubro: os avisos públicos «Em breve» e de preparação foram retirados. O layout e os assets A.M.O. presentes no workspace foram preservados. Esta alteração de texto não ativa stock, receitas operacionais ou compras; as pendências abaixo mantêm-se.
 
-Publicado em [ruvon.store/pedir#amo](https://www.ruvon.store/pedir#amo) e na homepage em 23 de outubro. A presença dos três artigos foi confirmada num browser público sem sessão de administrador, em telemóvel e desktop.
+Atualizado em 24 de outubro de 2026. **A categoria A.M.O. apresenta um pack de descoberta com as três cervejas**, uma garrafa de 33 cl de cada, por **12,50 € com IVA incluído** (4,50 € + 4,00 € + 4,00 €). A composição foi pedida pelo utilizador. O pack segue a apresentação dos packs Ruvon, com fotografia das três garrafas, lettering original da marca, fundo lilás e recibo rosa. Aparece apenas na categoria A.M.O., com o botão desativado «Indisponível».
 
-A apresentação lê apenas nomes, formatos e preços desse rascunho num componente de servidor. Não disponibiliza compra ou adição ao carrinho, nem inclui dados operacionais privados no JavaScript do browser. Não são apresentadas fotografias, teores alcoólicos ou descrições que a loja ainda não forneceu. A visibilidade dos produtos é independente da ativação do checkout; não constitui confirmação de stock ou de entrega.
+Endereço da categoria: [ruvon.store/pedir?categoria=amo](https://www.ruvon.store/pedir?categoria=amo). A pesquisa encontra o pack pelo seu nome, pela marca ou por qualquer uma das cervejas, mantendo sempre as três garrafas e o preço total. A seleção mantém-se após refresh. O link anterior `/pedir#amo` abre a categoria e preserva os parâmetros da campanha.
+
+O logótipo e as fotografias das garrafas em `public/images/amo/` são os elementos oficiais publicados pela A.M.O. em [Cervejas](https://www.amobrewery.com/beers). O logótipo preserva o lettering da referência fornecida pelo utilizador. A descrição da cervejeira baseia-se na [história oficial](https://www.amobrewery.com/about). As fotografias não foram geradas nem os rótulos recriados.
+
+O servidor lê [amo-draft.json](pilot/amo-draft.json) e envia apenas referência pública, nome, formato e preço para o componente da categoria. Dados operacionais privados não entram no browser. O rascunho continua sem importação para a base de dados, loja ativa ou stock inventado. Não há compra nem adição ao carrinho nesta categoria. A ativação de vendas continua pendente das condições abaixo.
 
 ## Dados recebidos
 
@@ -41,7 +45,7 @@ A oferta descrita não confirma os ingredientes dos packs de festa atuais. O uti
 
 Para cada SKU, completar: stock inicial em garrafas; peso e dimensões de transporte; classificação explícita de álcool e verificação de idade; disponibilidade; e ingredientes/alergénios necessários à informação ao cliente. Confirmar separadamente embalagens, sacos, selos e qualquer produto complementar. Não deduzir teor alcoólico ou conformidade a partir do nome da cerveja.
 
-Só depois se podem resolver packs em receitas de SKUs reais, somar os preços da loja e reservar o stock partilhado entre packs e artigos individuais. Não há ainda composições ou quantidades de packs aprovadas; nenhum pack foi inventado. O rascunho com os três preços recebidos não é um seed executável.
+Só depois se pode ativar o pack como receita de SKUs reais e reservar o stock partilhado entre packs e artigos individuais. A apresentação aprovada reúne uma Most wanted IPA, uma Borboletas APA e uma Alley Cat Amber; o preço resulta da soma dos três preços recebidos, sem desconto inventado. A apresentação não cria uma receita operacional nem ativa vendas. O rascunho não é um seed executável.
 
 O fluxo commerce já permite referências próprias da loja, separadas do catálogo de validação: cada unidade usa um ID `sku:<referência>`, o nome/unidade da ficha de stock e o preço dessa loja. O servidor valida disponibilidade e agrega o mesmo stock quando uma receita de pack usa essa referência. O carrinho e a cotação recuperam estes artigos após atualização da página. Isto prepara a entrada do catálogo confirmado; não cria cervejas ou packs A.M.O. por antecipação nem ativa o checkout.
 

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Acabou a bebida? Nós levamos. | Ruvon",
     description:
-      "Cerveja gelada, gelo, mixers e snacks. Não vás buscar. Pede. Em breve, zona a zona.",
+      "Cerveja gelada, gelo, mixers e snacks. Não vás buscar. Pede uma Ruvon.",
     locale: "pt_PT",
     type: "website",
     siteName: "Ruvon",

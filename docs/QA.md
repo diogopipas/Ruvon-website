@@ -1,3 +1,43 @@
+## Robo Courier and authentic callbacks — 25 October 2026
+
+- Final protected Preview `dpl_BRrUonhSpwXE2tJDzUU2w2R3KGzt` is READY after a 20-second build. Health/catalogue return 200/404; production is unchanged and no Uber credential name was added to Production. Upload review found zero private paths/credential matches in 294 regular files.
+- Final Test-mode run: one normal outbound delivered with simulated age verification; one customer-unavailable outbound returned, with its separately linked return delivered. One POST per scenario. The deliberately lost second response was recovered from its authentic callback plus an identity-checked GET; observation resumed in another process using the same saved identities.
+- Nineteen authentic callbacks (7 normal, 12 return exercise) were verified, persisted and processed into expected unmatched quarantine because this is a carrier-only probe with no commercial order. One controlled re-signed sanitised event replay per scenario returned 200, retained the same inbox ID and exactly one job. Byte-for-byte provider redelivery is not claimed.
+- Initial callbacks were 401 because the supplied signing configuration held the webhook URL. After the user corrected it, fresh test identities passed; initial evidence was preserved. The original lost response was recovered through List Deliveries/GET without another POST. Four total outbound test intents across both runs, one POST each.
+- The carrier run's Preview `dpl_9AmmoWivUoKeojyScVQdLzk9WRuV` exposed Checkly 429 responses during callback bursts. The final Preview confines monitor pings/health acknowledgement to scheduled work. Eight subsequent controlled replays returned 200 and kept the same event/job identities; immediate workers still process durable work without masking scheduler failure. Two scheduled worker calls thirty seconds apart returned 200 and advanced the database success heartbeat; the initial final-release runtime error scan returned zero records.
+- 285 local tests across twenty files, TypeScript and lint pass. Coverage includes pre-dispatch Uber identity guards, sanitised status retention, provider-only return quarantine, known-return recovery, documented signature-header fallback and scheduled/immediate heartbeat separation. All seven legacy orders/ten attempts retain complete-row hashes; flow 2 orders/stores/capability evidence remain zero. No new migration, live delivery or customer payment occurred.
+- Paid order orchestration, settlement, production alcohol eligibility, provider idempotency retention/replay guarantees and the application's active-delivery cancellation policy remain unverified. Carrier transport acceptance does not enable checkout.
+
+## Uber Direct authentication and quote — 25 October 2026
+
+- 273 unit/database/transport tests across nineteen files, TypeScript and lint pass. New tests cover the user's `UBER_DIRECT_*` names, legacy fallback, explicit blank values, disabled delivery mode, token reuse and cache isolation on secret/environment changes. Browser fixture servers blank the new variables to prevent use of local provider credentials.
+- A separate private probe exercised the actual adapter with the user-provided test credentials. Exactly one OAuth call and one quote call returned 200; the quote passed EUR/expiry validation and returned 609 cents for a public Lisbon route. The probe permitted no delivery endpoint and saved no token/credential values. No delivery, notification, database mutation, deployment or credential upload occurred.
+- This first probe verified test authentication and quoting only. The later carrier run above establishes booking, Robo Courier, tracking, returns, authentic callbacks and controlled lost-response recovery. Active-delivery cancellation and production alcohol approval remain outstanding. Checkout stays disabled; the later Preview uses sandbox delivery mode.
+
+## Easypay payment integrity — 24 October 2026
+
+- 269 unit/database/transport tests across nineteen files, TypeScript and lint pass. New cases cover account/environment/request rejection before dispatch, distinct authorisation/Single identifiers, hosted checkout identity, late callbacks after capture/void/expiry, pending captures, exact split allocation, lost responses, reserved refunds and missing Marketplace configuration.
+- Migration 016 is tested for atomic provider-fact/review/audit/alert rollback, duplicate case/notification keys, expired leases and preserved successful history. It is applied only to the isolated sandbox. Earlier migrations are unchanged; hosted parity/release evidence follows in the implementation status.
+- Real sandbox GETs for the Single list, a legacy MB WAY Single and its existing successful capture returned 200; parent identity/value match. No provider mutation was performed. These reads do not verify authorisation/capture/void/refund/splits for flow 2 or enable live checkout.
+- The protected Preview is READY after a 52-second build. Health/catalogue/merchant reads return 200/404/401 respectively; three scheduled worker calls returned 200. Sandbox schema/grant parity matches 25 tables and 59 functions, and all seven legacy orders/ten attempts retain their full-row hashes. The public deployment is unchanged. These checks do not constitute end-to-end financial acceptance.
+
+## Public copy without launch labels — 24 October 2026
+
+- Removed hero launch badge, ~25-minute sticker, early-access/upcoming wording and phase labels from public marketing, the A.M.O. presentation, FAQ, contact flow, legal copy and social-sharing metadata/image. Existing A.M.O. pack layout/assets from concurrent workspace work were preserved. The final form and confirmation clearly identify a registration of interest.
+- Build, TypeScript, lint and seven HTTP regressions passed. Twenty-four local responsive checks cover 320/390/768/1440 px, including synthetic local registrations. Twelve anonymous production-browser checks cover 390/1440 px, without submitting real forms. No page errors or horizontal overflow occurred. Public privacy identity/contact match the owner's explicit information.
+- Production `dpl_GZYgrDCpY2Fs1RR6p7A1sdtBZYpb` is READY. The public sharing image returned 200 and was visually checked; commerce catalogue remains 404. No financial/provider mutation or migration occurred. Public operator/privacy Config values were persisted in Production; provider secrets were not transferred. These presentation checks are not fulfilment acceptance.
+
+## A.M.O. discovery pack — 24 October 2026
+
+- The category now presents one pack with one 33 cl bottle of each confirmed beer for €12.50 including VAT, official brewery lettering and bottle images, a lilac/pink split layout and a brewery description. Ordering remains unavailable.
+- Safari desktop and Firefox at 320 px were visually reviewed. Searching for Borboletas retains all three beers and the full pack price; an unmatched search shows the pack empty state. The existing 13 pack tests, TypeScript, scoped ESLint and Webpack production build pass. Default Turbopack compilation is blocked by the environment's local-port restriction, including the escalated attempt; no configuration was changed to work around it.
+
+## Separate A.M.O. category — 24 October 2026
+
+- Homepage/default/other categories no longer show the A.M.O. products. The A.M.O. filter at `/pedir?categoria=amo` shows the three confirmed beers, prices and upcoming status. No images or purchase controls were added.
+- Build, TypeScript, lint, formatting and seven HTTP regressions pass. Four local responsive browser journeys and two anonymous production journeys verify category selection, filtering/empty recovery, reload, switching away, unchanged prices and compatibility with `/pedir#amo` without losing campaign parameters. No horizontal overflow or page errors occurred.
+- Production `dpl_6GgnVfMMYPXnLZUqg5FyBuMQ1kY2` is READY. Homepage returns 200, commerce catalogue 404, and the initial five-minute runtime scan returned zero errors. The operational draft is projected to public fields by a server-only adapter. Images are explicitly deferred; operational launch acceptance is unchanged.
+
 ## Visible A.M.O. catalogue — 23 October 2026
 
 - The three confirmed 33 cl bottle names and VAT-inclusive prices appear on the homepage and above the validation packs at `/pedir#amo`, explicitly marked upcoming and unavailable for orders. No purchase controls, stock, alcohol percentages or unapproved images were added.
@@ -115,3 +155,10 @@ Repeat the pack journey against hosted Supabase/Vercel before paid traffic. This
 - At 430 × 932, the primary/supporting hierarchy and Gin & Chill controls were checked; gin and tonic remained fixed while its extras were editable.
 - Removed remaining entry fades from the mobile cart and checkout content so essential content renders immediately in background Safari previews.
 - This revision uses provisional pack contribution amounts documented in `PACKS.md`. Existing generated scenes remain illustrative; no deployment or remote database changes were made.
+
+## Product-first storefront review — 24 October 2026
+
+- Homepage now presents categories and eight essential products instead of a promotional section sequence. Category filters share the current URL, cart and search.
+- Reviewed the local homepage in Firefox at 320 px and 390 px mobile widths and the desktop window. Confirmed product photography appears in the opening viewport, category selection changes content in place, and keyboard navigation reaches search.
+- Manually checked search and clearing search, adding/removing one product, cart contents/totals, six compact packs, A.M.O. price and disabled ordering, and merchant deep-link opening/closing via `?loja=1`. Restored the browser cart to empty.
+- TypeScript and ESLint passed. Production build passed with `npm run build -- --webpack`. Default Turbopack compilation hit an environment restriction binding an internal port; no build configuration was changed.

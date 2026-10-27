@@ -45,17 +45,26 @@ export function requireSecret(name: string, minimum = 1) {
     throw new RequestError("Configuração operacional incompleta.", 503);
   return value;
 }
-export function easypayCommerceConfig() {
+export function easypayAccountConfig() {
+  const environment = commerceEnvironment();
   return {
-    environment: commerceEnvironment(),
+    environment,
     account: requireSecret("EASYPAY_ACCOUNT_ID"),
     key: requireSecret("EASYPAY_API_KEY"),
     base:
-      commerceEnvironment() === "live"
+      environment === "live"
         ? "https://api.prod.easypay.pt/2.0"
         : "https://api.test.easypay.pt/2.0",
+  };
+}
+export function easypayCommerceConfig() {
+  return {
+    ...easypayAccountConfig(),
     marketplaceAccount: requireSecret("EASYPAY_MARKETPLACE_ACCOUNT_ID"),
   };
+}
+function requireSecretAlias(primary: string, legacy: string) {
+  return requireSecret(process.env[primary] !== undefined ? primary : legacy);
 }
 export function uberConfig() {
   const environment = commerceEnvironment();
@@ -63,8 +72,8 @@ export function uberConfig() {
     throw new RequestError("Entregas indisponíveis.", 503);
   return {
     environment,
-    customer: requireSecret("UBER_CUSTOMER_ID"),
-    client: requireSecret("UBER_CLIENT_ID"),
-    secret: requireSecret("UBER_CLIENT_SECRET"),
+    customer: requireSecretAlias("UBER_DIRECT_CUSTOMER_ID", "UBER_CUSTOMER_ID"),
+    client: requireSecretAlias("UBER_DIRECT_CLIENT_ID", "UBER_CLIENT_ID"),
+    secret: requireSecretAlias("UBER_DIRECT_SECRET", "UBER_CLIENT_SECRET"),
   };
 }

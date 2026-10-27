@@ -2,7 +2,11 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import type { CommerceOrder } from "@/lib/commerce";
 import { orderRepository } from "../orders/repository";
-import { easypayCommerceConfig, uberConfig } from "../commerce-config";
+import {
+  easypayAccountConfig,
+  easypayCommerceConfig,
+  uberConfig,
+} from "../commerce-config";
 import {
   currentAttempt,
   operationFor,
@@ -100,6 +104,7 @@ async function confirm(job: Job, o: CommerceOrder) {
       a.authorisation_id,
       a.id,
       o.total,
+      a.method,
     ))
   )
     throw new ProviderError("authorisation_not_confirmed");
@@ -268,8 +273,7 @@ async function cancel(job: Job, o: CommerceOrder) {
     return;
   }
   const fresh = await repo.order(o.id),
-    a = await currentAttempt(fresh),
-    config = easypayCommerceConfig();
+    a = await currentAttempt(fresh);
   if (fresh.payment_status === "authorised") {
     if (!a.authorisation_id) pending();
     const key = `void:${a.id}`;
@@ -286,7 +290,7 @@ async function cancel(job: Job, o: CommerceOrder) {
           parent_id: a.authorisation_id,
           body: { descriptive: "Ruvon: cancelamento do pedido" },
         },
-        config.account,
+        easypayAccountConfig().account,
         a.id,
       ));
     await run(job, op);
@@ -356,7 +360,7 @@ async function refund(job: Job, o: CommerceOrder) {
         refund_id: r.id,
         body: { value: r.amount / 100 },
       },
-      easypayCommerceConfig().account,
+      easypayAccountConfig().account,
       a.id,
     ));
   // Customer refunds are funded by Ruvon; merchant recovery remains a separate case.

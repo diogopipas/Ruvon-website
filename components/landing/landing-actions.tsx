@@ -1,12 +1,37 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, Store } from "lucide-react";
 import { categories, productById } from "@/lib/products";
 import { captureAttribution, track, trackOnce } from "@/lib/analytics";
 import { ProductArt } from "@/components/ui/product-art";
 const MerchantForm = dynamic(() => import("./merchant-form"));
+export function MerchantAccess() {
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [manuallyOpen, setManuallyOpen] = useState(false);
+  const open = manuallyOpen || params.get("loja") === "1";
+  function setOpen(value: boolean) {
+    setManuallyOpen(value);
+    if (!value && params.get("loja") === "1") {
+      const next = new URLSearchParams(params.toString());
+      next.delete("loja");
+      router.replace(`${pathname}${next.size ? `?${next}` : ""}`, {
+        scroll: false,
+      });
+    }
+  }
+  return (
+    <div id="lojas">
+      <button className="store-merchant-link" onClick={() => setOpen(true)}>
+        Tens uma loja?
+      </button>
+      {open && <MerchantForm open={open} onOpenChange={setOpen} />}
+    </div>
+  );
+}
 export function LandingView() {
   useEffect(() => {
     captureAttribution();
@@ -85,7 +110,7 @@ export function MerchantSection() {
       </div>
       <div>
         <h2>Tens uma loja?</h2>
-        <p>Procuramos as primeiras lojas parceiras. Junta-te à Ruvon.</p>
+        <p>Junta a tua loja à Ruvon.</p>
       </div>
       <button className="button button-secondary" onClick={() => setOpen(true)}>
         Quero vender na Ruvon

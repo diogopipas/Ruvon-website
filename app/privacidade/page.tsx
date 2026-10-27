@@ -16,8 +16,7 @@ export default function Privacy() {
         </Link>
         <h1>A tua privacidade.</h1>
         <p>
-          A Ruvon é um projeto em fase de validação. Esta página explica o que a
-          experiência guarda e para quê.
+          Esta página explica que dados a Ruvon guarda e para que os utiliza.
         </p>
         <h2>Quem é responsável</h2>
         {ready ? (
@@ -27,25 +26,24 @@ export default function Privacy() {
           </p>
         ) : (
           <p>
-            Esta política está em preparação. A identificação do responsável e o
-            contacto de privacidade serão publicados antes da abertura das
-            inscrições ao público.
+            O responsável pelo tratamento e o contacto de privacidade não estão
+            identificados nesta página.
           </p>
         )}
         <h2>O que guardamos</h2>
         <p>
           Se te inscreveres, guardamos o email ou telefone que escolheres, a
-          cidade, o carrinho simulado e a data do teu consentimento. Se
+          cidade, o carrinho selecionado e a data do teu consentimento. Se
           representares uma loja, guardamos o nome da loja, a cidade, o teu nome
           e o contacto indicado.
         </p>
         <h2>Para que usamos os dados</h2>
         <p>
-          Com o teu consentimento, usamos o teu contacto para comunicar o
-          lançamento da Ruvon na tua zona. A zona e os produtos escolhidos
-          ajudam-nos a decidir onde lançar e o que disponibilizar. Os contactos
-          das lojas são usados para preparar possíveis parcerias. Não pedimos
-          dados de pagamento.
+          Com o teu consentimento, usamos o teu contacto para comunicar a
+          disponibilidade da Ruvon na tua zona. A zona e os produtos escolhidos
+          ajudam-nos a perceber a procura e o que disponibilizar. Os contactos
+          das lojas são usados para falar sobre possíveis parcerias. Não pedimos
+          dados de pagamento neste formulário.
         </p>
         <h2>O que fica no teu dispositivo</h2>
         <p>
@@ -75,16 +73,16 @@ export default function Privacy() {
         <h2>Armazenamento e acesso</h2>
         <p>
           Só a equipa responsável pelo projeto tem acesso aos contactos e aos
-          pedidos simulados. Usamos fornecedores de alojamento e armazenamento
-          para manter a experiência disponível. Não vendemos os teus dados.
+          registos de interesse. Usamos fornecedores de alojamento e
+          armazenamento para manter a experiência disponível. Não vendemos os
+          teus dados.
         </p>
         <h2>Durante quanto tempo</h2>
         <p>
-          A política prevista para esta fase é conservar os contactos e os dados
-          associados durante um máximo de {retentionMonths} meses após a
-          inscrição, ou até retirares o consentimento. Depois, serão eliminados
-          ou anonimizados. Se o serviço lançar, qualquer nova utilização dos
-          dados será explicada antes de acontecer.
+          A política de conservação define um máximo de {retentionMonths} meses
+          após a inscrição para os contactos e os dados associados, ou até
+          retirares o consentimento. Depois, serão eliminados ou anonimizados.
+          Qualquer nova utilização dos dados será explicada antes de acontecer.
         </p>
         <h2>As tuas escolhas</h2>
         <p>
@@ -101,8 +99,8 @@ export default function Privacy() {
           </p>
         ) : (
           <p>
-            O contacto para exercer estes direitos será publicado antes da
-            abertura pública das inscrições.
+            O contacto para exercer estes direitos não está indicado nesta
+            página.
           </p>
         )}
         <h2>Se precisares de ajuda</h2>

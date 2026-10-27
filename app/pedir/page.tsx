@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Catalog } from "@/components/ordering/catalog";
-import { AmoPilotCatalog } from "@/components/ordering/amo-pilot-catalog";
+import { getAmoPilotProducts } from "@/lib/server/amo-pilot-catalog";
 import {
   commerceEnvironment,
   commerceExposed,
@@ -27,7 +27,7 @@ export default function Page() {
       {commerceExposed() ? (
         <CommerceCheckout environment={commerceEnvironment()} />
       ) : (
-        <Catalog pilotCatalog={<AmoPilotCatalog />} />
+        <Catalog amoProducts={getAmoPilotProducts()} />
       )}
     </Suspense>
   );

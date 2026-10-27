@@ -77,7 +77,7 @@ export default function MerchantForm({
       }
       description={
         success
-          ? "Recebemos o teu interesse. Entraremos em contacto quando prepararmos o lançamento na tua zona."
+          ? "Recebemos o teu interesse. Entraremos em contacto para falar sobre a tua loja."
           : "Mercearias, garrafeiras e lojas de bairro: há lugar para ti."
       }
     >

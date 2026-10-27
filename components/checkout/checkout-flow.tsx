@@ -167,7 +167,7 @@ export function CheckoutFlow() {
       return;
     }
     if (form.consent !== "on") {
-      setError("Confirma que queres receber novidades sobre o lançamento.");
+      setError("Confirma que queres receber avisos de disponibilidade.");
       return;
     }
     inFlight.current = true;
@@ -269,7 +269,7 @@ export function CheckoutFlow() {
                     className={step === "contact" ? "current" : ""}
                     aria-current={step === "contact" ? "step" : undefined}
                   >
-                    <span>{interest ? 2 : 3}</span>Aviso de lançamento
+                    <span>{interest ? 2 : 3}</span>O teu contacto
                   </li>
                 </ol>
               )}
@@ -283,13 +283,12 @@ export function CheckoutFlow() {
                       Qual é a tua zona?
                     </h1>
                     <p className="checkout-description">
-                      Estamos a preparar o lançamento. Seleciona a tua cidade: o
-                      teu interesse ajuda-nos a escolher as primeiras zonas.
+                      Seleciona a tua cidade para associar o teu interesse à
+                      zona onde queres receber.
                     </p>
                     <p className="checkout-explainer">
-                      Aqui guardas o teu interesse e podes pedir um aviso para
-                      quando a Ruvon chegar. Não há pagamento nem entrega nesta
-                      fase.
+                      Este formulário regista o teu interesse. Não conclui uma
+                      compra, não cobra pagamentos nem reserva uma entrega.
                     </p>
                     <form
                       className="form-stack checkout-form"
@@ -340,21 +339,15 @@ export function CheckoutFlow() {
                 )}
                 {step === "contact" && (
                   <>
-                    <span className="launch-badge">
-                      <span />
-                      Lançamento por zonas
-                    </span>
                     <h1 ref={headingRef} tabIndex={-1}>
-                      Queres saber
-                      <br />
-                      <span>quando chegar?</span>
+                      Regista o teu interesse.
                     </h1>
                     <p className="checkout-description">
                       {interest
                         ? "A tua zona conta."
-                        : "O teu carrinho ficou guardado e ajuda-nos a preparar o lançamento."}{" "}
-                      Deixa o teu contacto e avisamos-te quando a Ruvon chegar à
-                      tua zona.
+                        : "O teu carrinho ficou guardado."}{" "}
+                      Deixa o teu contacto para receber avisos de
+                      disponibilidade na tua zona.
                     </p>
                     <div className="selected-location">
                       <MapPin size={16} />
@@ -444,8 +437,8 @@ export function CheckoutFlow() {
                           }
                         />
                         <span>
-                          Quero receber novidades sobre o lançamento da Ruvon e
-                          li a{" "}
+                          Quero receber avisos de disponibilidade da Ruvon na
+                          minha zona e li a{" "}
                           <Link href="/privacidade" target="_blank">
                             Privacidade
                           </Link>
@@ -469,7 +462,7 @@ export function CheckoutFlow() {
                       >
                         {busy
                           ? "A guardar o teu contacto…"
-                          : "Quero saber quando chegar"}
+                          : "Registar interesse"}
                       </button>
                     </form>
                   </>
@@ -483,11 +476,11 @@ export function CheckoutFlow() {
                       Inscrição confirmada
                     </span>
                     <h1 ref={headingRef} tabIndex={-1}>
-                      Vais saber quando chegar.
+                      Interesse registado.
                     </h1>
                     <p>
-                      Guardámos o teu contacto. Quando a Ruvon chegar à tua
-                      zona, avisamos-te.
+                      Guardámos o teu contacto para te avisar sobre a
+                      disponibilidade na tua zona.
                     </p>
                     {location && (
                       <div className="success-zone">
